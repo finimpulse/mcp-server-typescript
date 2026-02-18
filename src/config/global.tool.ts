@@ -1,4 +1,3 @@
-import { debug } from 'console';
 import { z } from 'zod';
 
 export const GlobalToolConfigSchema = z.object({
