@@ -1,4 +1,3 @@
-// transports/http.ts
 import express, { Request, Response, NextFunction } from 'express';
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from '../server.js';
