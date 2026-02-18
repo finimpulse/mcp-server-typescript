@@ -21,7 +21,6 @@ export class ApiClient {
 		// 	url += '.ai';
 		// }
 		const bodyStr = body ? JSON.stringify(body) : undefined;
-		console.error("BODY STRING:", bodyStr);
 		try {
 			const response = await fetch(this.API_BASE + url, {
 				method,
