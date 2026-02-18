@@ -47,21 +47,20 @@ export const searchInputSchema = z.object({
 			desc: z.boolean().describe("Sorting direction (true for descending, false for ascending)."),
 		}),
 	).optional().describe(
-		`results sorting rules
-				optional field
-				you can use the same values as in the filters array to sort the results
-				possible sorting types:
-				asc – results will be sorted in the ascending order
-				desc – results will be sorted in the descending order
-				you should use a comma to set up a sorting type
-				example:
-				["keyword_data.keyword_info.competition,desc"]
-				default rule:
-				["ranked_serp_element.serp_item.rank_group,asc"]
-				note that you can set no more than three sorting rules in a single request
-				you should use a comma to separate several sorting rules
-				example:
-				["keyword_data.keyword_info.search_volume,desc","keyword_data.keyword_info.cpc,desc"]`
+		`Optional sorting configuration for result items. Each sorting setup is defined as [selector, desc]:
+
+			selector - Metric used for sorting (e.g., date).
+			desc - Sorting direction (true for descending, false for ascending).
+			Sortings can be combined using ,.
+			
+			Example:
+			
+			    {
+			        "selector": "date",
+			        "desc": true
+			    }
+			
+			`
 	),
 	has_public_financial_reports: z.boolean().optional().describe('Indicates whether the company provides public financial statements.'),
 })
