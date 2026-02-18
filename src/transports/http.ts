@@ -26,6 +26,7 @@ export async function runHttp(): Promise<void> {
 	
 	app.post('/http', bearerAuth, handleMcpRequest);
 	app.post('/mcp', bearerAuth, handleMcpRequest);
+	app.get('/mcp', bearerAuth, handleMcpRequest);
 	
 	const port = Number(process.env.PORT ?? 3000);
 	app.listen(port, () => console.error(`Finimpulse MCP Server running on HTTP :${port}`));
