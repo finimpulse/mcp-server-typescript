@@ -24,7 +24,7 @@ if (isNodeEnvironment) {
 		const __filename = fileURLToPath(import.meta.url);
 		const __dirname = path.dirname(__filename);
 		
-		const packageJsonPath = path.resolve(__dirname, '../../../../package.json');
+		const packageJsonPath = path.resolve(__dirname, '../../package.json');
 		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 		packageVersion = packageJson.version || packageVersion;
 		packageName = packageJson.name || packageName;
