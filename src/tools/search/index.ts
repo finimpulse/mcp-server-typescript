@@ -1,7 +1,8 @@
 import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {searchInputSchema} from './schema.js';
 import {searchHandler} from './handler.js';
+import {ApiClient} from '../../http/client.js';
 
-export function registerSearchTool(server: McpServer): void {
-	server.registerTool('get_search', { description: 'Returns a unified, cross-asset search result for financial instruments, including stocks, ETFs, and mutual funds.', inputSchema: searchInputSchema }, searchHandler);
+export function registerSearchTool(server: McpServer, client: ApiClient): void {
+	server.registerTool('get_search', { description: 'Returns a unified, cross-asset search result for financial instruments, including stocks, ETFs, and mutual funds.', inputSchema: searchInputSchema }, (input) => searchHandler(input, client));
 }

@@ -1,10 +1,13 @@
-import {StdioServerTransport} from "@modelcontextprotocol/sdk/server/stdio.js";
-import {createServer} from './server.js';
+import {runHttp} from './transports/http.js';
+import {runStdio} from './transports/stdio.js';
 
 async function main() {
-	const server = createServer();
-	await server.connect(new StdioServerTransport());
-	console.error("Finimpulse MCP Server running on stdio");
+	const mode = process.env.MCP_TRANSPORT ?? process.argv[2] ?? 'stdio';
+	
+	switch (mode) {
+		case 'http': await runHttp(); break;
+		default: await runStdio();
+	}
 }
 
 main().catch((error) => {
