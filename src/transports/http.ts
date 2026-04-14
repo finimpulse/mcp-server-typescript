@@ -50,10 +50,6 @@ export async function handleMcpRequest(req: Request, res: Response): Promise<voi
 
 export async function runHttp(): Promise<void> {
 	const app = express();
-	app.use((req, _res, next) => {
-		console.error(`→ ${req.method} ${req.originalUrl}`);
-		next();
-	});
 	app.use(express.json());
 
 	app.get('/.well-known/oauth-protected-resource', (req, res) => {
