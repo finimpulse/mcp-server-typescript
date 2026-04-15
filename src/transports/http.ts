@@ -28,6 +28,9 @@ async function exchangeOAuthToken(oauthToken: string): Promise<string | null> {
 async function resolveApiToken(req: Request): Promise<string | null> {
 	if (STATIC_API_TOKEN) return STATIC_API_TOKEN;
 
+	const directToken = req.headers['x-api-token'] as string | undefined;
+	if (directToken) return directToken;
+
 	const oauthToken = req.headers.authorization?.replace("Bearer ", "") ?? '';
 	if (!oauthToken) return null;
 	return exchangeOAuthToken(oauthToken);
