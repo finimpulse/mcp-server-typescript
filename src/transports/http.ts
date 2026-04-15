@@ -3,6 +3,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createServer } from '../server.js';
 
 const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL ?? 'http://localhost:8000';
+const STATIC_API_TOKEN = process.env.API_TOKEN ?? '';
 const apiTokenCache = new Map<string, string>();
 
 async function exchangeOAuthToken(oauthToken: string): Promise<string | null> {
@@ -24,16 +25,18 @@ async function exchangeOAuthToken(oauthToken: string): Promise<string | null> {
 	}
 }
 
-export async function bearerAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
-	const oauthToken = req.headers.authorization?.replace("Bearer ", "") ?? '';
-	if (!oauthToken) {
-		res.status(401).json({ error: "Unauthorized" });
-		return;
-	}
+async function resolveApiToken(req: Request): Promise<string | null> {
+	if (STATIC_API_TOKEN) return STATIC_API_TOKEN;
 
-	const apiToken = await exchangeOAuthToken(oauthToken);
+	const oauthToken = req.headers.authorization?.replace("Bearer ", "") ?? '';
+	if (!oauthToken) return null;
+	return exchangeOAuthToken(oauthToken);
+}
+
+export async function bearerAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+	const apiToken = await resolveApiToken(req);
 	if (!apiToken) {
-		res.status(401).json({ error: "Invalid token" });
+		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
 
@@ -52,10 +55,12 @@ export async function runHttp(): Promise<void> {
 	const app = express();
 	app.use(express.json());
 
-	app.get('/.well-known/oauth-protected-resource', (req, res) => {
-		const resource = `${req.protocol}://${req.get('host')}`;
-		res.json({ resource, authorization_servers: [AUTH_SERVER_URL] });
-	});
+	if (!STATIC_API_TOKEN) {
+		app.get('/.well-known/oauth-protected-resource', (req, res) => {
+			const resource = `${req.protocol}://${req.get('host')}`;
+			res.json({ resource, authorization_servers: [AUTH_SERVER_URL] });
+		});
+	}
 
 	app.post('/mcp', bearerAuth, handleMcpRequest);
 	app.get('/mcp', bearerAuth, handleMcpRequest);
