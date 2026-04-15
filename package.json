@@ -1,7 +1,7 @@
 {
-  "name": "mcp-server-typescript",
+  "name": "finimpulse-mcp-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "MCP server for FinImpulse financial market data API",
   "main": "build/index.js",
   "type": "module",
   "bin": {

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import 'dotenv/config';
 import {runHttp} from './transports/http.js';
 import {runStdio} from './transports/stdio.js';
