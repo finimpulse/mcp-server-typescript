@@ -1,6 +1,6 @@
 # FinImpulse MCP Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides structured financial market data to AI systems and development tools through the [FinImpulse API](https://finimpulse.com).
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides structured financial market data to AI systems and development tools through the [FinImpulse API](https://finimpulse.com/api/).
 
 It allows AI systems to access FinImpulse data — including stocks, ETFs, mutual funds, fundamentals, and market indicators — using a standardized MCP interface. The server acts as a bridge between the FinImpulse API and any MCP-compatible client, enabling LLMs and automation tools to retrieve financial data in a consistent format without building custom integrations.
 
