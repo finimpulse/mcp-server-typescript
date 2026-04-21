@@ -219,6 +219,23 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 | `get_holdings_general` | Portfolio composition and holdings-level aggregates: asset allocation, sector exposure. |
 | `get_holdings_top_holdings` | Top holdings list with ticker, name, and weight as % of total net assets. |
 
+### Analyst Coverage & Ratings
+
+| Tool | Description |
+|------|-------------|
+| `get_analysis_analysts` | Analyst coverage records per analyst: scores, ratings, sentiment, price targets, and announcement dates. |
+| `get_analysis_earnings` | Earnings and estimate data: EPS actuals, earnings vs. revenue, EPS trends, revisions, and growth metrics. |
+| `get_analysis_recommendations` | Analyst recommendation breakdown over time: Strong Buy, Buy, Hold, Sell, and Strong Sell counts per period. |
+| `get_analysis_upgrades_downgrades` | Analyst rating action feed: upgrades, downgrades, reiterations, and price target changes with from/to grades. |
+
+### Options
+
+| Tool | Description |
+|------|-------------|
+| `get_options_expirations` | Available option expiration dates for an underlying symbol. |
+| `get_options_chain` | Full option chain for a given expiration: calls and puts with pricing, bid/ask, volume, open interest, and implied volatility. |
+| `get_options_contracts` | Single option contract snapshot: pricing, bid/ask, volume, open interest, implied volatility, moneyness, and Greeks. |
+
 ## Configuration
 
 | Environment Variable | Required | Description |
