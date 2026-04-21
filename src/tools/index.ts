@@ -5,6 +5,10 @@ import {registerHistoriesTool} from './historical/index.js';
 import {registerSummaryTool} from './summary/index.js';
 import {registerProfileTool} from './profile/index.js';
 import {registerNewsTool} from './news/index.js';
+import {registerAnalysisAnalystsTool} from './analysis/analysts/index.js';
+import {registerAnalysisEarningsTool} from './analysis/earnings/index.js';
+import {registerAnalysisRecommendationsTool} from './analysis/recommendations/index.js';
+import {registerAnalysisUpgradesDowngradesTool} from './analysis/upgrades-downgrades/index.js';
 import {registerHoldersGeneralTool} from './holders/general/index.js';
 import {registerHoldersInstitutionalTool} from './holders/institutional/index.js';
 import {registerHoldersMutualFundsTool} from './holders/mutual-funds/index.js';
@@ -20,6 +24,9 @@ import {registerStatisticsRisksTool} from './statistics/risks/index.js';
 import {registerStatisticsAnnualReturnsTool} from './statistics/annual-returns/index.js';
 import {registerHoldingsGeneralTool} from './holdings/general/index.js';
 import {registerHoldingsTopHoldingsTool} from './holdings/top-holdings/index.js';
+import {registerOptionsChainTool} from './options/chain/index.js';
+import {registerOptionsContractsTool} from './options/contracts/index.js';
+import {registerOptionsExpirationsTool} from './options/expirations/index.js';
 
 export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerSearchTool(server, client);
@@ -27,6 +34,10 @@ export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerSummaryTool(server, client);
 	registerProfileTool(server, client);
 	registerNewsTool(server, client);
+	registerAnalysisAnalystsTool(server, client);
+	registerAnalysisEarningsTool(server, client);
+	registerAnalysisRecommendationsTool(server, client);
+	registerAnalysisUpgradesDowngradesTool(server, client);
 	registerHoldersGeneralTool(server, client);
 	registerHoldersInstitutionalTool(server, client);
 	registerHoldersMutualFundsTool(server, client);
@@ -42,4 +53,7 @@ export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerStatisticsAnnualReturnsTool(server, client);
 	registerHoldingsGeneralTool(server, client);
 	registerHoldingsTopHoldingsTool(server, client);
+	registerOptionsChainTool(server, client);
+	registerOptionsContractsTool(server, client);
+	registerOptionsExpirationsTool(server, client);
 }
