@@ -56,6 +56,7 @@ export async function handleMcpRequest(req: Request, res: Response): Promise<voi
 
 export async function runHttp(): Promise<void> {
 	const app = express();
+	app.set('trust proxy', true);
 	app.use(express.json());
 
 	if (!STATIC_API_TOKEN) {
