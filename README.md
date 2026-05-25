@@ -4,6 +4,8 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that p
 
 It allows AI systems to access FinImpulse data — including stocks, ETFs, mutual funds, fundamentals, and market indicators — using a standardized MCP interface. The server acts as a bridge between the FinImpulse API and any MCP-compatible client, enabling LLMs and automation tools to retrieve financial data in a consistent format without building custom integrations.
 
+> **Hosted server available.** You can connect any Streamable HTTP MCP client directly to `https://mcp.finimpulse.com/mcp` and authenticate via OAuth — no API token setup required. See [Quick Start](#quick-start) below.
+
 ## How It Works
 
 ```
@@ -40,12 +42,96 @@ The MCP server translates tool calls from AI clients into FinImpulse API request
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) 18+
-- A FinImpulse API token (obtain it in the [FinImpulse Dashboard](https://app.finimpulse.com/developer/settings))
+You can use FinImpulse MCP in two ways:
+
+- **Hosted (recommended):** no requirements other than a [FinImpulse account](https://app.finimpulse.com). Authentication is handled via OAuth in the browser — no manual API token management.
+- **Local (stdio):** [Node.js](https://nodejs.org/) 18+ and a FinImpulse API token (obtain it in the [FinImpulse Dashboard](https://app.finimpulse.com/developer/settings)).
 
 ## Quick Start
 
-### Claude Desktop
+There are two ways to connect: use the hosted server at `https://mcp.finimpulse.com/mcp` (Streamable HTTP + OAuth), or run the server locally via `npx`.
+
+---
+
+### Option 1 — Hosted server (OAuth)
+
+The FinImpulse-hosted MCP endpoint is available at:
+
+```
+https://mcp.finimpulse.com/mcp
+```
+
+It uses the [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http) transport and OAuth 2.0 — when you first connect, your MCP client will open a browser window to authorize access against your FinImpulse account. The client then stores the access token and forwards it automatically on every request. No API token needs to be configured by hand.
+
+#### Cursor
+
+Open `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-level) and add:
+
+```json
+{
+  "mcpServers": {
+    "finimpulse": {
+      "url": "https://mcp.finimpulse.com/mcp"
+    }
+  }
+}
+```
+
+#### VS Code (Copilot)
+
+Open your VS Code `settings.json` and add:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "finimpulse": {
+        "url": "https://mcp.finimpulse.com/mcp"
+      }
+    }
+  }
+}
+```
+
+#### Claude Desktop
+
+Claude Desktop does not yet speak Streamable HTTP natively. Bridge through `mcp-remote`, which handles the OAuth flow in your browser and forwards requests over stdio:
+
+```json
+{
+  "mcpServers": {
+    "finimpulse": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.finimpulse.com/mcp"]
+    }
+  }
+}
+```
+
+#### ChatGPT
+
+In the ChatGPT desktop app go to **Settings → Connectors → Add custom connector** and enter:
+
+- URL: `https://mcp.finimpulse.com/mcp`
+- Authentication: OAuth
+
+#### Windsurf / Cline / other Streamable-HTTP clients
+
+Any MCP client that supports the Streamable HTTP transport can use the URL directly:
+
+```
+https://mcp.finimpulse.com/mcp
+```
+
+For clients that only support stdio, use the `mcp-remote` bridge shown in the Claude Desktop example.
+
+---
+
+### Option 2 — Local (stdio via npx)
+
+If you prefer to run the server in-process on your machine, use the npm package. You'll need a FinImpulse API token from the [FinImpulse Dashboard](https://app.finimpulse.com/developer/settings).
+
+#### Claude Desktop
 
 Open `claude_desktop_config.json`:
 
@@ -69,7 +155,7 @@ Add the server configuration:
 }
 ```
 
-### Claude Code
+#### Claude Code
 
 ```bash
 claude mcp add finimpulse -- npx -y finimpulse-mcp-server
@@ -77,11 +163,7 @@ claude mcp add finimpulse -- npx -y finimpulse-mcp-server
 
 Then set the `API_TOKEN` environment variable or pass it inline.
 
-### ChatGPT
-
-ChatGPT supports MCP via its desktop app. Add the server in **Settings → MCP Servers** with the same `npx` command.
-
-### Cursor
+#### Cursor
 
 Open `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-level) and add:
 
@@ -99,7 +181,7 @@ Open `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-level) and add
 }
 ```
 
-### Windsurf
+#### Windsurf
 
 Open `~/.codeium/windsurf/mcp_config.json` and add:
 
@@ -117,7 +199,7 @@ Open `~/.codeium/windsurf/mcp_config.json` and add:
 }
 ```
 
-### VS Code (Copilot)
+#### VS Code (Copilot)
 
 Open your VS Code `settings.json` and add:
 
@@ -137,13 +219,13 @@ Open your VS Code `settings.json` and add:
 }
 ```
 
-### Gemini CLI
+#### Gemini CLI
 
 ```bash
 gemini mcp add finimpulse -- npx -y finimpulse-mcp-server
 ```
 
-### Cline
+#### Cline
 
 Open Cline settings, go to **MCP Servers**, and add a new server with this config:
 
@@ -161,7 +243,7 @@ Open Cline settings, go to **MCP Servers**, and add a new server with this confi
 }
 ```
 
-### Any MCP-Compatible Client (stdio)
+#### Any MCP-Compatible Client (stdio)
 
 ```bash
 API_TOKEN=your-api-token npx finimpulse-mcp-server
@@ -238,9 +320,13 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 
 ## Configuration
 
+When using the **hosted** server (`https://mcp.finimpulse.com/mcp`) no environment variables are required — your MCP client handles OAuth automatically.
+
+The variables below apply only when running the server **locally** (stdio via `npx` or your own deployment):
+
 | Environment Variable | Required | Description |
 |---------------------|----------|-------------|
-| `API_TOKEN` | Yes | Your FinImpulse API token |
+| `API_TOKEN` | Yes (local stdio) | Your FinImpulse API token |
 
 ## Development
 
