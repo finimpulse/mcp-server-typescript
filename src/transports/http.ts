@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from '../server.js';
 
-const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL ?? 'http://localhost:8000';
+const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL ?? 'https://data.finimpulse.com';
 const STATIC_API_TOKEN = process.env.API_TOKEN ?? '';
 const apiTokenCache = new Map<string, string>();
 
