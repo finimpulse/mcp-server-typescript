@@ -1,6 +1,6 @@
 {
   "name": "finimpulse-mcp-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP server for FinImpulse financial market data API",
   "main": "build/index.js",
   "type": "module",
@@ -23,8 +23,20 @@
     "type": "git",
     "url": "git+https://github.com/finimpulse/mcp-server-typescript.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "finimpulse",
+    "finance",
+    "financial-data",
+    "stocks",
+    "etf",
+    "mutual-funds",
+    "market-data",
+    "ai",
+    "llm"
+  ],
+  "author": "FinImpulse",
   "license": "ISC",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",

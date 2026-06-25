@@ -33,6 +33,7 @@ API_TOKEN=your-token npm run test:watch
 | File | Tools covered |
 |------|--------------|
 | `search-summary-profile-news.test.ts` | `get_search`, `get_summary`, `get_profile`, `get_news` |
+| `general-lite.test.ts` | `get_search_lite`, `get_summary_lite`, `get_market_price`, `get_metrics` |
 | `historical.test.ts` | `get_histories` |
 | `analysis.test.ts` | `get_analysis_analysts`, `get_analysis_earnings`, `get_analysis_recommendations`, `get_analysis_upgrades_downgrades` |
 | `holders.test.ts` | `get_holders_general`, `get_holders_institutional`, `get_holders_mutual_funds`, `get_holders_insiders`, `get_holders_insiders_transactions` |

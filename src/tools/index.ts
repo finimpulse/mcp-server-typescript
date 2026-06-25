@@ -1,10 +1,14 @@
 import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {ApiClient} from '../http/client.js';
 import {registerSearchTool} from './search/index.js';
+import {registerSearchLiteTool} from './search-lite/index.js';
 import {registerHistoriesTool} from './historical/index.js';
 import {registerSummaryTool} from './summary/index.js';
+import {registerSummaryLiteTool} from './summary-lite/index.js';
 import {registerProfileTool} from './profile/index.js';
 import {registerNewsTool} from './news/index.js';
+import {registerMarketPriceTool} from './market-price/index.js';
+import {registerMetricsTool} from './metrics/index.js';
 import {registerAnalysisAnalystsTool} from './analysis/analysts/index.js';
 import {registerAnalysisEarningsTool} from './analysis/earnings/index.js';
 import {registerAnalysisRecommendationsTool} from './analysis/recommendations/index.js';
@@ -30,10 +34,14 @@ import {registerOptionsExpirationsTool} from './options/expirations/index.js';
 
 export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerSearchTool(server, client);
+	registerSearchLiteTool(server, client);
 	registerHistoriesTool(server, client);
 	registerSummaryTool(server, client);
+	registerSummaryLiteTool(server, client);
 	registerProfileTool(server, client);
 	registerNewsTool(server, client);
+	registerMarketPriceTool(server, client);
+	registerMetricsTool(server, client);
 	registerAnalysisAnalystsTool(server, client);
 	registerAnalysisEarningsTool(server, client);
 	registerAnalysisRecommendationsTool(server, client);

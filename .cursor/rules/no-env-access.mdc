@@ -1,0 +1,14 @@
+---
+description: Prohibit reading or modifying .env secret files
+alwaysApply: true
+---
+
+# Do Not Touch .env Files
+
+`.env` files contain secrets (API tokens, credentials). Never read, open, print, edit, or copy them.
+
+- Do NOT read `.env` (or any `.env.*` except `.env.example`) with file-reading tools or shell commands (`cat`, `head`, `grep`, etc.).
+- Do NOT modify, rename, move, or delete `.env` files.
+- Do NOT echo their contents or include secret values in responses, code, or commits.
+
+If a task needs an environment variable, reference it by name (e.g. `process.env.API_TOKEN`) or update `.env.example` with a placeholder instead.

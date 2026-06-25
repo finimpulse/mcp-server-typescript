@@ -1,0 +1,57 @@
+{
+  "available_count": 34,
+  "implemented_count": 31,
+  "matched_count": 31,
+  "missing": [],
+  "skipped": [
+    {
+      "slug": "errors",
+      "endpoint": "GET v1/errors",
+      "endpoint_path": "errors"
+    },
+    {
+      "slug": "v1-appendix-user_data",
+      "endpoint": "GET v1/appendix/user_data",
+      "endpoint_path": "appendix/user_data"
+    }
+  ],
+  "no_endpoint_pages": [
+    {
+      "slug": "authentication",
+      "endpoint": null
+    }
+  ],
+  "implemented_tools": [
+    "search-lite",
+    "summary-lite",
+    "market-price",
+    "metrics",
+    "analysis/analysts",
+    "analysis/earnings",
+    "analysis/recommendations",
+    "analysis/upgrades-downgrades",
+    "financials/balance_sheet",
+    "financials/cash_flow",
+    "financials/general",
+    "financials/income_statement",
+    "financials/valuation_measures",
+    "historical",
+    "holders/general",
+    "holders/insiders",
+    "holders/insiders-transactions",
+    "holders/institutional",
+    "holders/mutual-funds",
+    "holdings/general",
+    "holdings/top-holdings",
+    "news",
+    "options/chain",
+    "options/contracts",
+    "options/expirations",
+    "profile",
+    "search",
+    "statistics/annual-returns",
+    "statistics/general",
+    "statistics/risks",
+    "summary"
+  ]
+}
