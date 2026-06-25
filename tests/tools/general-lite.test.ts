@@ -5,7 +5,7 @@ import { summaryLiteHandler } from '../../src/tools/summary-lite/handler.js';
 import { marketPriceHandler } from '../../src/tools/market-price/handler.js';
 import { metricsHandler } from '../../src/tools/metrics/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
 	expect(text).not.toMatch(/^Error:/);
@@ -18,7 +18,7 @@ function assertSuccess(text: string) {
 describe('get_search_lite', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -31,7 +31,7 @@ describe('get_search_lite', () => {
 describe('get_summary_lite', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -44,7 +44,7 @@ describe('get_summary_lite', () => {
 describe('get_market_price', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -57,7 +57,7 @@ describe('get_market_price', () => {
 describe('get_metrics', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 

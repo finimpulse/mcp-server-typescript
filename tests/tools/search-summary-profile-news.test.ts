@@ -5,7 +5,7 @@ import { summaryHandler } from '../../src/tools/summary/handler.js';
 import { profileHandler } from '../../src/tools/profile/handler.js';
 import { newsHandler } from '../../src/tools/news/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
 	expect(text).not.toMatch(/^Error:/);
@@ -18,7 +18,7 @@ function assertSuccess(text: string) {
 describe('get_search', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -31,7 +31,7 @@ describe('get_search', () => {
 describe('get_summary', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -44,7 +44,7 @@ describe('get_summary', () => {
 describe('get_profile', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -57,7 +57,7 @@ describe('get_profile', () => {
 describe('get_news', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 

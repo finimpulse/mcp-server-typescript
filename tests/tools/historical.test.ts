@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { ApiClient } from '../../src/http/client.js';
 import { historiesHandler } from '../../src/tools/historical/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
 	expect(text).not.toMatch(/^Error:/);
@@ -15,7 +15,7 @@ function assertSuccess(text: string) {
 describe('get_histories', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 

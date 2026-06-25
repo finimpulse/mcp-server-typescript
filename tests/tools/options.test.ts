@@ -4,7 +4,7 @@ import { optionsChainHandler } from '../../src/tools/options/chain/handler.js';
 import { optionsContractsHandler } from '../../src/tools/options/contracts/handler.js';
 import { optionsExpirationsHandler } from '../../src/tools/options/expirations/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
 	expect(text).not.toMatch(/^Error:/);
@@ -17,7 +17,7 @@ function assertSuccess(text: string) {
 describe('get_options_expirations', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -32,7 +32,7 @@ describe('get_options_chain', () => {
 	let expirationDate: string;
 
 	beforeAll(async () => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 		// Fetch the nearest expiration date dynamically
 		const expResult = await optionsExpirationsHandler({ symbol: 'AAPL' }, client);
@@ -51,7 +51,7 @@ describe('get_options_contracts', () => {
 	let contractName: string;
 
 	beforeAll(async () => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 		// Fetch a real contract name from the chain
 		const expResult = await optionsExpirationsHandler({ symbol: 'AAPL' }, client);

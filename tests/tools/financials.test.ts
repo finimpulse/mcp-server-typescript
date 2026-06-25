@@ -6,7 +6,7 @@ import { financialsBalanceSheetHandler } from '../../src/tools/financials/balanc
 import { financialsCashFlowHandler } from '../../src/tools/financials/cash_flow/handler.js';
 import { financialsValuationMeasuresHandler } from '../../src/tools/financials/valuation_measures/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
 	expect(text).not.toMatch(/^Error:/);
@@ -19,7 +19,7 @@ function assertSuccess(text: string) {
 describe('get_financials_general', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -32,7 +32,7 @@ describe('get_financials_general', () => {
 describe('get_financials_income_statement', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -45,7 +45,7 @@ describe('get_financials_income_statement', () => {
 describe('get_financials_balance_sheet', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -58,7 +58,7 @@ describe('get_financials_balance_sheet', () => {
 describe('get_financials_cash_flow', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -71,7 +71,7 @@ describe('get_financials_cash_flow', () => {
 describe('get_financials_valuation_measures', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 

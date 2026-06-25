@@ -115,7 +115,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { ApiClient } from '../../src/http/client.js';
 import { myToolHandler } from '../../src/tools/group/endpoint/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
     expect(text).not.toMatch(/^Error:/);
@@ -128,7 +128,7 @@ function assertSuccess(text: string) {
 describe('get_my_tool', () => {
     let client: ApiClient;
     beforeAll(() => {
-        if (!TOKEN) throw new Error('API_TOKEN env var is required');
+        if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
         client = new ApiClient(TOKEN);
     });
 
@@ -149,14 +149,14 @@ For full test commands and a map of which test file covers which tools, see [tes
 # Build TypeScript
 npm run build
 
-# Run all tests
-API_TOKEN=your-token npm test
+# Run all tests (tokens auto-load from .env; SANDBOX_API_TOKEN preferred, falls back to API_TOKEN)
+SANDBOX_API_TOKEN=your-token npm test
 
 # Run single test file
-API_TOKEN=your-token npx vitest run tests/tools/analysis.test.ts
+SANDBOX_API_TOKEN=your-token npx vitest run tests/tools/analysis.test.ts
 
 # Verbose output
-API_TOKEN=your-token npx vitest run --reporter=verbose
+SANDBOX_API_TOKEN=your-token npx vitest run --reporter=verbose
 ```
 
 When adding a new tool, check `tests/README.md` to find the right test file for its group. If no file exists for the group yet, create `tests/tools/<group>.test.ts` and add a row to the table in `tests/README.md`.

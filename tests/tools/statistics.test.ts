@@ -4,7 +4,7 @@ import { statisticsGeneralHandler } from '../../src/tools/statistics/general/han
 import { statisticsRisksHandler } from '../../src/tools/statistics/risks/handler.js';
 import { statisticsAnnualReturnsHandler } from '../../src/tools/statistics/annual-returns/handler.js';
 
-const TOKEN = process.env.API_TOKEN;
+const TOKEN = process.env.SANDBOX_API_TOKEN ?? process.env.API_TOKEN;
 
 function assertSuccess(text: string) {
 	expect(text).not.toMatch(/^Error:/);
@@ -17,7 +17,7 @@ function assertSuccess(text: string) {
 describe('get_statistics_general', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -30,7 +30,7 @@ describe('get_statistics_general', () => {
 describe('get_statistics_risks', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 
@@ -43,7 +43,7 @@ describe('get_statistics_risks', () => {
 describe('get_statistics_annual_returns', () => {
 	let client: ApiClient;
 	beforeAll(() => {
-		if (!TOKEN) throw new Error('API_TOKEN env var is required');
+		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
 		client = new ApiClient(TOKEN);
 	});
 

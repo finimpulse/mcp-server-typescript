@@ -4,28 +4,32 @@ Tests call tool handlers directly via `ApiClient` — no MCP protocol, no subpro
 
 ## Requirements
 
-A valid `API_TOKEN` from [finimpulse.com](https://finimpulse.com).
+A valid token from [finimpulse.com](https://finimpulse.com). Tests prefer `SANDBOX_API_TOKEN` and fall back to `API_TOKEN` when it is unset.
+
+Using the Sandbox token is recommended for tests: it returns dummy data with the same response structure and fields as production, but incurs no charges. See the [Sandbox docs](https://developers.finimpulse.com/sandbox/). The Sandbox token is available in the FinImpulse dashboard under API settings (API mode) and uses the same base URL — only the token differs.
 
 ## Run
 
+Tokens are auto-loaded from `.env`, so `npm test` works once `SANDBOX_API_TOKEN` (or `API_TOKEN`) is set there. The examples below pass it inline instead.
+
 **All tests:**
 ```bash
-API_TOKEN=your-token npm test
+SANDBOX_API_TOKEN=your-token npm test
 ```
 
 **Single group:**
 ```bash
-API_TOKEN=your-token npx vitest run tests/tools/analysis.test.ts
+SANDBOX_API_TOKEN=your-token npx vitest run tests/tools/analysis.test.ts
 ```
 
 **Verbose output:**
 ```bash
-API_TOKEN=your-token npx vitest run --reporter=verbose
+SANDBOX_API_TOKEN=your-token npx vitest run --reporter=verbose
 ```
 
 **Watch mode (reruns on file save):**
 ```bash
-API_TOKEN=your-token npm run test:watch
+SANDBOX_API_TOKEN=your-token npm run test:watch
 ```
 
 ## Test files
