@@ -1,20 +1,22 @@
 ---
-title: Balance Sheet
+title: Stock Balance Sheet API
 created: 2026-01-23
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/financials/balance_sheet
 auth: Bearer Token
 ---
 
-# Balance Sheet
+# Stock Balance Sheet API
 
-Returns comprehensive Balance Sheet data for stocks and some funds.
+Returns detailed Balance Sheet data for stocks and some funds, including assets, liabilities, and equity for the selected period. 
 
 This endpoint provides a snapshot of a company’s financial position and capital structure.
 
+Financial statements data covers over 85,000 tickers. Coverage starts from **September 30, 2021**, subject to availability per company. The full list of covered symbols is available for download [here](https://developers.finimpulse.com/wp-content/uploads/2026/06/tickers_with_financials.csv).
+
 ## When to Use This Endpoint
 - Populate the "Balance Sheet" section of the Financials views.
-- Retrieve structured historical data for solvency analysis, ratios, and modeling.
+- Retrieve multi-interval reporting series (trailing, quarterly, annual) for solvency analysis, ratios, and modeling.
 
 ## Request Parameters
 **POST** `v1/financials/balance_sheet` 
@@ -22,16 +24,15 @@ This endpoint provides a snapshot of a company’s financial position and capita
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **intervals**   
-     `array` *(optional)* — Reporting frequencies to return. **Supported values:**
+     `array` *(required)* — Reporting frequencies to return. **Supported values:**
     - `annual`
     - `quarterly`
-    - `trailing`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported intervals are returned. Note that interval availability depends on coverage. If data is missing for a period, values may be **null**. **Example:** `"intervals": [ "trailing", "quarterly", "annual" ]`
+     Note that interval availability depends on coverage. If data is missing for a period, values may be **null**.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -45,7 +46,11 @@ curl --location "https://api.finimpulse.com/v1/financials/balance_sheet" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "NVDA",
-      "start_date": "2020-08-11",
+      "intervals": [
+          "quarterly",
+          "annual"
+      ],
+      "start_date": "2021-10-01",
       "end_date": "2026-08-11",
       "tag": "just_tag"
   }'
@@ -65,7 +70,11 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""NVDA"",
-    ""start_date"": ""2020-08-11"",
+    ""intervals"": [
+        ""quarterly"",
+        ""annual""
+    ],
+    ""start_date"": ""2021-10-01"",
     ""end_date"": ""2026-08-11"",
     ""tag"": ""just_tag""
 }";
@@ -92,7 +101,11 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "NVDA",
-      "start_date" => "2020-08-11",
+      "intervals" => [
+        "quarterly",
+        "annual"
+      ],
+      "start_date" => "2021-10-01",
       "end_date" => "2026-08-11",
       "tag" => "just_tag"
     ]
@@ -117,7 +130,11 @@ headers = {
 }
 data = {
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 }
@@ -138,7 +155,11 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 });
@@ -164,10 +185,8 @@ req.end();
 ```
 
 
-The system covers data from **September 30, 2021**, subject to data availability per company.
-
 ## Response
-The response is a single object containing metadata and an ***items*** array of records.
+The response is a single object containing metadata and an ***items*** array of statement snapshots for a given interval and date.
 
 ### Metadata Fields
 
@@ -175,15 +194,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **display_name**   
-     `string` — Preferred display name (if available).
+     `string` — Asset display name.
 - **short_name**   
      `string` — Short descriptive name.
 - **long_name**   
-     `string` — Full legal or formal name (company/fund).
+     `string` — Full legal or formal name.
 - **quote_type**   
-     `string` — Asset type (expected - stock).
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **quote_source_name**   
-     `string` — Data source label for the quote (e.g., real-time vs delayed).
+     `string` — Data source label for the quote.
 - **currency**   
      `string` — Trading currency.
 - **full_exchange_name**   
@@ -199,11 +218,28 @@ The response is a single object containing metadata and an ***items*** array of 
 - **market_region**   
      `string` — Market/country code.
 - **total_count**   
-     `integer` — Total number of items that match filters.
+     `integer` — Total number of matching items.
 - **items_count**   
-     `integer` — Number of items in the response.
+     `integer` — Number of items returned.
+- **reports_count**   
+     `integer` — Total number of unique reports in the response.
+- **report_keys**   
+     `array` — Array of unique report identifiers returned in the response. Each key follows the format `interval|date`. All items sharing the same key belong to the same report.
 - **items**   
-     `array` — Array of statement records. It is a unified list where each element represents one report snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or source limitations.
+     `array` — Array of statement records. It is a unified list where each element represents one report snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or data limitations.
+
+
+### Snapshot Info
+
+
+- **type**   
+     `string` — Snapshot type (balance_sheet expected).
+- **report_key**   
+     `string` — Unique identifier of the report this item belongs to. Format: `interval|date`.
+- **interval**   
+     `string` — Reporting frequency (quarterly/annual).
+- **date**   
+     `string` — End date of the reporting period.
 
 
 ### Total Assets
@@ -220,7 +256,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **cash_financial**   
      `number` — Cash held in financial institutions.
 - **cash_equivalents**   
-     `number` — Highly liquid cash equivalents.
+     `number` — Cash equivalents.
 - **restricted_cash**   
      `number` — Restricted cash.
 - **other_short_term_investments**   
@@ -242,7 +278,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **allowance_for_doubtful_accounts_receivable**   
      `number` — Allowance for doubtful accounts receivable.
 - **receivables_adjustments_allowances**   
-     `number` — Adjustments and allowances for receivables.
+     `number` — Adjustments and allowances to receivables.
 - **accrued_interest_receivable**   
      `number` — Accrued interest receivable.
 - **other_receivables**   
@@ -254,7 +290,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **taxes_receivable**   
      `number` — Taxes receivable.
 - **duefrom_related_parties_current**   
-     `number` — Amounts due from related parties (current).
+     `number` — Current amounts due from related parties.
 - **inventory**   
      `number` — Total inventory.
 - **raw_materials**   
@@ -266,7 +302,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **other_inventories**   
      `number` — Other inventories.
 - **inventories_adjustments_allowances**   
-     `number` — Inventory adjustments and allowances.
+     `number` — Adjustments and allowances to inventories.
 - **prepaid_assets**   
      `number` — Prepaid assets.
 - **current_deferred_assets**   
@@ -280,9 +316,9 @@ The response is a single object containing metadata and an ***items*** array of 
 - **total_non_current_assets**   
      `number` — Total non-current assets.
 - **net_ppe**   
-     `number` — Net property, plant, and equipment.
+     `number` — Net property, plant, and equipment (PPE).
 - **gross_ppe**   
-     `number` — Gross property, plant, and equipment.
+     `number` — Gross property, plant, and equipment (PPE).
 - **accumulated_depreciation**   
      `number` — Accumulated depreciation.
 - **buildings_and_improvements**   
@@ -298,7 +334,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **properties**   
      `number` — Properties.
 - **leases**   
-     `number` — Lease-related assets.
+     `number` — Leases.
 - **other_properties**   
      `number` — Other properties.
 - **goodwill_and_other_intangible_assets**   
@@ -314,15 +350,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **other_investments**   
      `number` — Other investments.
 - **investments_in_other_ventures_under_equity_method**   
-     `number` — Equity-method investments in other ventures.
+     `number` — Investments in other ventures under the equity method.
 - **investmentsin_associatesat_cost**   
-     `number` — Investments in associates at cost.
+     `number` — Investments in associates, at cost.
 - **investmentsin_joint_venturesat_cost**   
-     `number` — Investments in joint ventures at cost.
+     `number` — Investments in joint ventures, at cost.
 - **investmentsin_subsidiariesat_cost**   
-     `number` — Investments in subsidiaries at cost.
+     `number` — Investments in subsidiaries, at cost.
 - **long_term_equity_investment**   
-     `number` — Long-term equity investments.
+     `number` — Long-term investments in equity.
 - **financial_assets**   
      `number` — Financial assets.
 - **financial_assets_designatedas_fair_value_through_profitor_loss_total**   
@@ -340,14 +376,14 @@ The response is a single object containing metadata and an ***items*** array of 
 - **other_non_current_assets**   
      `number` — Other non-current assets.
 - **duefrom_related_parties_non_current**   
-     `number` — Amounts due from related parties (non-current).
+     `number` — Non-current amounts due from related parties.
 
 
 ### Total Liabilities Net Minority Interest
 
 
 - **total_liabilities_net_minority_interest**   
-     `number` — Total liabilities net of minority interest.
+     `number` — Total liabilities, net of minority interest.
 - **current_liabilities**   
      `number` — Total current liabilities.
 - **accounts_payable**   
@@ -369,13 +405,13 @@ The response is a single object containing metadata and an ***items*** array of 
 - **commercial_paper**   
      `number` — Commercial paper.
 - **line_of_credit**   
-     `number` — Line of credit borrowings.
+     `number` — Line of credit.
 - **other_current_borrowings**   
      `number` — Other current borrowings.
 - **current_capital_lease_obligation**   
      `number` — Current capital lease obligation.
 - **current_debt_and_capital_lease_obligation**   
-     `number` — Current debt and capital lease obligations.
+     `number` — Current debt and capital lease obligation.
 - **current_deferred_liabilities**   
      `number` — Current deferred liabilities.
 - **current_deferred_taxes_liabilities**   
@@ -385,21 +421,21 @@ The response is a single object containing metadata and an ***items*** array of 
 - **dividends_payable**   
      `number` — Dividends payable.
 - **dueto_related_parties_current**   
-     `number` — Amounts due to related parties (current).
+     `number` — Current amounts due to related parties.
 - **pensionand_other_post_retirement_benefit_plans_current**   
-     `number` — Current pension and post-retirement benefit obligations.
+     `number` — Current pension and other post-retirement benefit obligations.
 - **current_provisions**   
      `number` — Current provisions.
 - **other_payable**   
-     `number` — Other payables.
+     `number` — Other payable.
 - **other_current_liabilities**   
      `number` — Other current liabilities.
 - **total_tax_payable**   
-     `number` — Total taxes payable.
+     `number` — Total tax payable.
 - **total_non_current_liabilities_net_minority_interest**   
-     `number` — Total non-current liabilities net of minority interest.
+     `number` — Total non-current liabilities, net of minority interest.
 - **long_term_debt_and_capital_lease_obligation**   
-     `number` — Long-term debt and capital lease obligations.
+     `number` — Long-term debt and capital lease obligation.
 - **long_term_debt**   
      `number` — Long-term debt.
 - **long_term_capital_lease_obligation**   
@@ -417,21 +453,21 @@ The response is a single object containing metadata and an ***items*** array of 
 - **non_current_accrued_expenses**   
      `number` — Non-current accrued expenses.
 - **tradeand_other_payables_non_current**   
-     `number` — Trade and other payables (non-current).
+     `number` — Non-current trade and other payables.
 - **derivative_product_liabilities**   
      `number` — Derivative product liabilities.
 - **liabilities_heldfor_sale_non_current**   
      `number` — Non-current liabilities held for sale.
 - **dueto_related_parties_non_current**   
-     `number` — Amounts due to related parties (non-current).
+     `number` — Non-current amounts due to related parties.
 - **non_current_pension_and_other_postretirement_benefit_plans**   
-     `number` — Non-current pension and post-retirement benefit obligations.
+     `number` — Non-current pension and other post-retirement benefit obligations.
 - **minimum_pension_liabilities**   
      `number` — Minimum pension liabilities.
 - **defined_pension_benefit**   
      `number` — Defined pension benefit obligations.
 - **employee_benefits**   
-     `number` — Employee benefit liabilities.
+     `number` — Employee benefits.
 - **other_non_current_liabilities**   
      `number` — Other non-current liabilities.
 
@@ -440,9 +476,9 @@ The response is a single object containing metadata and an ***items*** array of 
 
 
 - **total_equity_gross_minority_interest**   
-     `number` — Total equity including minority interest.
+     `number` — Total equity, gross of minority interest.
 - **stockholders_equity**   
-     `number` — Total stockholders’ equity.
+     `number` — Stockholders' equity.
 - **common_stock_equity**   
      `number` — Common stock equity.
 - **common_stock**   
@@ -454,15 +490,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **additional_paid_in_capital**   
      `number` — Additional paid-in capital.
 - **share_issued**   
-     `integer` — Total shares issued.
+     `integer` — Shares issued.
 - **ordinary_shares_number**   
-     `integer` — Number of ordinary shares outstanding.
+     `integer` — Number of ordinary shares.
 - **preferred_stock_equity**   
      `number` — Preferred stock equity.
 - **preferred_stock**   
      `number` — Preferred stock.
 - **preferred_shares_number**   
-     `integer` — Number of preferred shares outstanding.
+     `integer` — Number of preferred shares.
 - **retained_earnings**   
      `number` — Retained earnings.
 - **treasury_stock**   
@@ -480,7 +516,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **foreign_currency_translation_adjustments**   
      `number` — Foreign currency translation adjustments.
 - **unrealized_gain_loss**   
-     `number` — Unrealized gains and losses.
+     `number` — Unrealized gain or loss.
 - **gains_losses_not_affecting_retained_earnings**   
      `number` — Gains and losses not affecting retained earnings.
 - **fixed_assets_revaluation_reserve**   
@@ -514,40 +550,11 @@ The response is a single object containing metadata and an ***items*** array of 
      `number` — Invested capital.
 
 
-### Snapshot Info
-
-
-- **type**   
-     `string` — Report/snapshot type (balance_sheet expected).
-- **interval**   
-     `string` — Reporting frequencies (trailing/quarterly/annual).
-- **date**   
-     `string` — Reporting period end date.
-
-
 ### Example Response
 
 
 ```json
 {
-    "task_id": "4bb5a417-b40d-4a33-b73f-8f71a16526ee",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.003,
-    "data": {
-        "symbol": "NVDA",
-        "start_date": "2020-08-11",
-        "end_date": "2026-08-11",
-        "tag": "just_tag",
-        "intervals": [
-            "trailing",
-            "quarterly",
-            "annual"
-        ],
-        "types": [
-            "balance_sheet"
-        ]
-    },
     "result": {
         "symbol": "NVDA",
         "quote_type": "stock",
@@ -556,165 +563,33 @@ The response is a single object containing metadata and an ***items*** array of 
         "display_name": "NVIDIA",
         "market_region": "US_OT",
         "exchange_timezone_name": "America/New_York",
-        "exchange_timezone_short_name": "EST",
+        "exchange_timezone_short_name": "EDT",
         "exchange": "NMS",
         "short_name": "NVIDIA Corporation",
         "long_name": "NVIDIA Corporation",
-        "quote_source_name": "Nasdaq Real Time Price",
+        "quote_source_name": "BOATS Real Time Price",
         "time_offset": -14400,
-        "total_count": 11,
-        "items_count": 11,
+        "total_count": 13,
+        "items_count": 13,
+        "reports_count": 13,
+        "report_keys": [
+            "annual|2022-01-31",
+            "annual|2023-01-31",
+            "annual|2024-01-31",
+            "annual|2025-01-31",
+            "annual|2026-01-31",
+            "quarterly|2024-07-31",
+            "quarterly|2024-10-31",
+            "quarterly|2025-01-31",
+            "quarterly|2025-04-30",
+            "quarterly|2025-07-31",
+            "quarterly|2025-10-31",
+            "quarterly|2026-01-31",
+            "quarterly|2026-04-30"
+        ],
         "items": [
             {
-                "type": "balance_sheet",
-                "accounts_payable": null,
-                "accounts_receivable": null,
-                "accrued_interest_receivable": null,
-                "accumulated_depreciation": null,
-                "additional_paid_in_capital": null,
-                "allowance_for_doubtful_accounts_receivable": -21000000,
-                "assets_held_for_sale_current": null,
-                "available_for_sale_securities": null,
-                "buildings_and_improvements": null,
-                "capital_lease_obligations": null,
-                "capital_stock": null,
-                "cash_and_cash_equivalents": null,
-                "cash_cash_equivalents_and_short_term_investments": null,
-                "cash_equivalents": null,
-                "cash_financial": null,
-                "commercial_paper": null,
-                "common_stock": null,
-                "common_stock_equity": null,
-                "construction_in_progress": null,
-                "current_accrued_expenses": null,
-                "current_assets": null,
-                "current_capital_lease_obligation": null,
-                "current_debt": 999000000,
-                "current_debt_and_capital_lease_obligation": null,
-                "current_deferred_assets": null,
-                "current_deferred_liabilities": null,
-                "current_deferred_revenue": null,
-                "current_deferred_taxes_assets": null,
-                "current_deferred_taxes_liabilities": null,
-                "current_liabilities": null,
-                "current_notes_payable": null,
-                "current_provisions": null,
-                "defined_pension_benefit": null,
-                "derivative_product_liabilities": null,
-                "dividends_payable": null,
-                "duefrom_related_parties_current": null,
-                "duefrom_related_parties_non_current": null,
-                "dueto_related_parties_current": null,
-                "dueto_related_parties_non_current": null,
-                "employee_benefits": 33000000,
-                "financial_assets": null,
-                "financial_assets_designatedas_fair_value_through_profitor_loss_total": null,
-                "finished_goods": null,
-                "fixed_assets_revaluation_reserve": null,
-                "foreign_currency_translation_adjustments": null,
-                "gains_losses_not_affecting_retained_earnings": null,
-                "general_partnership_capital": null,
-                "goodwill": null,
-                "goodwill_and_other_intangible_assets": null,
-                "gross_accounts_receivable": 2450000000,
-                "gross_ppe": null,
-                "hedging_assets_current": null,
-                "held_to_maturity_securities": null,
-                "income_tax_payable": null,
-                "interest_payable": 74000000,
-                "inventories_adjustments_allowances": null,
-                "inventory": null,
-                "invested_capital": null,
-                "investment_properties": null,
-                "investmentin_financial_assets": null,
-                "investments_and_advances": null,
-                "investments_in_other_ventures_under_equity_method": null,
-                "investmentsin_associatesat_cost": null,
-                "investmentsin_joint_venturesat_cost": null,
-                "investmentsin_subsidiariesat_cost": null,
-                "land_and_improvements": null,
-                "leases": 385000000,
-                "liabilities_heldfor_sale_non_current": null,
-                "limited_partnership_capital": null,
-                "line_of_credit": null,
-                "loans_receivable": null,
-                "long_term_capital_lease_obligation": null,
-                "long_term_debt": null,
-                "long_term_debt_and_capital_lease_obligation": null,
-                "long_term_equity_investment": null,
-                "long_term_provisions": null,
-                "machinery_furniture_equipment": null,
-                "minimum_pension_liabilities": null,
-                "minority_interest": null,
-                "net_debt": 6116000000,
-                "net_ppe": null,
-                "net_tangible_assets": null,
-                "non_current_accounts_receivable": null,
-                "non_current_accrued_expenses": null,
-                "non_current_deferred_assets": null,
-                "non_current_deferred_liabilities": null,
-                "non_current_deferred_revenue": null,
-                "non_current_deferred_taxes_assets": null,
-                "non_current_deferred_taxes_liabilities": null,
-                "non_current_note_receivables": null,
-                "non_current_pension_and_other_postretirement_benefit_plans": null,
-                "non_current_prepaid_assets": null,
-                "notes_receivable": null,
-                "ordinary_shares_number": null,
-                "other_capital_stock": null,
-                "other_current_assets": null,
-                "other_current_borrowings": 999000000,
-                "other_current_liabilities": null,
-                "other_equity_adjustments": null,
-                "other_equity_interest": null,
-                "other_intangible_assets": null,
-                "other_inventories": null,
-                "other_investments": 144000000,
-                "other_non_current_assets": null,
-                "other_non_current_liabilities": null,
-                "other_payable": null,
-                "other_properties": null,
-                "other_receivables": null,
-                "other_short_term_investments": null,
-                "payables": null,
-                "payables_and_accrued_expenses": null,
-                "pensionand_other_post_retirement_benefit_plans_current": null,
-                "preferred_securities_outside_stock_equity": null,
-                "preferred_shares_number": null,
-                "preferred_stock": null,
-                "preferred_stock_equity": null,
-                "prepaid_assets": 239000000,
-                "properties": null,
-                "raw_materials": null,
-                "receivables": null,
-                "receivables_adjustments_allowances": null,
-                "restricted_cash": null,
-                "restricted_common_stock": null,
-                "retained_earnings": null,
-                "share_issued": null,
-                "stockholders_equity": null,
-                "tangible_book_value": null,
-                "taxes_receivable": null,
-                "total_assets": null,
-                "total_capitalization": null,
-                "total_debt": null,
-                "total_equity_gross_minority_interest": null,
-                "total_liabilities_net_minority_interest": null,
-                "total_non_current_assets": null,
-                "total_non_current_liabilities_net_minority_interest": null,
-                "total_partnership_capital": null,
-                "total_tax_payable": null,
-                "tradeand_other_payables_non_current": null,
-                "trading_securities": null,
-                "treasury_shares_number": 13800000000,
-                "treasury_stock": 10756000000,
-                "unrealized_gain_loss": null,
-                "work_in_process": null,
-                "working_capital": null,
-                "interval": "annual",
-                "date": "2021-01-31"
-            },
-            {
+                "report_key": "annual|2022-01-31",
                 "type": "balance_sheet",
                 "accounts_payable": 1783000000,
                 "accounts_receivable": 4650000000,
@@ -864,6 +739,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2022-01-31"
             },
             {
+                "report_key": "annual|2023-01-31",
                 "type": "balance_sheet",
                 "accounts_payable": 1193000000,
                 "accounts_receivable": 3827000000,
@@ -1013,6 +889,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2023-01-31"
             },
             {
+                "report_key": "annual|2024-01-31",
                 "type": "balance_sheet",
                 "accounts_payable": 2699000000,
                 "accounts_receivable": 9999000000,
@@ -1162,6 +1039,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-01-31"
             },
             {
+                "report_key": "annual|2025-01-31",
                 "type": "balance_sheet",
                 "accounts_payable": 6310000000,
                 "accounts_receivable": 23065000000,
@@ -1311,6 +1189,157 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "annual|2026-01-31",
+                "type": "balance_sheet",
+                "accounts_payable": 9812000000,
+                "accounts_receivable": 38466000000,
+                "accrued_interest_receivable": null,
+                "accumulated_depreciation": -6587000000,
+                "additional_paid_in_capital": 10118000000,
+                "allowance_for_doubtful_accounts_receivable": null,
+                "assets_held_for_sale_current": null,
+                "available_for_sale_securities": 22251000000,
+                "buildings_and_improvements": 2891000000,
+                "capital_lease_obligations": 2572000000,
+                "capital_stock": 24000000,
+                "cash_and_cash_equivalents": 10605000000,
+                "cash_cash_equivalents_and_short_term_investments": 62556000000,
+                "cash_equivalents": null,
+                "cash_financial": null,
+                "commercial_paper": null,
+                "common_stock": 24000000,
+                "common_stock_equity": 157293000000,
+                "construction_in_progress": 683000000,
+                "current_accrued_expenses": 13124000000,
+                "current_assets": 125605000000,
+                "current_capital_lease_obligation": null,
+                "current_debt": 999000000,
+                "current_debt_and_capital_lease_obligation": 999000000,
+                "current_deferred_assets": null,
+                "current_deferred_liabilities": 1379000000,
+                "current_deferred_revenue": 1379000000,
+                "current_deferred_taxes_assets": null,
+                "current_deferred_taxes_liabilities": null,
+                "current_liabilities": 32163000000,
+                "current_notes_payable": null,
+                "current_provisions": 2807000000,
+                "defined_pension_benefit": null,
+                "derivative_product_liabilities": null,
+                "dividends_payable": null,
+                "duefrom_related_parties_current": null,
+                "duefrom_related_parties_non_current": null,
+                "dueto_related_parties_current": null,
+                "dueto_related_parties_non_current": null,
+                "employee_benefits": null,
+                "financial_assets": null,
+                "financial_assets_designatedas_fair_value_through_profitor_loss_total": null,
+                "finished_goods": 8774000000,
+                "fixed_assets_revaluation_reserve": null,
+                "foreign_currency_translation_adjustments": null,
+                "gains_losses_not_affecting_retained_earnings": 178000000,
+                "general_partnership_capital": null,
+                "goodwill": 20832000000,
+                "goodwill_and_other_intangible_assets": 24138000000,
+                "gross_accounts_receivable": null,
+                "gross_ppe": 19837000000,
+                "hedging_assets_current": null,
+                "held_to_maturity_securities": null,
+                "income_tax_payable": null,
+                "interest_payable": null,
+                "inventories_adjustments_allowances": null,
+                "inventory": 21403000000,
+                "invested_capital": 165761000000,
+                "investment_properties": null,
+                "investmentin_financial_assets": 22251000000,
+                "investments_and_advances": 22251000000,
+                "investments_in_other_ventures_under_equity_method": null,
+                "investmentsin_associatesat_cost": null,
+                "investmentsin_joint_venturesat_cost": null,
+                "investmentsin_subsidiariesat_cost": null,
+                "land_and_improvements": 777000000,
+                "leases": null,
+                "liabilities_heldfor_sale_non_current": null,
+                "limited_partnership_capital": null,
+                "line_of_credit": null,
+                "loans_receivable": null,
+                "long_term_capital_lease_obligation": 2572000000,
+                "long_term_debt": 7469000000,
+                "long_term_debt_and_capital_lease_obligation": 10041000000,
+                "long_term_equity_investment": null,
+                "long_term_provisions": null,
+                "machinery_furniture_equipment": 12619000000,
+                "minimum_pension_liabilities": null,
+                "minority_interest": null,
+                "net_debt": null,
+                "net_ppe": 13250000000,
+                "net_tangible_assets": 133155000000,
+                "non_current_accounts_receivable": null,
+                "non_current_accrued_expenses": null,
+                "non_current_deferred_assets": 13258000000,
+                "non_current_deferred_liabilities": 2967000000,
+                "non_current_deferred_revenue": 1193000000,
+                "non_current_deferred_taxes_assets": 13258000000,
+                "non_current_deferred_taxes_liabilities": 1774000000,
+                "non_current_note_receivables": null,
+                "non_current_pension_and_other_postretirement_benefit_plans": null,
+                "non_current_prepaid_assets": null,
+                "notes_receivable": null,
+                "ordinary_shares_number": 24304000000,
+                "other_capital_stock": null,
+                "other_current_assets": 3180000000,
+                "other_current_borrowings": 999000000,
+                "other_current_liabilities": 1373000000,
+                "other_equity_adjustments": 178000000,
+                "other_equity_interest": null,
+                "other_intangible_assets": 3306000000,
+                "other_inventories": null,
+                "other_investments": null,
+                "other_non_current_assets": 8301000000,
+                "other_non_current_liabilities": 381000000,
+                "other_payable": null,
+                "other_properties": 2867000000,
+                "other_receivables": null,
+                "other_short_term_investments": 51951000000,
+                "payables": 12481000000,
+                "payables_and_accrued_expenses": 25605000000,
+                "pensionand_other_post_retirement_benefit_plans_current": null,
+                "preferred_securities_outside_stock_equity": null,
+                "preferred_shares_number": null,
+                "preferred_stock": 0,
+                "preferred_stock_equity": null,
+                "prepaid_assets": null,
+                "properties": 0,
+                "raw_materials": 3807000000,
+                "receivables": 38466000000,
+                "receivables_adjustments_allowances": null,
+                "restricted_cash": null,
+                "restricted_common_stock": null,
+                "retained_earnings": 146973000000,
+                "share_issued": 24304000000,
+                "stockholders_equity": 157293000000,
+                "tangible_book_value": 133155000000,
+                "taxes_receivable": null,
+                "total_assets": 206803000000,
+                "total_capitalization": 164762000000,
+                "total_debt": 11040000000,
+                "total_equity_gross_minority_interest": 157293000000,
+                "total_liabilities_net_minority_interest": 49510000000,
+                "total_non_current_assets": 81198000000,
+                "total_non_current_liabilities_net_minority_interest": 17347000000,
+                "total_partnership_capital": null,
+                "total_tax_payable": 2669000000,
+                "tradeand_other_payables_non_current": 3958000000,
+                "trading_securities": null,
+                "treasury_shares_number": null,
+                "treasury_stock": null,
+                "unrealized_gain_loss": null,
+                "work_in_process": 8822000000,
+                "working_capital": 93442000000,
+                "interval": "annual",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2024-07-31",
                 "type": "balance_sheet",
                 "accounts_payable": null,
                 "accounts_receivable": null,
@@ -1460,6 +1489,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-07-31"
             },
             {
+                "report_key": "quarterly|2024-10-31",
                 "type": "balance_sheet",
                 "accounts_payable": 5353000000,
                 "accounts_receivable": 17693000000,
@@ -1609,6 +1639,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-10-31"
             },
             {
+                "report_key": "quarterly|2025-01-31",
                 "type": "balance_sheet",
                 "accounts_payable": 6310000000,
                 "accounts_receivable": 23065000000,
@@ -1758,6 +1789,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "quarterly|2025-04-30",
                 "type": "balance_sheet",
                 "accounts_payable": 7331000000,
                 "accounts_receivable": 22132000000,
@@ -1907,6 +1939,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-04-30"
             },
             {
+                "report_key": "quarterly|2025-07-31",
                 "type": "balance_sheet",
                 "accounts_payable": 9064000000,
                 "accounts_receivable": 27808000000,
@@ -2056,6 +2089,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-07-31"
             },
             {
+                "report_key": "quarterly|2025-10-31",
                 "type": "balance_sheet",
                 "accounts_payable": 8624000000,
                 "accounts_receivable": 33391000000,
@@ -2203,6 +2237,306 @@ The response is a single object containing metadata and an ***items*** array of 
                 "working_capital": 90417000000,
                 "interval": "quarterly",
                 "date": "2025-10-31"
+            },
+            {
+                "report_key": "quarterly|2026-01-31",
+                "type": "balance_sheet",
+                "accounts_payable": 9812000000,
+                "accounts_receivable": 38466000000,
+                "accrued_interest_receivable": null,
+                "accumulated_depreciation": -6587000000,
+                "additional_paid_in_capital": 10118000000,
+                "allowance_for_doubtful_accounts_receivable": null,
+                "assets_held_for_sale_current": null,
+                "available_for_sale_securities": 22251000000,
+                "buildings_and_improvements": 2891000000,
+                "capital_lease_obligations": 2572000000,
+                "capital_stock": 24000000,
+                "cash_and_cash_equivalents": 10605000000,
+                "cash_cash_equivalents_and_short_term_investments": 62556000000,
+                "cash_equivalents": null,
+                "cash_financial": null,
+                "commercial_paper": null,
+                "common_stock": 24000000,
+                "common_stock_equity": 157293000000,
+                "construction_in_progress": 683000000,
+                "current_accrued_expenses": 13124000000,
+                "current_assets": 125605000000,
+                "current_capital_lease_obligation": null,
+                "current_debt": 999000000,
+                "current_debt_and_capital_lease_obligation": 999000000,
+                "current_deferred_assets": null,
+                "current_deferred_liabilities": 1379000000,
+                "current_deferred_revenue": 1379000000,
+                "current_deferred_taxes_assets": null,
+                "current_deferred_taxes_liabilities": null,
+                "current_liabilities": 32163000000,
+                "current_notes_payable": null,
+                "current_provisions": 2807000000,
+                "defined_pension_benefit": null,
+                "derivative_product_liabilities": null,
+                "dividends_payable": null,
+                "duefrom_related_parties_current": null,
+                "duefrom_related_parties_non_current": null,
+                "dueto_related_parties_current": null,
+                "dueto_related_parties_non_current": null,
+                "employee_benefits": null,
+                "financial_assets": null,
+                "financial_assets_designatedas_fair_value_through_profitor_loss_total": null,
+                "finished_goods": 8774000000,
+                "fixed_assets_revaluation_reserve": null,
+                "foreign_currency_translation_adjustments": null,
+                "gains_losses_not_affecting_retained_earnings": 178000000,
+                "general_partnership_capital": null,
+                "goodwill": 20832000000,
+                "goodwill_and_other_intangible_assets": 24138000000,
+                "gross_accounts_receivable": null,
+                "gross_ppe": 19837000000,
+                "hedging_assets_current": null,
+                "held_to_maturity_securities": null,
+                "income_tax_payable": null,
+                "interest_payable": null,
+                "inventories_adjustments_allowances": null,
+                "inventory": 21403000000,
+                "invested_capital": 165761000000,
+                "investment_properties": null,
+                "investmentin_financial_assets": 22251000000,
+                "investments_and_advances": 22251000000,
+                "investments_in_other_ventures_under_equity_method": null,
+                "investmentsin_associatesat_cost": null,
+                "investmentsin_joint_venturesat_cost": null,
+                "investmentsin_subsidiariesat_cost": null,
+                "land_and_improvements": 777000000,
+                "leases": null,
+                "liabilities_heldfor_sale_non_current": null,
+                "limited_partnership_capital": null,
+                "line_of_credit": null,
+                "loans_receivable": null,
+                "long_term_capital_lease_obligation": 2572000000,
+                "long_term_debt": 7469000000,
+                "long_term_debt_and_capital_lease_obligation": 10041000000,
+                "long_term_equity_investment": null,
+                "long_term_provisions": null,
+                "machinery_furniture_equipment": 12619000000,
+                "minimum_pension_liabilities": null,
+                "minority_interest": null,
+                "net_debt": null,
+                "net_ppe": 13250000000,
+                "net_tangible_assets": 133155000000,
+                "non_current_accounts_receivable": null,
+                "non_current_accrued_expenses": null,
+                "non_current_deferred_assets": 13258000000,
+                "non_current_deferred_liabilities": 2967000000,
+                "non_current_deferred_revenue": 1193000000,
+                "non_current_deferred_taxes_assets": 13258000000,
+                "non_current_deferred_taxes_liabilities": 1774000000,
+                "non_current_note_receivables": null,
+                "non_current_pension_and_other_postretirement_benefit_plans": null,
+                "non_current_prepaid_assets": null,
+                "notes_receivable": null,
+                "ordinary_shares_number": 24304000000,
+                "other_capital_stock": null,
+                "other_current_assets": 3180000000,
+                "other_current_borrowings": 999000000,
+                "other_current_liabilities": 1373000000,
+                "other_equity_adjustments": 178000000,
+                "other_equity_interest": null,
+                "other_intangible_assets": 3306000000,
+                "other_inventories": null,
+                "other_investments": null,
+                "other_non_current_assets": 8301000000,
+                "other_non_current_liabilities": 381000000,
+                "other_payable": null,
+                "other_properties": 2867000000,
+                "other_receivables": null,
+                "other_short_term_investments": 51951000000,
+                "payables": 12481000000,
+                "payables_and_accrued_expenses": 25605000000,
+                "pensionand_other_post_retirement_benefit_plans_current": null,
+                "preferred_securities_outside_stock_equity": null,
+                "preferred_shares_number": null,
+                "preferred_stock": 0,
+                "preferred_stock_equity": null,
+                "prepaid_assets": null,
+                "properties": 0,
+                "raw_materials": 3807000000,
+                "receivables": 38466000000,
+                "receivables_adjustments_allowances": null,
+                "restricted_cash": null,
+                "restricted_common_stock": null,
+                "retained_earnings": 146973000000,
+                "share_issued": 24304000000,
+                "stockholders_equity": 157293000000,
+                "tangible_book_value": 133155000000,
+                "taxes_receivable": null,
+                "total_assets": 206803000000,
+                "total_capitalization": 164762000000,
+                "total_debt": 11040000000,
+                "total_equity_gross_minority_interest": 157293000000,
+                "total_liabilities_net_minority_interest": 49510000000,
+                "total_non_current_assets": 81198000000,
+                "total_non_current_liabilities_net_minority_interest": 17347000000,
+                "total_partnership_capital": null,
+                "total_tax_payable": 2669000000,
+                "tradeand_other_payables_non_current": 3958000000,
+                "trading_securities": null,
+                "treasury_shares_number": null,
+                "treasury_stock": null,
+                "unrealized_gain_loss": null,
+                "work_in_process": 8822000000,
+                "working_capital": 93442000000,
+                "interval": "quarterly",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2026-04-30",
+                "type": "balance_sheet",
+                "accounts_payable": 13097000000,
+                "accounts_receivable": 40710000000,
+                "accrued_interest_receivable": null,
+                "accumulated_depreciation": null,
+                "additional_paid_in_capital": 10275000000,
+                "allowance_for_doubtful_accounts_receivable": null,
+                "assets_held_for_sale_current": null,
+                "available_for_sale_securities": 43364000000,
+                "buildings_and_improvements": null,
+                "capital_lease_obligations": 3878000000,
+                "capital_stock": 24000000,
+                "cash_and_cash_equivalents": 13237000000,
+                "cash_cash_equivalents_and_short_term_investments": 80572000000,
+                "cash_equivalents": null,
+                "cash_financial": null,
+                "commercial_paper": null,
+                "common_stock": 24000000,
+                "common_stock_equity": 195474000000,
+                "construction_in_progress": null,
+                "current_accrued_expenses": 12293000000,
+                "current_assets": 150995000000,
+                "current_capital_lease_obligation": null,
+                "current_debt": 1000000000,
+                "current_debt_and_capital_lease_obligation": 1000000000,
+                "current_deferred_assets": null,
+                "current_deferred_liabilities": 1714000000,
+                "current_deferred_revenue": 1714000000,
+                "current_deferred_taxes_assets": null,
+                "current_deferred_taxes_liabilities": null,
+                "current_liabilities": 43884000000,
+                "current_notes_payable": null,
+                "current_provisions": 2948000000,
+                "defined_pension_benefit": null,
+                "derivative_product_liabilities": null,
+                "dividends_payable": null,
+                "duefrom_related_parties_current": null,
+                "duefrom_related_parties_non_current": null,
+                "dueto_related_parties_current": null,
+                "dueto_related_parties_non_current": null,
+                "employee_benefits": null,
+                "financial_assets": null,
+                "financial_assets_designatedas_fair_value_through_profitor_loss_total": null,
+                "finished_goods": 9201000000,
+                "fixed_assets_revaluation_reserve": null,
+                "foreign_currency_translation_adjustments": null,
+                "gains_losses_not_affecting_retained_earnings": 137000000,
+                "general_partnership_capital": null,
+                "goodwill": 20894000000,
+                "goodwill_and_other_intangible_assets": 24014000000,
+                "gross_accounts_receivable": null,
+                "gross_ppe": 16661000000,
+                "hedging_assets_current": null,
+                "held_to_maturity_securities": null,
+                "income_tax_payable": null,
+                "interest_payable": null,
+                "inventories_adjustments_allowances": null,
+                "inventory": 25797000000,
+                "invested_capital": 203944000000,
+                "investment_properties": null,
+                "investmentin_financial_assets": 43364000000,
+                "investments_and_advances": 43364000000,
+                "investments_in_other_ventures_under_equity_method": null,
+                "investmentsin_associatesat_cost": null,
+                "investmentsin_joint_venturesat_cost": null,
+                "investmentsin_subsidiariesat_cost": null,
+                "land_and_improvements": null,
+                "leases": null,
+                "liabilities_heldfor_sale_non_current": null,
+                "limited_partnership_capital": null,
+                "line_of_credit": null,
+                "loans_receivable": null,
+                "long_term_capital_lease_obligation": 3878000000,
+                "long_term_debt": 7470000000,
+                "long_term_debt_and_capital_lease_obligation": 11348000000,
+                "long_term_equity_investment": null,
+                "long_term_provisions": null,
+                "machinery_furniture_equipment": null,
+                "minimum_pension_liabilities": null,
+                "minority_interest": null,
+                "net_debt": null,
+                "net_ppe": 16661000000,
+                "net_tangible_assets": 171460000000,
+                "non_current_accounts_receivable": null,
+                "non_current_accrued_expenses": null,
+                "non_current_deferred_assets": 11707000000,
+                "non_current_deferred_liabilities": 3201000000,
+                "non_current_deferred_revenue": 1403000000,
+                "non_current_deferred_taxes_assets": 11707000000,
+                "non_current_deferred_taxes_liabilities": 1798000000,
+                "non_current_note_receivables": null,
+                "non_current_pension_and_other_postretirement_benefit_plans": null,
+                "non_current_prepaid_assets": null,
+                "notes_receivable": null,
+                "ordinary_shares_number": 24220525225,
+                "other_capital_stock": null,
+                "other_current_assets": 3916000000,
+                "other_current_borrowings": 1000000000,
+                "other_current_liabilities": 2194000000,
+                "other_equity_adjustments": 137000000,
+                "other_equity_interest": null,
+                "other_intangible_assets": 3120000000,
+                "other_inventories": null,
+                "other_investments": null,
+                "other_non_current_assets": 12733000000,
+                "other_non_current_liabilities": 737000000,
+                "other_payable": null,
+                "other_properties": 16661000000,
+                "other_receivables": null,
+                "other_short_term_investments": 67335000000,
+                "payables": 23735000000,
+                "payables_and_accrued_expenses": 36028000000,
+                "pensionand_other_post_retirement_benefit_plans_current": null,
+                "preferred_securities_outside_stock_equity": null,
+                "preferred_shares_number": null,
+                "preferred_stock": 0,
+                "preferred_stock_equity": null,
+                "prepaid_assets": null,
+                "properties": null,
+                "raw_materials": 6647000000,
+                "receivables": 40710000000,
+                "receivables_adjustments_allowances": null,
+                "restricted_cash": null,
+                "restricted_common_stock": null,
+                "retained_earnings": 185038000000,
+                "share_issued": 24220525225,
+                "stockholders_equity": 195474000000,
+                "tangible_book_value": 171460000000,
+                "taxes_receivable": null,
+                "total_assets": 259474000000,
+                "total_capitalization": 202944000000,
+                "total_debt": 12348000000,
+                "total_equity_gross_minority_interest": 195474000000,
+                "total_liabilities_net_minority_interest": 64000000000,
+                "total_non_current_assets": 108479000000,
+                "total_non_current_liabilities_net_minority_interest": 20116000000,
+                "total_partnership_capital": null,
+                "total_tax_payable": 10638000000,
+                "tradeand_other_payables_non_current": 4830000000,
+                "trading_securities": null,
+                "treasury_shares_number": null,
+                "treasury_stock": null,
+                "unrealized_gain_loss": null,
+                "work_in_process": 9949000000,
+                "working_capital": 107111000000,
+                "interval": "quarterly",
+                "date": "2026-04-30"
             }
         ]
     }

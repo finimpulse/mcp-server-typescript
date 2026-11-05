@@ -1,18 +1,18 @@
 ---
-title: User Data
+title: User Account &amp; API Balance Data
 created: 2026-04-16
-updated: 2026-04-16
+updated: 2026-10-09
 endpoint: GET v1/appendix/user_data
 auth: Bearer Token
 ---
 
-# User Data
+# User Account &amp; API Balance Data
 
 Returns the user's account email, API token name, and current balance.
 
 The user data endpoint returns account information for the authenticated user: the account email, the name of the API token used in the request, and the current balance.
 
-Use this endpoint to verify the active token or check the remaining balance before making paid requests.
+Use this endpoint to verify the active token or check the remaining balance before making paid requests. To view your API activity and request history in the web app, see the [Usage page guide](https://finimpulse.com/help/api-usage/).
 
 This endpoint has no associated cost and **does not affect the account balance**.
 

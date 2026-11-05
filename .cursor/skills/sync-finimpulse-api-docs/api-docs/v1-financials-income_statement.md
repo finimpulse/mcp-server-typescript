@@ -1,20 +1,22 @@
 ---
-title: Income Statement
+title: Stock Income Statement API
 created: 2026-01-23
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/financials/income_statement
 auth: Bearer Token
 ---
 
-# Income Statement
+# Stock Income Statement API
 
 Returns detailed Income Statement data for stocks and some funds, including revenue, expenses, and net income for the selected period. 
 
-This endpoint helps analyze the company’s profitability and operational results over time.
+This endpoint covers line-item revenue, expense, and net income data for the selected reporting periods.
+
+Financial statements data covers over 85,000 tickers. Coverage starts from **September 30, 2021**, subject to availability per company. The full list of covered symbols is available for download [here](https://developers.finimpulse.com/wp-content/uploads/2026/06/tickers_with_financials.csv).
 
 ## When to Use This Endpoint
-- Populate the "Income Statement" section.
-- Pull time-series data for financial modeling, charting, or benchmarking.
+- Populate the “Income Statement” section of the Financials views.
+- Retrieve multi-interval reporting series (trailing, quarterly, annual) for financial modeling, charting, or benchmarking.
 
 ## Request Parameters
 **POST** `v1/financials/income_statement` 
@@ -22,16 +24,16 @@ This endpoint helps analyze the company’s profitability and operational result
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **intervals**   
-     `array` *(optional)* — Reporting frequencies to return. **Supported values:**
+     `array` *(required)* — Reporting frequencies to return. **Supported values:**
     - `annual`
     - `quarterly`
     - `trailing`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported intervals are returned. Note that interval availability depends on coverage. If data is missing for a period, values may be **null**. **Example:** `"intervals": [ "trailing", "quarterly", "annual" ]`
+     Note that interval availability depends on coverage. If data is missing for a period, values may be **null**.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -45,7 +47,12 @@ curl --location "https://api.finimpulse.com/v1/financials/income_statement" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "NVDA",
-      "start_date": "2020-08-11",
+      "intervals": [
+          "trailing",
+          "quarterly",
+          "annual"
+      ],
+      "start_date": "2021-10-01",
       "end_date": "2026-08-11",
       "tag": "just_tag"
   }'
@@ -65,7 +72,12 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""NVDA"",
-    ""start_date"": ""2020-08-11"",
+    ""intervals"": [
+        ""trailing"",
+        ""quarterly"",
+        ""annual""
+    ],
+    ""start_date"": ""2021-10-01"",
     ""end_date"": ""2026-08-11"",
     ""tag"": ""just_tag""
 }";
@@ -92,7 +104,12 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "NVDA",
-      "start_date" => "2020-08-11",
+      "intervals" => [
+        "trailing",
+        "quarterly",
+        "annual"
+      ],
+      "start_date" => "2021-10-01",
       "end_date" => "2026-08-11",
       "tag" => "just_tag"
     ]
@@ -117,7 +134,12 @@ headers = {
 }
 data = {
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "trailing",
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 }
@@ -138,7 +160,12 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "trailing",
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 });
@@ -164,10 +191,8 @@ req.end();
 ```
 
 
-The system covers data from **September 30, 2021**, subject to data availability per company.
-
 ## Response
-The response is a single object containing metadata and an ***items*** array of records.
+The response is a single object containing metadata and an ***items*** array of statement snapshots for a given interval and date.
 
 ### Metadata Fields
 
@@ -175,15 +200,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **display_name**   
-     `string` — Preferred display name (if available).
+     `string` — Asset display name.
 - **short_name**   
      `string` — Short descriptive name.
 - **long_name**   
-     `string` — Full legal or formal name (company/fund).
+     `string` — Full legal or formal name.
 - **quote_type**   
-     `string` — Asset type (expected - stock).
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **quote_source_name**   
-     `string` — Data source label for the quote (e.g., real-time vs delayed).
+     `string` — Data source label for the quote.
 - **currency**   
      `string` — Trading currency.
 - **full_exchange_name**   
@@ -199,11 +224,28 @@ The response is a single object containing metadata and an ***items*** array of 
 - **market_region**   
      `string` — Market/country code.
 - **total_count**   
-     `integer` — Total number of items that match filters.
+     `integer` — Total number of matching items.
 - **items_count**   
-     `integer` — Number of items in the response.
+     `integer` — Number of items returned.
+- **reports_count**   
+     `integer` — Total number of unique reports in the response.
+- **report_keys**   
+     `array` — Array of unique report identifiers returned in the response. Each key follows the format `interval|date`. All items sharing the same key belong to the same report.
 - **items**   
-     `array` — Array of statement records. It is a unified list where each element represents one report snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or source limitations.
+     `array` — Array of statement records. It is a unified list where each element represents one report snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or data limitations.
+
+
+### Snapshot Info
+
+
+- **type**   
+     `string` — Snapshot type (income_statement expected).
+- **report_key**   
+     `string` — Unique identifier of the report this item belongs to. Format: `interval|date`.
+- **interval**   
+     `string` — Reporting frequency (trailing/quarterly/annual).
+- **date**   
+     `string` — End date of the reporting period.
 
 
 ### Total Revenue
@@ -212,7 +254,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **total_revenue**   
      `number` — Total revenue for the period.
 - **operating_revenue**   
-     `number` — Revenue from core operations.
+     `number` — Operating revenue for the period.
 - **excise_taxes**   
      `number` — Excise taxes.
 
@@ -237,7 +279,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **reconciled_depreciation**   
      `number` — Reconciled depreciation.
 - **insurance_and_claims**   
-     `number` — Insurance costs and claims-related expenses.
+     `number` — Insurance and claims expense.
 - **rent_and_landing_fees**   
      `number` — Rent and landing fees.
 - **reconciled_cost_of_revenue**   
@@ -252,15 +294,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **research_and_development**   
      `number` — Research and development expenses.
 - **selling_general_and_administration**   
-     `number` — SG&amp;A expenses.
+     `number` — Selling, general, and administrative (SG&amp;A) expenses.
 - **selling_and_marketing_expense**   
      `number` — Selling and marketing expenses.
 - **general_and_administrative_expense**   
      `number` — General and administrative expenses.
 - **salaries_and_wages**   
-     `number` — Salaries and wages.
+     `number` — Salaries and wages expense.
 - **other_gand_a**   
-     `number` — Other G&amp;A expenses.
+     `number` — Other general and administrative (G&amp;A) expenses.
 - **other_operating_expenses**   
      `number` — Other operating expenses.
 - **impairment_of_capital_assets**   
@@ -268,7 +310,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **other_special_charges**   
      `number` — Other special charges.
 - **rent_expense_supplemental**   
-     `number` — Rent expense supplemental.
+     `number` — Supplemental rent expense.
 - **provision_for_doubtful_accounts**   
      `number` — Provision for doubtful accounts.
 
@@ -279,9 +321,9 @@ The response is a single object containing metadata and an ***items*** array of 
 - **operating_income**   
      `number` — Operating income.
 - **total_operating_income_as_reported**   
-     `number` — Total operating income reported.
+     `number` — Total operating income, as reported.
 - **restructuring_and_mergern_acquisition**   
-     `number` — Restructuring and M&amp;A expenses.
+     `number` — Restructuring and merger &amp; acquisition (M&amp;A) expenses.
 
 
 ### Other Income &amp; Expense
@@ -290,19 +332,19 @@ The response is a single object containing metadata and an ***items*** array of 
 - **other_income_expense**   
      `number` — Other income or expense.
 - **other_non_operating_income_expenses**   
-     `number` — Other non-operating income/expenses.
+     `number` — Other non-operating income or expense.
 - **special_income_charges**   
-     `number` — Special income/charges.
+     `number` — Special income or charges.
 - **total_other_finance_cost**   
      `number` — Total other finance cost.
 - **gain_on_sale_of_business**   
-     `number` — Gain on sale of business.
+     `number` — Gain on sale of a business.
 - **gain_on_sale_of_ppe**   
-     `number` — Gain on sale of PPE.
+     `number` — Gain on sale of property, plant, and equipment (PPE).
 - **gain_on_sale_of_security**   
-     `number` — Gain on sale of security.
+     `number` — Gain on sale of securities.
 - **securities_amortization**   
-     `number` — Securities amortization.
+     `number` — Amortization of securities.
 - **interest_income**   
      `number` — Interest income.
 - **interest_income_non_operating**   
@@ -314,11 +356,11 @@ The response is a single object containing metadata and an ***items*** array of 
 - **net_interest_income**   
      `number` — Net interest income.
 - **net_non_operating_interest_income_expense**   
-     `number` — Net non-operating interest income/expense.
+     `number` — Net non-operating interest income or expense.
 - **earnings_from_equity_interest**   
      `number` — Earnings from equity interest.
 - **earnings_from_equity_interest_net_of_tax**   
-     `number` — Earnings from equity interest net of tax.
+     `number` — Earnings from equity interest, net of tax.
 
 
 ### Tax Provision
@@ -329,7 +371,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **other_taxes**   
      `number` — Other taxes.
 - **tax_rate_for_calcs**   
-     `number` — Tax rate for calculations.
+     `number` — Tax rate used for calculations.
 - **tax_effect_of_unusual_items**   
      `number` — Tax effect of unusual items.
 
@@ -340,7 +382,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **net_income_including_noncontrolling_interests**   
      `number` — Net income including non-controlling interests.
 - **net_income_from_continuing_operation_net_minority_interest**   
-     `number` — Net income from continuing operations excluding minority interests.
+     `number` — Net income from continuing operations, net of minority interest.
 - **net_income_from_tax_loss_carryforward**   
      `number` — Net income impact from tax loss carryforwards.
 - **net_income_discontinuous_operations**   
@@ -356,20 +398,20 @@ The response is a single object containing metadata and an ***items*** array of 
 - **net_income**   
      `number` — Net income for the period.
 - **net_income_common_stockholders**   
-     `number` — Net income for common shareholders.
+     `number` — Net income available to common shareholders.
 - **diluted_ni_availto_com_stockholders**   
      `number` — Diluted net income available to common shareholders.
 - **otherunder_preferred_stock_dividend**   
-     `number` — Other preferred stock adjustments.
+     `number` — Other adjustments to preferred stock dividends.
 - **preferred_stock_dividends**   
      `number` — Preferred stock dividends.
 
 
-### Basic EPS
+### Basic Earnings Per Share (EPS)
 
 
 - **basic_eps**   
-     `number` — Basic EPS.
+     `number` — Basic earnings per share (EPS).
 - **basic_average_shares**   
      `integer` — Basic average shares.
 - **basic_continuous_operations**   
@@ -383,20 +425,20 @@ The response is a single object containing metadata and an ***items*** array of 
 - **basic_eps_other_gains_losses**   
      `number` — Basic EPS excluding other gains and losses.
 - **continuing_and_discontinued_basic_eps**   
-     `number` — Continuing and discontinued basic EPS.
+     `number` — Basic EPS from continuing and discontinued operations.
 - **normalized_basic_eps**   
      `number` — Normalized basic EPS.
 - **reported_normalized_basic_eps**   
-     `number` — Normalized basic EPS as reported by the company.
+     `number` — Normalized basic EPS, as reported.
 - **tax_loss_carryforward_basic_eps**   
      `number` — Tax loss carryforward effect on basic EPS.
 
 
-### Diluted EPS
+### Diluted Earnings Per Share (EPS)
 
 
 - **diluted_eps**   
-     `number` — Diluted EPS.
+     `number` — Diluted earnings per share (EPS).
 - **average_dilution_earnings**   
      `number` — Average dilution earnings.
 - **diluted_average_shares**   
@@ -416,16 +458,16 @@ The response is a single object containing metadata and an ***items*** array of 
 - **normalized_diluted_eps**   
      `number` — Normalized diluted EPS.
 - **reported_normalized_diluted_eps**   
-     `number` — Normalized diluted EPS as reported by the company.
+     `number` — Normalized diluted EPS, as reported.
 - **tax_loss_carryforward_diluted_eps**   
      `number` — Tax loss carryforward effect on diluted EPS.
 
 
-### EBITDA
+### Earnings Before Interest, Taxes, Depreciation, and Amortization (EBITDA)
 
 
 - **ebitda**   
-     `number` — Earnings before interest, taxes, depreciation, and amortization.
+     `number` — Earnings before interest, taxes, depreciation, and amortization (EBITDA).
 - **normalized_ebitda**   
      `number` — Normalized EBITDA.
 
@@ -436,7 +478,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **total_unusual_items**   
      `number` — Total unusual items.
 - **total_unusual_items_excluding_goodwill**   
-     `number` — Unusual items excluding goodwill.
+     `number` — Total unusual items, excluding goodwill.
 - **write_off**   
      `number` — Write-offs of assets or expenses.
 
@@ -451,22 +493,11 @@ The response is a single object containing metadata and an ***items*** array of 
 - **dividend_per_share**   
      `number` — Dividends paid per share during the period.
 - **ebit**   
-     `number` — Earnings before interest and taxes.
+     `number` — Earnings before interest and taxes (EBIT).
 - **normalized_income**   
      `number` — Normalized income.
 - **total_expenses**   
      `number` — Total expenses.
-
-
-### Snapshot Info
-
-
-- **type**   
-     `string` — Report/snapshot type (income_statement expected).
-- **interval**   
-     `string` — Reporting frequencies (trailing/quarterly/annual).
-- **date**   
-     `string` — Reporting period end date.
 
 
 ### Example Response
@@ -474,24 +505,6 @@ The response is a single object containing metadata and an ***items*** array of 
 
 ```json
 {
-    "task_id": "0d9b20b3-9ba6-4502-b591-89ec47b2b8ca",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0032,
-    "data": {
-        "symbol": "NVDA",
-        "start_date": "2020-08-11",
-        "end_date": "2026-08-11",
-        "tag": "just_tag",
-        "intervals": [
-            "trailing",
-            "quarterly",
-            "annual"
-        ],
-        "types": [
-            "income_statement"
-        ]
-    },
     "result": {
         "symbol": "NVDA",
         "quote_type": "stock",
@@ -500,117 +513,34 @@ The response is a single object containing metadata and an ***items*** array of 
         "display_name": "NVIDIA",
         "market_region": "US_OT",
         "exchange_timezone_name": "America/New_York",
-        "exchange_timezone_short_name": "EST",
+        "exchange_timezone_short_name": "EDT",
         "exchange": "NMS",
         "short_name": "NVIDIA Corporation",
         "long_name": "NVIDIA Corporation",
-        "quote_source_name": "Nasdaq Real Time Price",
+        "quote_source_name": "BOATS Real Time Price",
         "time_offset": -14400,
-        "total_count": 12,
-        "items_count": 12,
+        "total_count": 14,
+        "items_count": 14,
+        "reports_count": 14,
+        "report_keys": [
+            "annual|2022-01-31",
+            "annual|2023-01-31",
+            "annual|2024-01-31",
+            "annual|2025-01-31",
+            "annual|2026-01-31",
+            "quarterly|2024-07-31",
+            "quarterly|2024-10-31",
+            "quarterly|2025-01-31",
+            "quarterly|2025-04-30",
+            "quarterly|2025-07-31",
+            "quarterly|2025-10-31",
+            "quarterly|2026-01-31",
+            "quarterly|2026-04-30",
+            "trailing|2026-06-19"
+        ],
         "items": [
             {
-                "type": "income_statement",
-                "amortization": null,
-                "amortization_of_intangibles_income_statement": null,
-                "average_dilution_earnings": null,
-                "basic_accounting_change": null,
-                "basic_average_shares": null,
-                "basic_continuous_operations": null,
-                "basic_discontinuous_operations": null,
-                "basic_eps": null,
-                "basic_eps_other_gains_losses": null,
-                "basic_extraordinary": null,
-                "continuing_and_discontinued_basic_eps": null,
-                "continuing_and_discontinued_diluted_eps": null,
-                "cost_of_revenue": null,
-                "depletion_income_statement": null,
-                "depreciation_amortization_depletion_income_statement": null,
-                "depreciation_and_amortization_in_income_statement": null,
-                "depreciation_income_statement": null,
-                "diluted_accounting_change": null,
-                "diluted_average_shares": null,
-                "diluted_continuous_operations": null,
-                "diluted_discontinuous_operations": null,
-                "diluted_eps": null,
-                "diluted_eps_other_gains_losses": null,
-                "diluted_extraordinary": null,
-                "diluted_ni_availto_com_stockholders": null,
-                "dividend_per_share": null,
-                "ebit": null,
-                "ebitda": null,
-                "earnings_from_equity_interest": null,
-                "earnings_from_equity_interest_net_of_tax": null,
-                "excise_taxes": null,
-                "gain_on_sale_of_business": null,
-                "gain_on_sale_of_ppe": null,
-                "gain_on_sale_of_security": null,
-                "general_and_administrative_expense": null,
-                "gross_profit": null,
-                "impairment_of_capital_assets": null,
-                "insurance_and_claims": null,
-                "interest_expense": null,
-                "interest_expense_non_operating": null,
-                "interest_income": null,
-                "interest_income_non_operating": null,
-                "minority_interests": null,
-                "net_income": null,
-                "net_income_common_stockholders": null,
-                "net_income_continuous_operations": null,
-                "net_income_discontinuous_operations": null,
-                "net_income_extraordinary": null,
-                "net_income_from_continuing_and_discontinued_operation": null,
-                "net_income_from_continuing_operation_net_minority_interest": null,
-                "net_income_from_tax_loss_carryforward": null,
-                "net_income_including_noncontrolling_interests": null,
-                "net_interest_income": null,
-                "net_non_operating_interest_income_expense": null,
-                "normalized_basic_eps": null,
-                "normalized_diluted_eps": null,
-                "normalized_ebitda": null,
-                "normalized_income": null,
-                "operating_expense": null,
-                "operating_income": null,
-                "operating_revenue": null,
-                "other_gand_a": null,
-                "other_income_expense": null,
-                "other_non_operating_income_expenses": null,
-                "other_operating_expenses": null,
-                "other_special_charges": null,
-                "other_taxes": null,
-                "otherunder_preferred_stock_dividend": null,
-                "preferred_stock_dividends": null,
-                "pretax_income": null,
-                "provision_for_doubtful_accounts": null,
-                "reconciled_cost_of_revenue": null,
-                "reconciled_depreciation": null,
-                "rent_and_landing_fees": null,
-                "rent_expense_supplemental": null,
-                "reported_normalized_basic_eps": null,
-                "reported_normalized_diluted_eps": null,
-                "research_and_development": null,
-                "restructuring_and_mergern_acquisition": null,
-                "salaries_and_wages": null,
-                "securities_amortization": null,
-                "selling_and_marketing_expense": null,
-                "selling_general_and_administration": null,
-                "special_income_charges": null,
-                "tax_effect_of_unusual_items": null,
-                "tax_loss_carryforward_basic_eps": null,
-                "tax_loss_carryforward_diluted_eps": null,
-                "tax_provision": null,
-                "tax_rate_for_calcs": null,
-                "total_expenses": null,
-                "total_operating_income_as_reported": null,
-                "total_other_finance_cost": null,
-                "total_revenue": null,
-                "total_unusual_items": null,
-                "total_unusual_items_excluding_goodwill": null,
-                "write_off": null,
-                "interval": "annual",
-                "date": "2021-01-31"
-            },
-            {
+                "report_key": "annual|2022-01-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -712,6 +642,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2022-01-31"
             },
             {
+                "report_key": "annual|2023-01-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -813,6 +744,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2023-01-31"
             },
             {
+                "report_key": "annual|2024-01-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -914,6 +846,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-01-31"
             },
             {
+                "report_key": "annual|2025-01-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1015,6 +948,109 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "annual|2026-01-31",
+                "type": "income_statement",
+                "amortization": null,
+                "amortization_of_intangibles_income_statement": null,
+                "average_dilution_earnings": null,
+                "basic_accounting_change": null,
+                "basic_average_shares": 24359000000,
+                "basic_continuous_operations": null,
+                "basic_discontinuous_operations": null,
+                "basic_eps": 4.93,
+                "basic_eps_other_gains_losses": null,
+                "basic_extraordinary": null,
+                "continuing_and_discontinued_basic_eps": null,
+                "continuing_and_discontinued_diluted_eps": null,
+                "cost_of_revenue": 62475000000,
+                "depletion_income_statement": null,
+                "depreciation_amortization_depletion_income_statement": null,
+                "depreciation_and_amortization_in_income_statement": null,
+                "depreciation_income_statement": null,
+                "diluted_accounting_change": null,
+                "diluted_average_shares": 24514000000,
+                "diluted_continuous_operations": null,
+                "diluted_discontinuous_operations": null,
+                "diluted_eps": 4.9,
+                "diluted_eps_other_gains_losses": null,
+                "diluted_extraordinary": null,
+                "diluted_ni_availto_com_stockholders": 120067000000,
+                "dividend_per_share": null,
+                "ebit": 141709000000,
+                "ebitda": 144552000000,
+                "earnings_from_equity_interest": null,
+                "earnings_from_equity_interest_net_of_tax": null,
+                "excise_taxes": null,
+                "gain_on_sale_of_business": null,
+                "gain_on_sale_of_ppe": null,
+                "gain_on_sale_of_security": null,
+                "general_and_administrative_expense": null,
+                "gross_profit": 153463000000,
+                "impairment_of_capital_assets": null,
+                "insurance_and_claims": null,
+                "interest_expense": 259000000,
+                "interest_expense_non_operating": 259000000,
+                "interest_income": 2300000000,
+                "interest_income_non_operating": 2300000000,
+                "minority_interests": null,
+                "net_income": 120067000000,
+                "net_income_common_stockholders": 120067000000,
+                "net_income_continuous_operations": 120067000000,
+                "net_income_discontinuous_operations": null,
+                "net_income_extraordinary": null,
+                "net_income_from_continuing_and_discontinued_operation": 120067000000,
+                "net_income_from_continuing_operation_net_minority_interest": 120067000000,
+                "net_income_from_tax_loss_carryforward": null,
+                "net_income_including_noncontrolling_interests": 120067000000,
+                "net_interest_income": 2041000000,
+                "net_non_operating_interest_income_expense": 2041000000,
+                "normalized_basic_eps": null,
+                "normalized_diluted_eps": null,
+                "normalized_ebitda": 144552000000,
+                "normalized_income": 120067000000,
+                "operating_expense": 23076000000,
+                "operating_income": 130387000000,
+                "operating_revenue": 215938000000,
+                "other_gand_a": null,
+                "other_income_expense": 9022000000,
+                "other_non_operating_income_expenses": 9022000000,
+                "other_operating_expenses": null,
+                "other_special_charges": null,
+                "other_taxes": null,
+                "otherunder_preferred_stock_dividend": null,
+                "preferred_stock_dividends": null,
+                "pretax_income": 141450000000,
+                "provision_for_doubtful_accounts": null,
+                "reconciled_cost_of_revenue": 62475000000,
+                "reconciled_depreciation": 2843000000,
+                "rent_and_landing_fees": null,
+                "rent_expense_supplemental": null,
+                "reported_normalized_basic_eps": null,
+                "reported_normalized_diluted_eps": null,
+                "research_and_development": 18497000000,
+                "restructuring_and_mergern_acquisition": null,
+                "salaries_and_wages": null,
+                "securities_amortization": null,
+                "selling_and_marketing_expense": null,
+                "selling_general_and_administration": 4579000000,
+                "special_income_charges": null,
+                "tax_effect_of_unusual_items": 0,
+                "tax_loss_carryforward_basic_eps": null,
+                "tax_loss_carryforward_diluted_eps": null,
+                "tax_provision": 21383000000,
+                "tax_rate_for_calcs": 0.15117,
+                "total_expenses": 85551000000,
+                "total_operating_income_as_reported": 130387000000,
+                "total_other_finance_cost": null,
+                "total_revenue": 215938000000,
+                "total_unusual_items": null,
+                "total_unusual_items_excluding_goodwill": null,
+                "write_off": null,
+                "interval": "annual",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2024-07-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1116,6 +1152,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-07-31"
             },
             {
+                "report_key": "quarterly|2024-10-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1217,6 +1254,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-10-31"
             },
             {
+                "report_key": "quarterly|2025-01-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1318,6 +1356,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "quarterly|2025-04-30",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1419,6 +1458,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-04-30"
             },
             {
+                "report_key": "quarterly|2025-07-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1520,6 +1560,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-07-31"
             },
             {
+                "report_key": "quarterly|2025-10-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
@@ -1621,35 +1662,36 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-10-31"
             },
             {
+                "report_key": "quarterly|2026-01-31",
                 "type": "income_statement",
                 "amortization": null,
                 "amortization_of_intangibles_income_statement": null,
                 "average_dilution_earnings": null,
                 "basic_accounting_change": null,
-                "basic_average_shares": 24405750000,
+                "basic_average_shares": 24304000000,
                 "basic_continuous_operations": null,
                 "basic_discontinuous_operations": null,
-                "basic_eps": 4.06,
+                "basic_eps": 1.77,
                 "basic_eps_other_gains_losses": null,
                 "basic_extraordinary": null,
                 "continuing_and_discontinued_basic_eps": null,
                 "continuing_and_discontinued_diluted_eps": null,
-                "cost_of_revenue": 56049000000,
+                "cost_of_revenue": 17034000000,
                 "depletion_income_statement": null,
                 "depreciation_amortization_depletion_income_statement": null,
                 "depreciation_and_amortization_in_income_statement": null,
                 "depreciation_income_statement": null,
                 "diluted_accounting_change": null,
-                "diluted_average_shares": 24582750000,
+                "diluted_average_shares": 24432000000,
                 "diluted_continuous_operations": null,
                 "diluted_discontinuous_operations": null,
-                "diluted_eps": 4.04,
+                "diluted_eps": 1.76,
                 "diluted_eps_other_gains_losses": null,
                 "diluted_extraordinary": null,
-                "diluted_ni_availto_com_stockholders": 99198000000,
+                "diluted_ni_availto_com_stockholders": 42960000000,
                 "dividend_per_share": null,
-                "ebit": 116516000000,
-                "ebitda": 119090000000,
+                "ebit": 50471000000,
+                "ebitda": 51283000000,
                 "earnings_from_equity_interest": null,
                 "earnings_from_equity_interest_net_of_tax": null,
                 "excise_taxes": null,
@@ -1657,69 +1699,273 @@ The response is a single object containing metadata and an ***items*** array of 
                 "gain_on_sale_of_ppe": null,
                 "gain_on_sale_of_security": null,
                 "general_and_administrative_expense": null,
-                "gross_profit": 131093000000,
+                "gross_profit": 51093000000,
                 "impairment_of_capital_assets": null,
                 "insurance_and_claims": null,
-                "interest_expense": 247000000,
-                "interest_expense_non_operating": 247000000,
-                "interest_income": 2243000000,
-                "interest_income_non_operating": 2243000000,
+                "interest_expense": 73000000,
+                "interest_expense_non_operating": 73000000,
+                "interest_income": 568000000,
+                "interest_income_non_operating": 568000000,
                 "minority_interests": null,
-                "net_income": 99198000000,
-                "net_income_common_stockholders": 99198000000,
-                "net_income_continuous_operations": 99198000000,
+                "net_income": 42960000000,
+                "net_income_common_stockholders": 42960000000,
+                "net_income_continuous_operations": 42960000000,
                 "net_income_discontinuous_operations": null,
                 "net_income_extraordinary": null,
-                "net_income_from_continuing_and_discontinued_operation": 99198000000,
-                "net_income_from_continuing_operation_net_minority_interest": 99198000000,
+                "net_income_from_continuing_and_discontinued_operation": 42960000000,
+                "net_income_from_continuing_operation_net_minority_interest": 42960000000,
                 "net_income_from_tax_loss_carryforward": null,
-                "net_income_including_noncontrolling_interests": 99198000000,
-                "net_interest_income": 1996000000,
-                "net_non_operating_interest_income_expense": 1996000000,
+                "net_income_including_noncontrolling_interests": 42960000000,
+                "net_interest_income": 495000000,
+                "net_non_operating_interest_income_expense": 495000000,
                 "normalized_basic_eps": null,
                 "normalized_diluted_eps": null,
-                "normalized_ebitda": 119090000000,
-                "normalized_income": 99198000000,
-                "operating_expense": 20971000000,
-                "operating_income": 110122000000,
-                "operating_revenue": 187142000000,
+                "normalized_ebitda": 51283000000,
+                "normalized_income": 42960000000,
+                "operating_expense": 6794000000,
+                "operating_income": 44299000000,
+                "operating_revenue": 68127000000,
                 "other_gand_a": null,
-                "other_income_expense": 4151000000,
-                "other_non_operating_income_expenses": 4151000000,
+                "other_income_expense": 5604000000,
+                "other_non_operating_income_expenses": 5604000000,
                 "other_operating_expenses": null,
                 "other_special_charges": null,
                 "other_taxes": null,
                 "otherunder_preferred_stock_dividend": null,
                 "preferred_stock_dividends": null,
-                "pretax_income": 116269000000,
+                "pretax_income": 50398000000,
                 "provision_for_doubtful_accounts": null,
-                "reconciled_cost_of_revenue": 56049000000,
-                "reconciled_depreciation": 2574000000,
+                "reconciled_cost_of_revenue": 17034000000,
+                "reconciled_depreciation": 812000000,
                 "rent_and_landing_fees": null,
                 "rent_expense_supplemental": null,
                 "reported_normalized_basic_eps": null,
                 "reported_normalized_diluted_eps": null,
-                "research_and_development": 16699000000,
+                "research_and_development": 5512000000,
                 "restructuring_and_mergern_acquisition": null,
                 "salaries_and_wages": null,
                 "securities_amortization": null,
                 "selling_and_marketing_expense": null,
-                "selling_general_and_administration": 4272000000,
+                "selling_general_and_administration": 1282000000,
                 "special_income_charges": null,
                 "tax_effect_of_unusual_items": 0,
                 "tax_loss_carryforward_basic_eps": null,
                 "tax_loss_carryforward_diluted_eps": null,
-                "tax_provision": 17071000000,
-                "tax_rate_for_calcs": 0.146823,
-                "total_expenses": 77020000000,
-                "total_operating_income_as_reported": 110122000000,
+                "tax_provision": 7438000000,
+                "tax_rate_for_calcs": 0.147585,
+                "total_expenses": 23828000000,
+                "total_operating_income_as_reported": 44299000000,
                 "total_other_finance_cost": null,
-                "total_revenue": 187142000000,
-                "total_unusual_items": 0,
-                "total_unusual_items_excluding_goodwill": 0,
+                "total_revenue": 68127000000,
+                "total_unusual_items": null,
+                "total_unusual_items_excluding_goodwill": null,
+                "write_off": null,
+                "interval": "quarterly",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2026-04-30",
+                "type": "income_statement",
+                "amortization": null,
+                "amortization_of_intangibles_income_statement": null,
+                "average_dilution_earnings": null,
+                "basic_accounting_change": null,
+                "basic_average_shares": 24286000000,
+                "basic_continuous_operations": null,
+                "basic_discontinuous_operations": null,
+                "basic_eps": 2.4,
+                "basic_eps_other_gains_losses": null,
+                "basic_extraordinary": null,
+                "continuing_and_discontinued_basic_eps": null,
+                "continuing_and_discontinued_diluted_eps": null,
+                "cost_of_revenue": 20458000000,
+                "depletion_income_statement": null,
+                "depreciation_amortization_depletion_income_statement": null,
+                "depreciation_and_amortization_in_income_statement": null,
+                "depreciation_income_statement": null,
+                "diluted_accounting_change": null,
+                "diluted_average_shares": 24391000000,
+                "diluted_continuous_operations": null,
+                "diluted_discontinuous_operations": null,
+                "diluted_eps": 2.39,
+                "diluted_eps_other_gains_losses": null,
+                "diluted_extraordinary": null,
+                "diluted_ni_availto_com_stockholders": 58321000000,
+                "dividend_per_share": null,
+                "ebit": 70005000000,
+                "ebitda": 71002000000,
+                "earnings_from_equity_interest": null,
+                "earnings_from_equity_interest_net_of_tax": null,
+                "excise_taxes": null,
+                "gain_on_sale_of_business": null,
+                "gain_on_sale_of_ppe": null,
+                "gain_on_sale_of_security": null,
+                "general_and_administrative_expense": null,
+                "gross_profit": 61157000000,
+                "impairment_of_capital_assets": null,
+                "insurance_and_claims": null,
+                "interest_expense": 102000000,
+                "interest_expense_non_operating": 102000000,
+                "interest_income": 540000000,
+                "interest_income_non_operating": 540000000,
+                "minority_interests": null,
+                "net_income": 58321000000,
+                "net_income_common_stockholders": 58321000000,
+                "net_income_continuous_operations": 58321000000,
+                "net_income_discontinuous_operations": null,
+                "net_income_extraordinary": null,
+                "net_income_from_continuing_and_discontinued_operation": 58321000000,
+                "net_income_from_continuing_operation_net_minority_interest": 58321000000,
+                "net_income_from_tax_loss_carryforward": null,
+                "net_income_including_noncontrolling_interests": 58321000000,
+                "net_interest_income": 438000000,
+                "net_non_operating_interest_income_expense": 438000000,
+                "normalized_basic_eps": null,
+                "normalized_diluted_eps": null,
+                "normalized_ebitda": 71002000000,
+                "normalized_income": 58321000000,
+                "operating_expense": 7621000000,
+                "operating_income": 53536000000,
+                "operating_revenue": 81615000000,
+                "other_gand_a": null,
+                "other_income_expense": 15929000000,
+                "other_non_operating_income_expenses": 15929000000,
+                "other_operating_expenses": null,
+                "other_special_charges": null,
+                "other_taxes": null,
+                "otherunder_preferred_stock_dividend": null,
+                "preferred_stock_dividends": null,
+                "pretax_income": 69903000000,
+                "provision_for_doubtful_accounts": null,
+                "reconciled_cost_of_revenue": 20458000000,
+                "reconciled_depreciation": 997000000,
+                "rent_and_landing_fees": null,
+                "rent_expense_supplemental": null,
+                "reported_normalized_basic_eps": null,
+                "reported_normalized_diluted_eps": null,
+                "research_and_development": 6321000000,
+                "restructuring_and_mergern_acquisition": null,
+                "salaries_and_wages": null,
+                "securities_amortization": null,
+                "selling_and_marketing_expense": null,
+                "selling_general_and_administration": 1300000000,
+                "special_income_charges": null,
+                "tax_effect_of_unusual_items": 0,
+                "tax_loss_carryforward_basic_eps": null,
+                "tax_loss_carryforward_diluted_eps": null,
+                "tax_provision": 11582000000,
+                "tax_rate_for_calcs": 0.165687,
+                "total_expenses": 28079000000,
+                "total_operating_income_as_reported": 53536000000,
+                "total_other_finance_cost": null,
+                "total_revenue": 81615000000,
+                "total_unusual_items": null,
+                "total_unusual_items_excluding_goodwill": null,
+                "write_off": null,
+                "interval": "quarterly",
+                "date": "2026-04-30"
+            },
+            {
+                "report_key": "trailing|2026-06-19",
+                "type": "income_statement",
+                "amortization": null,
+                "amortization_of_intangibles_income_statement": null,
+                "average_dilution_earnings": null,
+                "basic_accounting_change": null,
+                "basic_average_shares": 24320250000,
+                "basic_continuous_operations": null,
+                "basic_discontinuous_operations": null,
+                "basic_eps": 6.56,
+                "basic_eps_other_gains_losses": null,
+                "basic_extraordinary": null,
+                "continuing_and_discontinued_basic_eps": null,
+                "continuing_and_discontinued_diluted_eps": null,
+                "cost_of_revenue": 65539000000,
+                "depletion_income_statement": null,
+                "depreciation_amortization_depletion_income_statement": null,
+                "depreciation_and_amortization_in_income_statement": null,
+                "depreciation_income_statement": null,
+                "diluted_accounting_change": null,
+                "diluted_average_shares": 24459000000,
+                "diluted_continuous_operations": null,
+                "diluted_discontinuous_operations": null,
+                "diluted_eps": 6.53,
+                "diluted_eps_other_gains_losses": null,
+                "diluted_extraordinary": null,
+                "diluted_ni_availto_com_stockholders": 159613000000,
+                "dividend_per_share": null,
+                "ebit": 189741000000,
+                "ebitda": 192970000000,
+                "earnings_from_equity_interest": null,
+                "earnings_from_equity_interest_net_of_tax": null,
+                "excise_taxes": null,
+                "gain_on_sale_of_business": null,
+                "gain_on_sale_of_ppe": null,
+                "gain_on_sale_of_security": null,
+                "general_and_administrative_expense": null,
+                "gross_profit": 187952000000,
+                "impairment_of_capital_assets": null,
+                "insurance_and_claims": null,
+                "interest_expense": 298000000,
+                "interest_expense_non_operating": 298000000,
+                "interest_income": 2325000000,
+                "interest_income_non_operating": 2325000000,
+                "minority_interests": null,
+                "net_income": 159613000000,
+                "net_income_common_stockholders": 159613000000,
+                "net_income_continuous_operations": 159613000000,
+                "net_income_discontinuous_operations": null,
+                "net_income_extraordinary": null,
+                "net_income_from_continuing_and_discontinued_operation": 159613000000,
+                "net_income_from_continuing_operation_net_minority_interest": 159613000000,
+                "net_income_from_tax_loss_carryforward": null,
+                "net_income_including_noncontrolling_interests": 159613000000,
+                "net_interest_income": 2027000000,
+                "net_non_operating_interest_income_expense": 2027000000,
+                "normalized_basic_eps": null,
+                "normalized_diluted_eps": null,
+                "normalized_ebitda": 192970000000,
+                "normalized_income": 159613000000,
+                "operating_expense": 25667000000,
+                "operating_income": 162285000000,
+                "operating_revenue": 253491000000,
+                "other_gand_a": null,
+                "other_income_expense": 25131000000,
+                "other_non_operating_income_expenses": 25131000000,
+                "other_operating_expenses": null,
+                "other_special_charges": null,
+                "other_taxes": null,
+                "otherunder_preferred_stock_dividend": null,
+                "preferred_stock_dividends": null,
+                "pretax_income": 189443000000,
+                "provision_for_doubtful_accounts": null,
+                "reconciled_cost_of_revenue": 65539000000,
+                "reconciled_depreciation": 3229000000,
+                "rent_and_landing_fees": null,
+                "rent_expense_supplemental": null,
+                "reported_normalized_basic_eps": null,
+                "reported_normalized_diluted_eps": null,
+                "research_and_development": 20829000000,
+                "restructuring_and_mergern_acquisition": null,
+                "salaries_and_wages": null,
+                "securities_amortization": null,
+                "selling_and_marketing_expense": null,
+                "selling_general_and_administration": 4838000000,
+                "special_income_charges": null,
+                "tax_effect_of_unusual_items": 0,
+                "tax_loss_carryforward_basic_eps": null,
+                "tax_loss_carryforward_diluted_eps": null,
+                "tax_provision": 29830000000,
+                "tax_rate_for_calcs": 0.157462,
+                "total_expenses": 91206000000,
+                "total_operating_income_as_reported": 162285000000,
+                "total_other_finance_cost": null,
+                "total_revenue": 253491000000,
+                "total_unusual_items": null,
+                "total_unusual_items_excluding_goodwill": null,
                 "write_off": null,
                 "interval": "trailing",
-                "date": "2026-01-30"
+                "date": "2026-06-19"
             }
         ]
     }

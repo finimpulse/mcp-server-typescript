@@ -1,41 +1,69 @@
 {
-  "available_count": 34,
-  "implemented_count": 31,
-  "matched_count": 31,
-  "missing": [],
-  "skipped": [
+  "counts": {
+    "doc_endpoints": 39,
+    "implemented": 30,
+    "missing": 7,
+    "skipped": 2,
+    "orphaned_tools": 1
+  },
+  "missing": [
     {
-      "slug": "errors",
-      "endpoint": "GET v1/errors",
-      "endpoint_path": "errors"
+      "slug": "v1-events-tickers",
+      "endpoint": "POST v1/events/tickers"
     },
     {
-      "slug": "v1-appendix-user_data",
-      "endpoint": "GET v1/appendix/user_data",
-      "endpoint_path": "appendix/user_data"
+      "slug": "v1-holdings-history-dates",
+      "endpoint": "POST v1/holdings/history/dates/{symbol}"
+    },
+    {
+      "slug": "v1-holdings-history",
+      "endpoint": "POST v1/holdings/history"
+    },
+    {
+      "slug": "v1-macro-economics",
+      "endpoint": "POST v1/macro-economics"
+    },
+    {
+      "slug": "v1-market-calendars",
+      "endpoint": "POST v1/market/calendars"
+    },
+    {
+      "slug": "v1-market-index",
+      "endpoint": "POST v1/market/index"
+    },
+    {
+      "slug": "v1-sec-filings-events",
+      "endpoint": "POST v1/sec-filings/events"
     }
+  ],
+  "orphaned_tools": [
+    {
+      "path": "financials/general",
+      "handler": "src/tools/financials/general/handler.ts"
+    }
+  ],
+  "skipped": [
+    "GET v1/errors",
+    "GET v1/appendix/user_data"
   ],
   "no_endpoint_pages": [
-    {
-      "slug": "authentication",
-      "endpoint": null
-    }
+    "authentication",
+    "financial-statements",
+    "intro",
+    "mcp-clients",
+    "model-context-protocol",
+    "sandbox"
   ],
-  "implemented_tools": [
-    "search-lite",
-    "summary-lite",
-    "market-price",
-    "metrics",
+  "implemented": [
     "analysis/analysts",
     "analysis/earnings",
     "analysis/recommendations",
     "analysis/upgrades-downgrades",
     "financials/balance_sheet",
     "financials/cash_flow",
-    "financials/general",
     "financials/income_statement",
     "financials/valuation_measures",
-    "historical",
+    "histories",
     "holders/general",
     "holders/insiders",
     "holders/insiders-transactions",
@@ -43,15 +71,19 @@
     "holders/mutual-funds",
     "holdings/general",
     "holdings/top-holdings",
+    "market-price",
+    "metrics",
     "news",
     "options/chain",
     "options/contracts",
     "options/expirations",
     "profile",
     "search",
+    "search-lite",
     "statistics/annual-returns",
     "statistics/general",
     "statistics/risks",
-    "summary"
+    "summary",
+    "summary-lite"
   ]
 }

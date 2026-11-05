@@ -1,12 +1,12 @@
 ---
-title: General
+title: ETF &amp; Mutual Fund Holdings Overview API
 created: 2026-01-28
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/holdings/general
 auth: Bearer Token
 ---
 
-# General
+# ETF &amp; Mutual Fund Holdings Overview API
 
 Returns consolidated portfolio composition and holdings-level aggregates for a fund-like asset, including ETFs and mutual funds.
 
@@ -157,81 +157,73 @@ The response is a single object containing holdings overview fields for the requ
 
 
 - **symbol**   
-     `string` — Asset symbol.
+     `string` — Asset identifier (ticker symbol).
 
 
 ### Asset Allocation
 
-High-level allocation across asset classes within the fund.
-
 
 - **cash_position**   
-     `number` — Cash and cash equivalents allocation.
+     `number` — Percentage of fund assets held in cash.
 - **stock_position**   
-     `number` — Equity holdings allocation.
+     `number` — Percentage of fund assets held in stocks.
 - **bond_position**   
-     `number` — Bond holdings allocation.
+     `number` — Percentage of fund assets held in bonds.
 - **other_position**   
-     `number` — Other asset classes allocation.
+     `number` — Percentage of fund assets held in other instruments.
 - **preferred_position**   
-     `number` — Preferred securities allocation.
+     `number` — Percentage of fund assets held in preferred stock.
 - **convertible_position**   
-     `number` — Convertible securities allocation.
+     `number` — Percentage of fund assets held in convertible securities.
 
 
 ### Valuation Characteristics (Holdings-weighted)
 
-Aggregated valuation metrics calculated across the fund’s holdings, weighted by position size.
-
 
 - **price_to_earnings**   
-     `number` — Price to earnings ratio.
+     `number` — Price-to-earnings (P/E) ratio.
 - **price_to_book_holding**   
-     `number` — Price to book ratio.
+     `number` — Holdings-weigted price-to-book (P/B) ratio.
 - **price_to_sales**   
-     `number` — Price to sales ratio.
+     `number` — Price-to-sales (P/S) ratio.
 - **price_to_cashflow**   
-     `number` — Price to cash flow ratio.
+     `number` — Price-to-cash flow (P/CF) ratio.
 
 
 ### Market Size and Growth Characteristics
 
-Aggregated market-cap and growth indicators derived from the underlying holdings.
-
 
 - **median_market_cap**   
-     `number` — Median market capitalization.
+     `number` — Median market capitalization of fund holdings.
 - **three_year_earnings_growth**   
-     `number` — Three-year earnings growth.
+     `number` — 3-year earnings growth.
 
 
 ### Sector Allocation
 
-Sector exposure of the fund, expressed as a proportion of total assets.
-
 
 - **realestate**   
-     `number` — Real estate sector exposure.
+     `number` — Percentage of fund assets in the real estate sector.
 - **consumer_cyclical**   
-     `number` — Consumer cyclical sector exposure.
+     `number` — Percentage of fund assets in the consumer cyclical sector.
 - **basic_materials**   
-     `number` — Basic materials sector exposure.
+     `number` — Percentage of fund assets in the basic materials sector.
 - **consumer_defensive**   
-     `number` — Consumer defensive sector exposure.
+     `number` — Percentage of fund assets in the consumer defensive sector.
 - **technology**   
-     `number` — Technology sector exposure.
+     `number` — Percentage of fund assets in the technology sector.
 - **communication_services**   
-     `number` — Communication services sector exposure.
+     `number` — Percentage of fund assets in the communication services sector.
 - **financial_services**   
-     `number` — Financial services sector exposure.
+     `number` — Percentage of fund assets in the financial services sector.
 - **utilities**   
-     `number` — Utilities sector exposure.
+     `number` — Percentage of fund assets in the utilities sector.
 - **industrials**   
-     `number` — Industrials sector exposure.
+     `number` — Percentage of fund assets in the industrials sector.
 - **energy**   
-     `number` — Energy sector exposure.
+     `number` — Percentage of fund assets in the energy sector.
 - **healthcare**   
-     `number` — Healthcare sector exposure.
+     `number` — Percentage of fund assets in the healthcare sector.
 
 
 ### Example Response
@@ -239,39 +231,31 @@ Sector exposure of the fund, expressed as a proportion of total assets.
 
 ```json
 {
-    "task_id": "e32ae526-2dc5-46e8-af1e-100a2a11d30f",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.01,
-    "data": {
-        "symbol": "SPY",
-        "tag": "just tag"
-    },
     "result": {
         "symbol": "SPY",
-        "cash_position": 0.0026,
-        "stock_position": 0.9974,
+        "cash_position": 0.0011,
+        "stock_position": 0.9989,
         "bond_position": 0,
         "other_position": 0,
         "preferred_position": 0,
         "convertible_position": 0,
-        "price_to_earnings": 0.03622,
-        "price_to_book_holding": 0.19672,
-        "price_to_sales": 0.28377,
-        "price_to_cashflow": 0.05073,
+        "price_to_earnings": 0.03691,
+        "price_to_book_holding": 0.18424,
+        "price_to_sales": 0.2638,
+        "price_to_cashflow": 0.04899,
         "median_market_cap": null,
         "three_year_earnings_growth": null,
-        "realestate": 0.0183,
-        "consumer_cyclical": 0.1055,
-        "basic_materials": 0.0165,
-        "consumer_defensive": 0.0471,
-        "technology": 0.3509,
-        "communication_services": 0.1089,
-        "financial_services": 0.1313,
-        "utilities": 0.0225,
-        "industrials": 0.0749,
-        "energy": 0.02809999,
-        "healthcare": 0.0959
+        "realestate": 0.01809999,
+        "consumer_cyclical": 0.0989,
+        "basic_materials": 0.0167,
+        "consumer_defensive": 0.045,
+        "technology": 0.39049998,
+        "communication_services": 0.1064,
+        "financial_services": 0.1107,
+        "utilities": 0.0211,
+        "industrials": 0.0782,
+        "energy": 0.0313,
+        "healthcare": 0.083
     }
 }
 ```

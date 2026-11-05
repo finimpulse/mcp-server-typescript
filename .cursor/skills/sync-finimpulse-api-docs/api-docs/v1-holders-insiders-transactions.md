@@ -1,20 +1,18 @@
 ---
-title: Insiders Transactions
+title: Stock Insider Transactions API
 created: 2026-01-13
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/holders/insiders-transactions
 auth: Bearer Token
 ---
 
-# Insiders Transactions
+# Stock Insider Transactions API
 
 Provides transaction-level data and is more granular than /holders/insiders.
 
 This endpoint returns a detailed, paginated list of insider transactions for a stock, including transaction descriptions, share counts, values, filer identity, and ownership type.
 
-## Asset Type Compatibility
-- **Stocks:** Returns insider transaction records based on reported filings.
-- **ETFs and Mutual funds:** Not applicable. Returns an empty result:
+It is **stock-centric**, so for **ETFs** and **mutual funds** the endpoint returns an empty result:
 
 ```
 "result": {
@@ -24,7 +22,7 @@ This endpoint returns a detailed, paginated list of insider transactions for a s
 }
 ```
 
-This behavior is expected and does not indicate an error.
+This behavior is expected.
 
 ## When to Use This Endpoint
 - Display a full insider trading history for a stock.
@@ -37,40 +35,45 @@ This behavior is expected and does not indicate an error.
 **POST** `v1/holders/insiders-transactions` 
 
 - **symbol**   
-     `string` *(required)* — Asset identifier (ticker symbol). Must be a stock symbol.
+     `string` *(required)* — Asset identifier (ticker symbol).
+- **offset**   
+     `integer` *(optional)* — Pagination offset (0-based).
+- **limit**   
+     `integer` *(optional)* — Maximum number of matched transaction records returned (user-defined).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires `%` as a wildcard)
-    - `not_like` - pattern does not match (requires `%` as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
+    - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
     - `startswith` - string starts with value
     - `endswith` - string ends with value
      
-     `%` *usage examples:*
-    - `%abc%` - matches any string containing "abc"
-    - `abc%` - matches any string starting with "abc"
-    - `%abc` - matches any string ending with "abc"
+     *`%` usage examples:*
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ "shares", ">", 10000 ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., shares).
     - `desc` - Sorting direction (*true* for descending, *false* for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "shares", "desc": false } ]`
-- **offset**   
-     `integer` *(optional)* — Pagination offset (0-based).
-- **limit**   
-     `integer` *(optional)* — Maximum number of transaction records to return (user-defined).
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -84,8 +87,19 @@ curl --location "https://api.finimpulse.com/v1/holders/insiders-transactions" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "NVDA",
-      "offset": 0,
       "limit": 3,
+      "offset": 0,
+      "filters": [
+          "shares",
+          ">",
+          10000
+      ],
+      "sort_by": [
+          {
+              "selector": "shares",
+              "desc": false
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -104,8 +118,19 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""NVDA"",
-    ""offset"": 0,
     ""limit"": 3,
+    ""offset"": 0,
+    ""filters"": [
+        ""shares"",
+        "">"",
+        10000
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""shares"",
+            ""desc"": false
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -131,8 +156,19 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "NVDA",
-      "offset" => 0,
       "limit" => 3,
+      "offset" => 0,
+      "filters" => [
+        "shares",
+        ">",
+        10000
+      ],
+      "sort_by" => [
+        [
+          "selector" => "shares",
+          "desc" => false
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -156,8 +192,19 @@ headers = {
 }
 data = {
     "symbol": "NVDA",
-    "offset": 0,
     "limit": 3,
+    "offset": 0,
+    "filters": [
+        "shares",
+        ">",
+        10000
+    ],
+    "sort_by": [
+        {
+            "selector": "shares",
+            "desc": False
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -177,8 +224,19 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "NVDA",
-    "offset": 0,
     "limit": 3,
+    "offset": 0,
+    "filters": [
+        "shares",
+        ">",
+        10000
+    ],
+    "sort_by": [
+        {
+            "selector": "shares",
+            "desc": false
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -210,9 +268,9 @@ Returns pagination metadata and an array of insider transaction records.
 
 
 - **total_count**   
-     `integer` — Total number of insider transactions available.
+     `integer` — Total number of matching insider transactions.
 - **items_count**   
-     `integer` — Number of transactions returned in the current response.
+     `integer` — Number of insider transactions returned.
 - **items**   
      `array` — Array of insider transaction entries.
 
@@ -223,17 +281,17 @@ Returns pagination metadata and an array of insider transaction records.
 - **shares**   
      `integer` — Number of shares involved in the transaction.
 - **value**   
-     `number` — Transaction value (currency units; may be 0 for non-cash events such as grants).
+     `number` — Transaction value (may be 0 for non-cash events such as grants).
 - **transaction_text**   
-     `string` — Description of the transaction (e.g. sale, award, grant). Reflects the filing description and may include pricing details.
+     `string` — Description of the transaction. May include pricing details.
 - **filer_name**   
-     `string` — Name of the insider who filed the transaction.
+     `string` — Insider name (who filed the transaction).
 - **filer_relation**   
-     `string` — Insider’s role or relationship to the company (e.g. Director, Officer).
+     `string` — Insider’s relationship to the company (e.g. Director, Officer).
 - **start_date**   
-     `string` — Transaction or filing date.
+     `string` — Date the transaction was reported.
 - **ownership**   
-     `string` — Ownership type under which the shares are held or transacted. ***Possible values:***
+     `string` — Ownership type. ***Possible values:***
     - `D — Direct ownership` Shares are owned or transacted directly by the insider in their personal capacity.
     - `I — Indirect ownership` Shares are owned or transacted indirectly, typically through trusts, family members, controlled entities, partnerships, or investment vehicles. The insider has a beneficial interest but does not hold the shares in a personal account.
 
@@ -243,27 +301,6 @@ Returns pagination metadata and an array of insider transaction records.
 
 ```json
 {
-    "task_id": "fa30960d-0a12-49a5-a0a7-3ad2a3cb1af9",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0014,
-    "data": {
-        "symbol": "NVDA",
-        "limit": 3,
-        "offset": 0,
-        "filters": [
-            "shares",
-            ">",
-            10000
-        ],
-        "tag": "just tag",
-        "sort_by": [
-            {
-                "selector": "shares",
-                "desc": false
-            }
-        ]
-    },
     "result": {
         "total_count": 131,
         "items_count": 3,

@@ -1,12 +1,12 @@
 ---
-title: Expirations
+title: Stock &amp; ETF Option Expiration Dates API
 created: 2026-03-10
-updated: 2026-03-10
+updated: 2026-11-03
 endpoint: GET v1/options/expirations/{symbol}
 auth: Bearer Token
 ---
 
-# Expirations
+# Stock &amp; ETF Option Expiration Dates API
 
 Returns the list of available option expiration dates for a single underlying symbol.
 
@@ -37,7 +37,7 @@ If a ticker is valid but has no options coverage, the response can return an emp
 - Build expiration calendars for screening tools, strategy builders, or AI-driven analytics.
 - Filter expirations dynamically by maturity range — for example, to isolate short-dated or long-dated options.
 
-## Request 
+## Request 
 
 **GET** `v1/options/expirations/{symbol}` 
 
@@ -135,11 +135,11 @@ req.end();
 
 
 - **total_count**   
-     `integer` — Total number of expiration records available for the ticker.
+     `integer` — Total number of available expiration records.
 - **items_count**   
-     `integer` — Number of expiration records returned in this response.
+     `integer` — Number of expiration records returned.
 - **items**   
-     `array` — Array of expiration entries.
+     `array` — Array of expiration records.
 
 
 ### Expiration Item
@@ -148,9 +148,9 @@ Each item represents one available expiration date for the requested underlying.
 
 
 - **type**   
-     `string` — Record type. Expected value - "expiration".
+     `string` — Record type (expiration expected).
 - **expiration_date**   
-     `string` — Available option expiration date (YYYY-MM-DD).
+     `string` — Expiration date (YYYY-MM-DD).
 
 
 ### Example Response
@@ -158,13 +158,6 @@ Each item represents one available expiration date for the requested underlying.
 
 ```json
 {
-    "task_id": "8dbf1a4b-f22b-45b4-b293-f1f2c6042c8b",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0004,
-    "data": {
-        "symbol": "NVDA"
-    },
     "result": {
         "total_count": 39,
         "items_count": 39,

@@ -1,16 +1,22 @@
 ---
-title: Upgrades &amp; Downgrades
+title: Analyst Upgrades, Downgrades &amp; Price Target Changes API
 created: 2026-03-04
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/analysis/upgrades-downgrades
 auth: Bearer Token
 ---
 
-# Upgrades &amp; Downgrades
+# Analyst Upgrades, Downgrades &amp; Price Target Changes API
 
 Returns a feed of analyst rating actions for a ticker, including upgrades/downgrades (rating changes), reiterations, and price target changes.
 
-This endpoint is typically used to power an “**Upgrades &amp; Downgrades**” table in the Analysis module.
+This endpoint is typically used to power an **Upgrades &amp; Downgrades** table in the Analysis module.
+
+Analyst estimates, ratings, and price targets are sourced from third parties and provided for informational purposes only. FinImpulse does not guarantee their accuracy and does not present them as its own investment recommendations.
+
+## Data Freshness
+
+Analyst data is refreshed daily.
 
 ## Asset Type Compatibility
 
@@ -31,24 +37,29 @@ This endpoint is typically used to power an “**Upgrades &amp; Downgrades**” 
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires % as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
     - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
@@ -56,17 +67,17 @@ This endpoint is typically used to power an “**Upgrades &amp; Downgrades**” 
     - `endswith` - string ends with value
      
      *`%` usage examples:*
-    - %abc% - matches any string containing "abc"
-    - abc% - matches any string starting with "abc"
-    - %abc - matches any string ending with "abc"
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ ["prior_price_target", "=", 330], "and", ["firm", "<>", "Wedbush"] ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., grade_date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "grade_date", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -84,6 +95,25 @@ curl --location "https://api.finimpulse.com/v1/analysis/upgrades-downgrades" \
       "end_date": "2026-01-30",
       "limit": 5,
       "offset": 0,
+      "filters": [
+          [
+              "prior_price_target",
+              "=",
+              330
+          ],
+          "and",
+          [
+              "firm",
+              "<>",
+              "Wedbush"
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "grade_date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -106,6 +136,25 @@ var json = @"{
     ""end_date"": ""2026-01-30"",
     ""limit"": 5,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""prior_price_target"",
+            ""="",
+            330
+        ],
+        ""and"",
+        [
+            ""firm"",
+            ""<>"",
+            ""Wedbush""
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""grade_date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -135,6 +184,25 @@ curl_setopt_array($curl, [
       "end_date" => "2026-01-30",
       "limit" => 5,
       "offset" => 0,
+      "filters" => [
+        [
+          "prior_price_target",
+          "=",
+          330
+        ],
+        "and",
+        [
+          "firm",
+          "<>",
+          "Wedbush"
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "grade_date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -162,6 +230,25 @@ data = {
     "end_date": "2026-01-30",
     "limit": 5,
     "offset": 0,
+    "filters": [
+        [
+            "prior_price_target",
+            "=",
+            330
+        ],
+        "and",
+        [
+            "firm",
+            "<>",
+            "Wedbush"
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "grade_date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -185,6 +272,25 @@ const data = JSON.stringify({
     "end_date": "2026-01-30",
     "limit": 5,
     "offset": 0,
+    "filters": [
+        [
+            "prior_price_target",
+            "=",
+            330
+        ],
+        "and",
+        [
+            "firm",
+            "<>",
+            "Wedbush"
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "grade_date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -217,9 +323,9 @@ The response contains pagination fields and a list of analyst action records.
 
 
 - **total_count**   
-     `integer` — Total number of matching records available.
+     `integer` — Total number of matching records.
 - **items_count**   
-     `integer` — Number of records returned in the current response.
+     `integer` — Number of records returned.
 - **items**   
      `array` — Array of analyst action records.
 
@@ -228,7 +334,7 @@ The response contains pagination fields and a list of analyst action records.
 
 
 - **grade_date**   
-     `string` — Action timestamp (UTC, ISO 8601).
+     `string` — Date the rating was issued (ISO 8601).
 - **firm**   
      `string` — Analyst firm name.
 - **to_grade**   
@@ -238,11 +344,11 @@ The response contains pagination fields and a list of analyst action records.
 - **action**   
      `string` — Action type code (e.g., main, reit, up, down, init).
 - **price_target_action**   
-     `string` — Price target change label.
+     `string` — Price target change label (e.g., Maintains, Lowers).
 - **current_price_target**   
-     `number` — Updated price target after the action.
+     `number` — New price target (after the action).
 - **prior_price_target**   
-     `number` — Previous price target before the action.
+     `number` — Previous price target (before the action).
 
 
 ### Example Response
@@ -250,36 +356,6 @@ The response contains pagination fields and a list of analyst action records.
 
 ```json
 {
-    "task_id": "4b764499-ddc3-4984-99d6-6e92df807558",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0,
-    "data": {
-        "symbol": "AAPL",
-        "limit": 5,
-        "offset": 0,
-        "filters": [
-            [
-                "prior_price_target",
-                "=",
-                330
-            ],
-            "and",
-            [
-                "firm",
-                "<>",
-                "Wedbush"
-            ]
-        ],
-        "start_date": "2025-01-01",
-        "end_date": "2026-01-30",
-        "sort_by": [
-            {
-                "selector": "grade_date",
-                "desc": true
-            }
-        ]
-    },
     "result": {
         "total_count": 2,
         "items_count": 2,
@@ -308,8 +384,3 @@ The response contains pagination fields and a list of analyst action records.
     }
 }
 ```
-
-
-## Notes
-
-- **to_grade** and **from_grade** can be the same when the analyst **reiterates or maintains** the previous rating.

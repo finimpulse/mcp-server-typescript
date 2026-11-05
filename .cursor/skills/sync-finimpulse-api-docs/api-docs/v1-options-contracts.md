@@ -1,18 +1,26 @@
 ---
-title: Contracts
+title: Option Contract Data &amp; Greeks API
 created: 2026-03-10
-updated: 2026-03-10
+updated: 2026-11-03
 endpoint: POST v1/options/contracts
 auth: Bearer Token
 ---
 
-# Contracts
+# Option Contract Data &amp; Greeks API
 
 Returns a single option contract snapshot for a specific contract identifier.
 
-This endpoint retrieves a single exact option contract by its full contract name. It returns the same core contract-level fields as [/v1/options/chain](https://developers.finimpulse.com/v1/options/chain/), but scoped to a single instrument.
+This endpoint retrieves a single exact option contract by its full contract name. It returns the same core contract-level fields as [**/v1/options/chain**](https://developers.finimpulse.com/v1/options/chain/), but scoped to a single instrument.
 
-Use it when the user has already selected a contract, and you need a clean, direct lookup for contract details, pricing, liquidity, implied volatility, and related metadata without loading the full chain.
+Use it when you need a clean, direct lookup for contract details, pricing, liquidity, implied volatility, and related metadata without loading the full chain.
+
+## Options Endpoint Workflow
+
+This endpoint is the third step in a three-stage options workflow:
+
+1. [**GET /v1/options/expirations/{symbol}**](https://developers.finimpulse.com/v1/options/expirations/): Retrieve the list of available expiration dates for the underlying.
+2. [**POST /v1/options/chain**](https://developers.finimpulse.com/v1/options/chain/): Retrieve the full option chain for a selected expiration date.
+3. **POST /v1/options/contracts**: Retrieve data for a single contract, looked up by the **contract_name** obtained from [**POST /v1/options/chain**](https://developers.finimpulse.com/v1/options/chain/).
 
 ## Asset Type Compatibility
 
@@ -160,41 +168,43 @@ The response returns a single contract snapshot for the requested option identif
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **underlying_price**   
-     `number` — Current/reference price of the asset associated with the contract snapshot.
+     `number` — Current price of the underlying asset.
 - **expiration_date**   
-     `string` — Contract expiration date (YYYY-MM-DD).
+     `string` — Expiration date (YYYY-MM-DD).
 - **contract_name**   
      `string` — Full option contract identifier.
 - **option_type**   
-     `string` — Contract side. Expected values – `call`/`put`.
+     `string` — Contract side. **Possible values:**
+    - `call`
+    - `put`
 - **strike**   
-     `number` — Strike price of the contract.
+     `number` — Strike price.
 - **currency**   
-     `string` — Pricing currency.
+     `string` — Trading currency.
 - **last_price**   
-     `number` — Last traded contract price.
+     `number` — Last traded price.
 - **change**   
-     `number` — Absolute change in contract price versus prior reference.
+     `number` — Absolute price change.
 - **percent_change**   
-     `number` — Percentage change in contract price (returned as fraction).
+     `number` — Percentage price change.
 - **volume**   
-     `integer` — Traded contract volume.
+     `integer` — Traded volume.
 - **open_interest**   
-     `integer` — Open interest for the contract.
+     `integer` — Open interest.
 - **bid**   
-     `number` — Current bid price.
+     `number` — Bid price.
 - **ask**   
-     `number` — Current ask price.
+     `number` — Ask price.
 - **contract_size**   
      `string` — Contract size classification (e.g., REGULAR).
 - **last_trade_date**   
-     `string` — Timestamp of the last recorded trade for the contract.
+     `string` — Timestamp of the last recorded trade (ISO 8601).
 - **implied_volatility**   
-     `number` — Implied volatility (returned as fraction).
+     `number` — Implied volatility.
 - **in_the_money**   
-     `boolean` — Indicates whether the contract is currently in the money based on the underlying/reference price.
+     `boolean` — Indicates whether the contract is currently in the money.
 - **greeks**   
-     `array` — Array of greeks (e.g., delta, gamma, theta, vega, rho). Returns `null` if values are not available.
+     `array` — Array of greeks (delta, gamma, theta, vega, rho). Returns `null` if values are not available.
 
 
 ### Example Response
@@ -202,13 +212,6 @@ The response returns a single contract snapshot for the requested option identif
 
 ```json
 {
-    "task_id": "4785c224-8286-4ff4-965a-64fb4de47a4f",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0004,
-    "data": {
-        "contract_name": "NVDA260311C00155000"
-    },
     "result": {
         "symbol": "NVDA",
         "underlying_price": 182.65,
@@ -238,9 +241,3 @@ The response returns a single contract snapshot for the requested option identif
     }
 }
 ```
-
-
-## Notes
-
-- The contract must be requested by the exact **contract_name**. If the identifier is missing or malformed, the contract cannot be resolved.
-- For contract discovery, use **[/v1/options/expirations/{symbol}](https://developers.finimpulse.com/v1/options/expirations/)** and [**/v1/options/chain**](https://developers.finimpulse.com/v1/options/chain/) first, then use **/v1/options/contracts** for exact contract lookup.

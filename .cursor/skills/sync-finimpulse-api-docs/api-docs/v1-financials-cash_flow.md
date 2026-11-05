@@ -1,20 +1,22 @@
 ---
-title: Cash Flow
+title: Stock Cash Flow Statement API
 created: 2026-01-23
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/financials/cash_flow
 auth: Bearer Token
 ---
 
-# Cash Flow
+# Stock Cash Flow Statement API
 
-Returns detailed Cash Flow Statement data, including operating, investing, and financing cash flows for the selected period.
+Returns detailed Cash Flow Statement data, including operating, investing, and financing cash flows.
 
-This endpoint helps evaluate the company’s liquidity and cash management practices.
+This endpoint provides operating, investing, and financing cash flow data for the selected reporting periods.
+
+Financial statements data covers over 85,000 tickers. Coverage starts from **September 30, 2021**, subject to availability per company. The full list of covered symbols is available for download [here](https://developers.finimpulse.com/wp-content/uploads/2026/06/tickers_with_financials.csv).
 
 ## When to Use This Endpoint
 - Populate the "Cash Flow" section of the Financials tabs or analytics tools.
-- Extract multi-period cash flow series for liquidity analysis, forecasting, or visualization.
+- Retrieve multi-interval reporting series (trailing, quarterly, annual) for liquidity analysis, forecasting, or visualization.
 
 ## Request Parameters
 **POST** `v1/financials/cash_flow` 
@@ -22,16 +24,16 @@ This endpoint helps evaluate the company’s liquidity and cash management pract
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **intervals**   
-     `array` *(optional)* — Reporting frequencies to return. **Supported values:**
+     `array` *(required)* — Reporting frequencies to return. **Supported values:**
     - `annual`
     - `quarterly`
     - `trailing`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported intervals are returned. Note that interval availability depends on coverage. If data is missing for a period, values may be **null**. **Example:** `"intervals": [ "trailing", "quarterly", "annual" ]`
+     Note that interval availability depends on coverage. If data is missing for a period, values may be **null**.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -45,7 +47,12 @@ curl --location "https://api.finimpulse.com/v1/financials/cash_flow" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "NVDA",
-      "start_date": "2020-08-11",
+      "intervals": [
+          "trailing",
+          "quarterly",
+          "annual"
+      ],
+      "start_date": "2021-10-01",
       "end_date": "2026-08-11",
       "tag": "just_tag"
   }'
@@ -65,7 +72,12 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""NVDA"",
-    ""start_date"": ""2020-08-11"",
+    ""intervals"": [
+        ""trailing"",
+        ""quarterly"",
+        ""annual""
+    ],
+    ""start_date"": ""2021-10-01"",
     ""end_date"": ""2026-08-11"",
     ""tag"": ""just_tag""
 }";
@@ -92,7 +104,12 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "NVDA",
-      "start_date" => "2020-08-11",
+      "intervals" => [
+        "trailing",
+        "quarterly",
+        "annual"
+      ],
+      "start_date" => "2021-10-01",
       "end_date" => "2026-08-11",
       "tag" => "just_tag"
     ]
@@ -117,7 +134,12 @@ headers = {
 }
 data = {
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "trailing",
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 }
@@ -138,7 +160,12 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "trailing",
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 });
@@ -164,10 +191,8 @@ req.end();
 ```
 
 
-The system covers data from **September 30, 2021**, subject to data availability per company.
-
 ## Response
-The response is a single object containing metadata and an ***items*** array of records.
+The response is a single object containing metadata and an ***items*** array of statement snapshots for a given interval and date.
 
 ### Metadata Fields
 
@@ -175,15 +200,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **display_name**   
-     `string` — Preferred display name (if available).
+     `string` — Asset display name.
 - **short_name**   
      `string` — Short descriptive name.
 - **long_name**   
-     `string` — Full legal or formal name (company/fund).
+     `string` — Full legal or formal name.
 - **quote_type**   
-     `string` — Asset type (expected - stock).
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **quote_source_name**   
-     `string` — Data source label for the quote (e.g., real-time vs delayed).
+     `string` — Data source label for the quote.
 - **currency**   
      `string` — Trading currency.
 - **full_exchange_name**   
@@ -199,22 +224,39 @@ The response is a single object containing metadata and an ***items*** array of 
 - **market_region**   
      `string` — Market/country code.
 - **total_count**   
-     `integer` — Total number of items that match filters.
+     `integer` — Total number of matching items.
 - **items_count**   
-     `integer` — Number of items in the response.
+     `integer` — Number of items returned.
+- **reports_count**   
+     `integer` — Total number of unique reports in the response.
+- **report_keys**   
+     `array` — Array of unique report identifiers returned in the response. Each key follows the format `interval|date`. All items sharing the same key belong to the same report.
 - **items**   
-     `array` — Array of statement records. It is a unified list where each element represents one report snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or source limitations.
+     `array` — Array of statement records. It is a unified list where each element represents one report snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or data limitations.
+
+
+### Snapshot Info
+
+
+- **type**   
+     `string` — Snapshot type (cash_flow expected).
+- **report_key**   
+     `string` — Unique identifier of the report this item belongs to. Format: `interval|date`.
+- **interval**   
+     `string` — Reporting frequency (trailing/quarterly/annual).
+- **date**   
+     `string` — End date of the reporting period.
 
 
 ### Operating Cash Flow
 
 
 - **operating_cash_flow**   
-     `number` — Net operating cash flow.
+     `number` — Operating cash flow.
 - **cash_flow_from_continuing_operating_activities**   
      `number` — Cash flow from continuing operating activities.
 - **cash_flowsfromusedin_operating_activities_direct**   
-     `number` — Cash flows from (used in) operating activities using the direct method.
+     `number` — Cash flows from (used in) operating activities, direct method.
 - **net_income_from_continuing_operations**   
      `number` — Net income from continuing operations.
 - **operating_gains_losses**   
@@ -222,7 +264,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **pension_and_employee_benefit_expense**   
      `number` — Pension and employee benefit expense.
 - **gain_loss_on_sale_of_ppe**   
-     `number` — Gain or loss on sale of property, plant, and equipment.
+     `number` — Gain or loss on sale of property, plant, and equipment (PPE).
 - **net_foreign_currency_exchange_gain_loss**   
      `number` — Net foreign currency exchange gain or loss.
 - **gain_loss_on_sale_of_business**   
@@ -238,9 +280,9 @@ The response is a single object containing metadata and an ***items*** array of 
 - **depreciation**   
      `number` — Depreciation.
 - **amortization_cash_flow**   
-     `number` — Amortization reflected in cash flow.
+     `number` — Amortization.
 - **amortization_of_intangibles**   
-     `number` — Amortization of intangible assets.
+     `number` — Amortization of intangibles.
 - **amortization_of_securities**   
      `number` — Amortization of securities.
 - **depletion**   
@@ -254,7 +296,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **stock_based_compensation**   
      `number` — Stock-based compensation.
 - **provisionand_write_offof_assets**   
-     `number` — Asset provisions and write-offs.
+     `number` — Provision and write-off of assets.
 - **other_non_cash_items**   
      `number` — Other non-cash items.
 - **earnings_losses_from_equity_investments**   
@@ -276,7 +318,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **change_in_account_payable**   
      `number` — Change in accounts payable.
 - **change_in_dividend_payable**   
-     `number` — Change in dividends payable.
+     `number` — Change in dividend payable.
 - **change_in_income_tax_payable**   
      `number` — Change in income tax payable.
 - **change_in_interest_payable**   
@@ -290,7 +332,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **change_in_other_current_liabilities**   
      `number` — Change in other current liabilities.
 - **change_in_other_working_capital**   
-     `number` — Change in other working capital items.
+     `number` — Change in other working capital.
 - **other_cash_receiptsfrom_operating_activities**   
      `number` — Other cash receipts from operating activities.
 - **other_cash_paymentsfrom_operating_activities**   
@@ -309,21 +351,21 @@ The response is a single object containing metadata and an ***items*** array of 
 
 
 - **investing_cash_flow**   
-     `number` — Net cash flow from investing activities.
+     `number` — Investing cash flow.
 - **cash_flow_from_continuing_investing_activities**   
      `number` — Cash flow from continuing investing activities.
 - **net_ppe_purchase_and_sale**   
-     `number` — Net cash from purchase and sale of PPE.
+     `number` — Net cash from property, plant, and equipment (PPE).
 - **purchase_of_ppe**   
-     `number` — Cash paid to purchase PPE.
+     `number` — Cash paid to purchase property, plant, and equipment (PPE).
 - **sale_of_ppe**   
-     `number` — Cash received from the sale of PPE.
+     `number` — Cash received from the sale of property, plant, and equipment (PPE).
 - **net_intangibles_purchase_and_sale**   
-     `number` — Net cash from purchase and sale of intangible assets.
+     `number` — Net cash from purchase and sale of intangibles.
 - **purchase_of_intangibles**   
-     `number` — Cash paid to purchase intangible assets.
+     `number` — Cash paid to purchase intangibles.
 - **sale_of_intangibles**   
-     `number` — Cash received from the sale of intangible assets.
+     `number` — Cash received from the sale of intangibles.
 - **net_investment_properties_purchase_and_sale**   
      `number` — Net cash from purchase and sale of investment properties.
 - **purchase_of_investment_properties**   
@@ -333,9 +375,9 @@ The response is a single object containing metadata and an ***items*** array of 
 - **net_business_purchase_and_sale**   
      `number` — Net cash from purchase and sale of businesses.
 - **purchase_of_business**   
-     `number` — Cash paid to acquire businesses.
+     `number` — Cash paid to purchase a business.
 - **sale_of_business**   
-     `number` — Cash received from the sale of businesses.
+     `number` — Cash received from the sale of a business.
 - **net_investment_purchase_and_sale**   
      `number` — Net cash from purchase and sale of investments.
 - **purchase_of_investment**   
@@ -345,16 +387,16 @@ The response is a single object containing metadata and an ***items*** array of 
 - **net_other_investing_changes**   
      `number` — Net cash from other investing activities.
 - **dividends_received_cfi**   
-     `number` — Dividends received from investments.
+     `number` — Dividends received, cash flow from investing (CFI).
 - **interest_received_cfi**   
-     `number` — Interest received from investments.
+     `number` — Interest received, cash flow from investing (CFI).
 
 
 ### Financing Cash Flow
 
 
 - **financing_cash_flow**   
-     `number` — Net cash flow from financing activities.
+     `number` — Financing cash flow.
 - **cash_flow_from_continuing_financing_activities**   
      `number` — Cash flow from continuing financing activities.
 - **net_issuance_payments_of_debt**   
@@ -382,9 +424,9 @@ The response is a single object containing metadata and an ***items*** array of 
 - **preferred_stock_issuance**   
      `number` — Cash received from issuing preferred stock.
 - **preferred_stock_payments**   
-     `number` — Cash used to redeem preferred stock.
+     `number` — Cash used to repay preferred stock.
 - **proceeds_from_stock_option_exercised**   
-     `number` — Cash received from stock options exercised by employees.
+     `number` — Cash received from stock option exercises.
 - **cash_dividends_paid**   
      `number` — Total cash dividends paid.
 - **common_stock_dividend_paid**   
@@ -394,7 +436,7 @@ The response is a single object containing metadata and an ***items*** array of 
 - **net_other_financing_charges**   
      `number` — Other net financing charges.
 - **interest_paid_cff**   
-     `number` — Interest paid on debt and other financing obligations.
+     `number` — Interest paid, cash flow from financing (CFF).
 - **repurchase_of_capital_stock**   
      `number` — Cash used to repurchase capital stock.
 - **issuance_of_capital_stock**   
@@ -405,28 +447,28 @@ The response is a single object containing metadata and an ***items*** array of 
 
 
 - **end_cash_position**   
-     `number` — Ending cash position.
+     `number` — Cash position at the end of the period.
 - **changes_in_cash**   
      `number` — Changes in cash during the period.
 - **effect_of_exchange_rate_changes**   
-     `number` — Effect of foreign exchange rate changes on cash.
+     `number` — Effect of exchange rate changes on cash.
 - **beginning_cash_position**   
-     `number` — Beginning cash position.
+     `number` — Cash position at the beginning of the period.
 - **other_cash_adjustment_inside_changein_cash**   
-     `number` — Other cash adjustments included in change in cash.
+     `number` — Other cash adjustments included in the change in cash.
 - **other_cash_adjustment_outside_changein_cash**   
-     `number` — Other cash adjustments excluded from change in cash.
+     `number` — Other cash adjustments excluded from the change in cash.
 
 
 ### Income Tax Paid Supplemental Data
 
 
 - **income_tax_paid_supplemental_data**   
-     `number` — Income taxes paid (supplemental data).
+     `number` — Income tax paid, supplemental disclosure.
 - **taxes_refund_paid**   
-     `number` — Taxes refunded or paid.
+     `number` — Tax refunds received.
 - **taxes_refund_paid_direct**   
-     `number` — Direct taxes refunded or paid.
+     `number` — Tax refunds received, direct method.
 - **excess_tax_benefit_from_stock_based_compensation**   
      `number` — Excess tax benefit from stock-based compensation.
 
@@ -435,11 +477,11 @@ The response is a single object containing metadata and an ***items*** array of 
 
 
 - **interest_paid_supplemental_data**   
-     `number` — Interest paid (supplemental data).
+     `number` — Interest paid, supplemental disclosure.
 - **interest_paid_direct**   
-     `number` — Interest paid directly.
+     `number` — Interest paid, direct method.
 - **interest_received_direct**   
-     `number` — Interest received directly.
+     `number` — Interest received, direct method.
 
 
 ### Cash Flow From Discontinued Operation
@@ -448,59 +490,48 @@ The response is a single object containing metadata and an ***items*** array of 
 - **cash_flow_from_discontinued_operation**   
      `number` — Cash flow from discontinued operations.
 - **cash_from_discontinued_operating_activities**   
-     `number` — Cash from discontinued operating activities.
+     `number` — Cash received from discontinued operating activities.
 - **cash_from_discontinued_investing_activities**   
-     `number` — Cash from discontinued investing activities.
+     `number` — Cash received from discontinued investing activities.
 - **cash_from_discontinued_financing_activities**   
-     `number` — Cash from discontinued financing activities.
+     `number` — Cash received from discontinued financing activities.
 
 
 ### Other
 
 
 - **interest_paid_cfo**   
-     `number` — Interest paid in operating activities.
+     `number` — Interest paid, cash flow from operations (CFO).
 - **interest_received_cfo**   
-     `number` — Interest received in operating activities.
+     `number` — Interest received, cash flow from operations (CFO).
 - **dividends_paid_direct**   
-     `number` — Dividends paid directly.
+     `number` — Dividends paid, direct method.
 - **dividends_received_direct**   
-     `number` — Dividends received directly.
+     `number` — Dividends received, direct method.
 - **dividend_paid_cfo**   
-     `number` — Dividends paid in operating activities.
+     `number` — Dividend paid, cash flow from operations (CFO).
 - **dividend_received_cfo**   
-     `number` — Dividends received in operating activities.
+     `number` — Dividend received, cash flow from operations (CFO).
 - **capital_expenditure**   
-     `number` — Capital expenditures.
+     `number` — Capital expenditure.
 - **capital_expenditure_reported**   
-     `number` — Reported capital expenditures.
+     `number` — Capital expenditure, as reported.
 - **issuance_of_debt**   
-     `number` — Cash received from issuance of debt.
+     `number` — Cash received from issuing debt.
 - **repayment_of_debt**   
      `number` — Cash used to repay debt.
 - **free_cash_flow**   
-     `number` — Free cash flow.
+     `number` — Free cash flow (FCF).
 - **adjusted_geography_segment_data**   
      `number` — Adjusted data by geographic segment.
 - **domestic_sales**   
-     `number` — Domestic sales cash flow.
+     `number` — Domestic sales.
 - **foreign_sales**   
-     `number` — Foreign sales cash flow.
+     `number` — Foreign sales.
 - **paymentsto_suppliersfor_goodsand_services**   
      `number` — Cash payments to suppliers for goods and services.
 - **paymentson_behalfof_employees**   
      `number` — Cash payments on behalf of employees.
-
-
-### Snapshot Info
-
-
-- **type**   
-     `string` — Report/snapshot type (cash_flow expected).
-- **interval**   
-     `string` — Reporting frequencies (trailing/quarterly/annual).
-- **date**   
-     `string` — Reporting period end date.
 
 
 ### Example Response
@@ -508,24 +539,6 @@ The response is a single object containing metadata and an ***items*** array of 
 
 ```json
 {
-    "task_id": "da4f1823-aeba-463b-b395-b4c1356c9aaf",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0032,
-    "data": {
-        "symbol": "NVDA",
-        "start_date": "2020-08-11",
-        "end_date": "2026-08-11",
-        "tag": "just_tag",
-        "intervals": [
-            "trailing",
-            "quarterly",
-            "annual"
-        ],
-        "types": [
-            "cash_flow"
-        ]
-    },
     "result": {
         "symbol": "NVDA",
         "quote_type": "stock",
@@ -534,144 +547,34 @@ The response is a single object containing metadata and an ***items*** array of 
         "display_name": "NVIDIA",
         "market_region": "US_OT",
         "exchange_timezone_name": "America/New_York",
-        "exchange_timezone_short_name": "EST",
+        "exchange_timezone_short_name": "EDT",
         "exchange": "NMS",
         "short_name": "NVIDIA Corporation",
         "long_name": "NVIDIA Corporation",
-        "quote_source_name": "Nasdaq Real Time Price",
+        "quote_source_name": "BOATS Real Time Price",
         "time_offset": -14400,
-        "total_count": 12,
-        "items_count": 12,
+        "total_count": 14,
+        "items_count": 14,
+        "reports_count": 14,
+        "report_keys": [
+            "annual|2022-01-31",
+            "annual|2023-01-31",
+            "annual|2024-01-31",
+            "annual|2025-01-31",
+            "annual|2026-01-31",
+            "quarterly|2024-07-31",
+            "quarterly|2024-10-31",
+            "quarterly|2025-01-31",
+            "quarterly|2025-04-30",
+            "quarterly|2025-07-31",
+            "quarterly|2025-10-31",
+            "quarterly|2026-01-31",
+            "quarterly|2026-04-30",
+            "trailing|2026-06-19"
+        ],
         "items": [
             {
-                "type": "cash_flow",
-                "adjusted_geography_segment_data": null,
-                "amortization_cash_flow": 612000000,
-                "amortization_of_intangibles": 612000000,
-                "amortization_of_securities": null,
-                "asset_impairment_charge": null,
-                "beginning_cash_position": null,
-                "capital_expenditure": null,
-                "capital_expenditure_reported": -1128000000,
-                "cash_dividends_paid": null,
-                "cash_flow_from_continuing_financing_activities": null,
-                "cash_flow_from_continuing_investing_activities": null,
-                "cash_flow_from_continuing_operating_activities": null,
-                "cash_flow_from_discontinued_operation": null,
-                "cash_flowsfromusedin_operating_activities_direct": null,
-                "cash_from_discontinued_financing_activities": null,
-                "cash_from_discontinued_investing_activities": null,
-                "cash_from_discontinued_operating_activities": null,
-                "change_in_account_payable": null,
-                "change_in_accrued_expense": null,
-                "change_in_dividend_payable": null,
-                "change_in_income_tax_payable": null,
-                "change_in_interest_payable": null,
-                "change_in_inventory": null,
-                "change_in_other_current_assets": null,
-                "change_in_other_current_liabilities": null,
-                "change_in_other_working_capital": 163000000,
-                "change_in_payable": null,
-                "change_in_payables_and_accrued_expense": null,
-                "change_in_prepaid_assets": null,
-                "change_in_receivables": null,
-                "change_in_tax_payable": null,
-                "change_in_working_capital": null,
-                "changes_in_account_receivables": null,
-                "changes_in_cash": null,
-                "classesof_cash_payments": null,
-                "classesof_cash_receiptsfrom_operating_activities": null,
-                "common_stock_dividend_paid": null,
-                "common_stock_issuance": null,
-                "common_stock_payments": null,
-                "deferred_income_tax": null,
-                "deferred_tax": null,
-                "depletion": null,
-                "depreciation": 486000000,
-                "depreciation_amortization_depletion": null,
-                "depreciation_and_amortization": null,
-                "dividend_paid_cfo": null,
-                "dividend_received_cfo": null,
-                "dividends_paid_direct": null,
-                "dividends_received_cfi": null,
-                "dividends_received_direct": null,
-                "domestic_sales": null,
-                "earnings_losses_from_equity_investments": null,
-                "effect_of_exchange_rate_changes": null,
-                "end_cash_position": null,
-                "excess_tax_benefit_from_stock_based_compensation": null,
-                "financing_cash_flow": null,
-                "foreign_sales": null,
-                "free_cash_flow": null,
-                "gain_loss_on_investment_securities": null,
-                "gain_loss_on_sale_of_business": null,
-                "gain_loss_on_sale_of_ppe": null,
-                "income_tax_paid_supplemental_data": null,
-                "interest_paid_cff": null,
-                "interest_paid_cfo": null,
-                "interest_paid_direct": null,
-                "interest_paid_supplemental_data": null,
-                "interest_received_cfi": null,
-                "interest_received_cfo": null,
-                "interest_received_direct": null,
-                "investing_cash_flow": null,
-                "issuance_of_capital_stock": null,
-                "issuance_of_debt": 4968000000,
-                "long_term_debt_issuance": 4968000000,
-                "long_term_debt_payments": null,
-                "net_business_purchase_and_sale": null,
-                "net_common_stock_issuance": null,
-                "net_foreign_currency_exchange_gain_loss": null,
-                "net_income_from_continuing_operations": null,
-                "net_intangibles_purchase_and_sale": null,
-                "net_investment_properties_purchase_and_sale": null,
-                "net_investment_purchase_and_sale": null,
-                "net_issuance_payments_of_debt": null,
-                "net_long_term_debt_issuance": null,
-                "net_other_financing_charges": null,
-                "net_other_investing_changes": null,
-                "net_ppe_purchase_and_sale": null,
-                "net_preferred_stock_issuance": null,
-                "net_short_term_debt_issuance": null,
-                "operating_cash_flow": null,
-                "operating_gains_losses": null,
-                "other_cash_adjustment_inside_changein_cash": null,
-                "other_cash_adjustment_outside_changein_cash": null,
-                "other_cash_paymentsfrom_operating_activities": null,
-                "other_cash_receiptsfrom_operating_activities": null,
-                "other_non_cash_items": null,
-                "paymentson_behalfof_employees": null,
-                "paymentsto_suppliersfor_goodsand_services": null,
-                "pension_and_employee_benefit_expense": null,
-                "preferred_stock_dividend_paid": null,
-                "preferred_stock_issuance": null,
-                "preferred_stock_payments": null,
-                "proceeds_from_stock_option_exercised": null,
-                "provisionand_write_offof_assets": null,
-                "purchase_of_business": null,
-                "purchase_of_intangibles": null,
-                "purchase_of_investment": null,
-                "purchase_of_investment_properties": null,
-                "purchase_of_ppe": null,
-                "receiptsfrom_customers": null,
-                "receiptsfrom_government_grants": null,
-                "repayment_of_debt": null,
-                "repurchase_of_capital_stock": null,
-                "sale_of_business": null,
-                "sale_of_intangibles": null,
-                "sale_of_investment": null,
-                "sale_of_investment_properties": null,
-                "sale_of_ppe": null,
-                "short_term_debt_issuance": null,
-                "short_term_debt_payments": null,
-                "stock_based_compensation": null,
-                "taxes_refund_paid": null,
-                "taxes_refund_paid_direct": null,
-                "unrealized_gain_loss_on_investment_securities": null,
-                "interval": "annual",
-                "date": "2021-01-31"
-            },
-            {
+                "report_key": "annual|2022-01-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": 563000000,
@@ -800,6 +703,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2022-01-31"
             },
             {
+                "report_key": "annual|2023-01-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": 699000000,
@@ -928,6 +832,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2023-01-31"
             },
             {
+                "report_key": "annual|2024-01-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": 614000000,
@@ -1056,6 +961,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-01-31"
             },
             {
+                "report_key": "annual|2025-01-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1184,6 +1090,136 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "annual|2026-01-31",
+                "type": "cash_flow",
+                "adjusted_geography_segment_data": null,
+                "amortization_cash_flow": null,
+                "amortization_of_intangibles": null,
+                "amortization_of_securities": null,
+                "asset_impairment_charge": null,
+                "beginning_cash_position": 8589000000,
+                "capital_expenditure": -6042000000,
+                "capital_expenditure_reported": null,
+                "cash_dividends_paid": -974000000,
+                "cash_flow_from_continuing_financing_activities": -48474000000,
+                "cash_flow_from_continuing_investing_activities": -52228000000,
+                "cash_flow_from_continuing_operating_activities": 102718000000,
+                "cash_flow_from_discontinued_operation": null,
+                "cash_flowsfromusedin_operating_activities_direct": null,
+                "cash_from_discontinued_financing_activities": null,
+                "cash_from_discontinued_investing_activities": null,
+                "cash_from_discontinued_operating_activities": null,
+                "change_in_account_payable": 3096000000,
+                "change_in_accrued_expense": 5257000000,
+                "change_in_dividend_payable": null,
+                "change_in_income_tax_payable": null,
+                "change_in_interest_payable": null,
+                "change_in_inventory": -11324000000,
+                "change_in_other_current_assets": null,
+                "change_in_other_current_liabilities": 1844000000,
+                "change_in_other_working_capital": null,
+                "change_in_payable": 3096000000,
+                "change_in_payables_and_accrued_expense": 8353000000,
+                "change_in_prepaid_assets": 577000000,
+                "change_in_receivables": -15399000000,
+                "change_in_tax_payable": null,
+                "change_in_working_capital": -15949000000,
+                "changes_in_account_receivables": -15399000000,
+                "changes_in_cash": 2016000000,
+                "classesof_cash_payments": null,
+                "classesof_cash_receiptsfrom_operating_activities": null,
+                "common_stock_dividend_paid": -974000000,
+                "common_stock_issuance": null,
+                "common_stock_payments": -40086000000,
+                "deferred_income_tax": -1424000000,
+                "deferred_tax": -1424000000,
+                "depletion": null,
+                "depreciation": null,
+                "depreciation_amortization_depletion": 2843000000,
+                "depreciation_and_amortization": 2843000000,
+                "dividend_paid_cfo": null,
+                "dividend_received_cfo": null,
+                "dividends_paid_direct": null,
+                "dividends_received_cfi": null,
+                "dividends_received_direct": null,
+                "domestic_sales": null,
+                "earnings_losses_from_equity_investments": null,
+                "effect_of_exchange_rate_changes": null,
+                "end_cash_position": 10605000000,
+                "excess_tax_benefit_from_stock_based_compensation": null,
+                "financing_cash_flow": -48474000000,
+                "foreign_sales": null,
+                "free_cash_flow": 96676000000,
+                "gain_loss_on_investment_securities": -8918000000,
+                "gain_loss_on_sale_of_business": null,
+                "gain_loss_on_sale_of_ppe": null,
+                "income_tax_paid_supplemental_data": 20288000000,
+                "interest_paid_cff": null,
+                "interest_paid_cfo": null,
+                "interest_paid_direct": null,
+                "interest_paid_supplemental_data": null,
+                "interest_received_cfi": null,
+                "interest_received_cfo": null,
+                "interest_received_direct": null,
+                "investing_cash_flow": -52228000000,
+                "issuance_of_capital_stock": null,
+                "issuance_of_debt": null,
+                "long_term_debt_issuance": null,
+                "long_term_debt_payments": 0,
+                "net_business_purchase_and_sale": -14535000000,
+                "net_common_stock_issuance": -40086000000,
+                "net_foreign_currency_exchange_gain_loss": null,
+                "net_income_from_continuing_operations": 120067000000,
+                "net_intangibles_purchase_and_sale": null,
+                "net_investment_properties_purchase_and_sale": null,
+                "net_investment_purchase_and_sale": -31651000000,
+                "net_issuance_payments_of_debt": 0,
+                "net_long_term_debt_issuance": 0,
+                "net_other_financing_charges": -8058000000,
+                "net_other_investing_changes": null,
+                "net_ppe_purchase_and_sale": -6042000000,
+                "net_preferred_stock_issuance": null,
+                "net_short_term_debt_issuance": null,
+                "operating_cash_flow": 102718000000,
+                "operating_gains_losses": -8918000000,
+                "other_cash_adjustment_inside_changein_cash": null,
+                "other_cash_adjustment_outside_changein_cash": null,
+                "other_cash_paymentsfrom_operating_activities": null,
+                "other_cash_receiptsfrom_operating_activities": null,
+                "other_non_cash_items": -287000000,
+                "paymentson_behalfof_employees": null,
+                "paymentsto_suppliersfor_goodsand_services": null,
+                "pension_and_employee_benefit_expense": null,
+                "preferred_stock_dividend_paid": null,
+                "preferred_stock_issuance": null,
+                "preferred_stock_payments": null,
+                "proceeds_from_stock_option_exercised": 644000000,
+                "provisionand_write_offof_assets": null,
+                "purchase_of_business": -14535000000,
+                "purchase_of_intangibles": null,
+                "purchase_of_investment": -58118000000,
+                "purchase_of_investment_properties": null,
+                "purchase_of_ppe": -6042000000,
+                "receiptsfrom_customers": null,
+                "receiptsfrom_government_grants": null,
+                "repayment_of_debt": 0,
+                "repurchase_of_capital_stock": -40086000000,
+                "sale_of_business": null,
+                "sale_of_intangibles": null,
+                "sale_of_investment": 26467000000,
+                "sale_of_investment_properties": null,
+                "sale_of_ppe": null,
+                "short_term_debt_issuance": null,
+                "short_term_debt_payments": null,
+                "stock_based_compensation": 6386000000,
+                "taxes_refund_paid": null,
+                "taxes_refund_paid_direct": null,
+                "unrealized_gain_loss_on_investment_securities": null,
+                "interval": "annual",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2024-07-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1312,6 +1348,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-07-31"
             },
             {
+                "report_key": "quarterly|2024-10-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1440,6 +1477,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-10-31"
             },
             {
+                "report_key": "quarterly|2025-01-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1568,6 +1606,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "quarterly|2025-04-30",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1696,6 +1735,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-04-30"
             },
             {
+                "report_key": "quarterly|2025-07-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1824,6 +1864,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-07-31"
             },
             {
+                "report_key": "quarterly|2025-10-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
@@ -1952,52 +1993,53 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-10-31"
             },
             {
+                "report_key": "quarterly|2026-01-31",
                 "type": "cash_flow",
                 "adjusted_geography_segment_data": null,
                 "amortization_cash_flow": null,
                 "amortization_of_intangibles": null,
                 "amortization_of_securities": null,
                 "asset_impairment_charge": null,
-                "beginning_cash_position": 9107000000,
-                "capital_expenditure": -5835000000,
+                "beginning_cash_position": 11486000000,
+                "capital_expenditure": -1284000000,
                 "capital_expenditure_reported": null,
-                "cash_dividends_paid": -977000000,
-                "cash_flow_from_continuing_financing_activities": -52215000000,
-                "cash_flow_from_continuing_investing_activities": -28565000000,
-                "cash_flow_from_continuing_operating_activities": 83159000000,
+                "cash_dividends_paid": -242000000,
+                "cash_flow_from_continuing_financing_activities": -6208000000,
+                "cash_flow_from_continuing_investing_activities": -30861000000,
+                "cash_flow_from_continuing_operating_activities": 36188000000,
                 "cash_flow_from_discontinued_operation": null,
                 "cash_flowsfromusedin_operating_activities_direct": null,
                 "cash_from_discontinued_financing_activities": null,
                 "cash_from_discontinued_investing_activities": null,
                 "cash_from_discontinued_operating_activities": null,
-                "change_in_account_payable": 2899000000,
-                "change_in_accrued_expense": 4564000000,
+                "change_in_account_payable": 1064000000,
+                "change_in_accrued_expense": 1053000000,
                 "change_in_dividend_payable": null,
                 "change_in_income_tax_payable": null,
                 "change_in_interest_payable": null,
-                "change_in_inventory": -12127000000,
+                "change_in_inventory": -1621000000,
                 "change_in_other_current_assets": null,
-                "change_in_other_current_liabilities": 1683000000,
+                "change_in_other_current_liabilities": 533000000,
                 "change_in_other_working_capital": null,
-                "change_in_payable": 2899000000,
-                "change_in_payables_and_accrued_expense": 7463000000,
-                "change_in_prepaid_assets": 1188000000,
-                "change_in_receivables": -15694000000,
+                "change_in_payable": 1064000000,
+                "change_in_payables_and_accrued_expense": 2117000000,
+                "change_in_prepaid_assets": -280000000,
+                "change_in_receivables": -5074000000,
                 "change_in_tax_payable": null,
-                "change_in_working_capital": -17487000000,
-                "changes_in_account_receivables": -15694000000,
-                "changes_in_cash": 2379000000,
+                "change_in_working_capital": -4325000000,
+                "changes_in_account_receivables": -5074000000,
+                "changes_in_cash": -881000000,
                 "classesof_cash_payments": null,
                 "classesof_cash_receiptsfrom_operating_activities": null,
-                "common_stock_dividend_paid": -977000000,
+                "common_stock_dividend_paid": -242000000,
                 "common_stock_issuance": null,
-                "common_stock_payments": -44082000000,
-                "deferred_income_tax": -2633000000,
-                "deferred_tax": -2633000000,
+                "common_stock_payments": -3815000000,
+                "deferred_income_tax": 611000000,
+                "deferred_tax": 611000000,
                 "depletion": null,
                 "depreciation": null,
-                "depreciation_amortization_depletion": 2574000000,
-                "depreciation_and_amortization": 2574000000,
+                "depreciation_amortization_depletion": 812000000,
+                "depreciation_and_amortization": 812000000,
                 "dividend_paid_cfo": null,
                 "dividend_received_cfo": null,
                 "dividends_paid_direct": null,
@@ -2006,15 +2048,15 @@ The response is a single object containing metadata and an ***items*** array of 
                 "domestic_sales": null,
                 "earnings_losses_from_equity_investments": null,
                 "effect_of_exchange_rate_changes": null,
-                "end_cash_position": 11486000000,
+                "end_cash_position": 10605000000,
                 "excess_tax_benefit_from_stock_based_compensation": null,
-                "financing_cash_flow": -52215000000,
+                "financing_cash_flow": -6208000000,
                 "foreign_sales": null,
-                "free_cash_flow": 77324000000,
-                "gain_loss_on_investment_securities": -4154000000,
+                "free_cash_flow": 34904000000,
+                "gain_loss_on_investment_securities": -5492000000,
                 "gain_loss_on_sale_of_business": null,
                 "gain_loss_on_sale_of_ppe": null,
-                "income_tax_paid_supplemental_data": 17438000000,
+                "income_tax_paid_supplemental_data": 6979000000,
                 "interest_paid_cff": null,
                 "interest_paid_cfo": null,
                 "interest_paid_direct": null,
@@ -2022,62 +2064,320 @@ The response is a single object containing metadata and an ***items*** array of 
                 "interest_received_cfi": null,
                 "interest_received_cfo": null,
                 "interest_received_direct": null,
-                "investing_cash_flow": -28565000000,
+                "investing_cash_flow": -30861000000,
                 "issuance_of_capital_stock": null,
                 "issuance_of_debt": null,
                 "long_term_debt_issuance": null,
                 "long_term_debt_payments": 0,
-                "net_business_purchase_and_sale": -1912000000,
-                "net_common_stock_issuance": -44082000000,
+                "net_business_purchase_and_sale": -13165000000,
+                "net_common_stock_issuance": -3815000000,
                 "net_foreign_currency_exchange_gain_loss": null,
-                "net_income_from_continuing_operations": 99198000000,
+                "net_income_from_continuing_operations": 42960000000,
                 "net_intangibles_purchase_and_sale": null,
                 "net_investment_properties_purchase_and_sale": null,
-                "net_investment_purchase_and_sale": -20840000000,
+                "net_investment_purchase_and_sale": -16412000000,
                 "net_issuance_payments_of_debt": 0,
                 "net_long_term_debt_issuance": 0,
-                "net_other_financing_charges": -7800000000,
+                "net_other_financing_charges": -2152000000,
                 "net_other_investing_changes": null,
-                "net_ppe_purchase_and_sale": -5835000000,
+                "net_ppe_purchase_and_sale": -1284000000,
                 "net_preferred_stock_issuance": null,
                 "net_short_term_debt_issuance": null,
-                "operating_cash_flow": 83159000000,
-                "operating_gains_losses": -4154000000,
+                "operating_cash_flow": 36188000000,
+                "operating_gains_losses": -5492000000,
                 "other_cash_adjustment_inside_changein_cash": null,
                 "other_cash_adjustment_outside_changein_cash": null,
                 "other_cash_paymentsfrom_operating_activities": null,
                 "other_cash_receiptsfrom_operating_activities": null,
-                "other_non_cash_items": -413000000,
+                "other_non_cash_items": -11000000,
                 "paymentson_behalfof_employees": null,
                 "paymentsto_suppliersfor_goodsand_services": null,
                 "pension_and_employee_benefit_expense": null,
                 "preferred_stock_dividend_paid": null,
                 "preferred_stock_issuance": null,
                 "preferred_stock_payments": null,
-                "proceeds_from_stock_option_exercised": 644000000,
+                "proceeds_from_stock_option_exercised": 1000000,
                 "provisionand_write_offof_assets": null,
-                "purchase_of_business": -1912000000,
+                "purchase_of_business": -13165000000,
                 "purchase_of_intangibles": null,
-                "purchase_of_investment": -32266000000,
+                "purchase_of_investment": -33340000000,
                 "purchase_of_investment_properties": null,
-                "purchase_of_ppe": -5835000000,
+                "purchase_of_ppe": -1284000000,
                 "receiptsfrom_customers": null,
                 "receiptsfrom_government_grants": null,
                 "repayment_of_debt": 0,
-                "repurchase_of_capital_stock": -44082000000,
+                "repurchase_of_capital_stock": -3815000000,
                 "sale_of_business": null,
                 "sale_of_intangibles": null,
-                "sale_of_investment": 11426000000,
+                "sale_of_investment": 16928000000,
                 "sale_of_investment_properties": null,
                 "sale_of_ppe": null,
                 "short_term_debt_issuance": null,
                 "short_term_debt_payments": null,
-                "stock_based_compensation": 6074000000,
+                "stock_based_compensation": 1633000000,
+                "taxes_refund_paid": null,
+                "taxes_refund_paid_direct": null,
+                "unrealized_gain_loss_on_investment_securities": null,
+                "interval": "quarterly",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2026-04-30",
+                "type": "cash_flow",
+                "adjusted_geography_segment_data": null,
+                "amortization_cash_flow": null,
+                "amortization_of_intangibles": null,
+                "amortization_of_securities": null,
+                "asset_impairment_charge": null,
+                "beginning_cash_position": 10605000000,
+                "capital_expenditure": -1757000000,
+                "capital_expenditure_reported": null,
+                "cash_dividends_paid": -243000000,
+                "cash_flow_from_continuing_financing_activities": -21283000000,
+                "cash_flow_from_continuing_investing_activities": -26429000000,
+                "cash_flow_from_continuing_operating_activities": 50344000000,
+                "cash_flow_from_discontinued_operation": null,
+                "cash_flowsfromusedin_operating_activities_direct": null,
+                "cash_from_discontinued_financing_activities": null,
+                "cash_from_discontinued_investing_activities": null,
+                "cash_from_discontinued_operating_activities": null,
+                "change_in_account_payable": 2210000000,
+                "change_in_accrued_expense": 7763000000,
+                "change_in_dividend_payable": null,
+                "change_in_income_tax_payable": null,
+                "change_in_interest_payable": null,
+                "change_in_inventory": -4420000000,
+                "change_in_other_current_assets": null,
+                "change_in_other_current_liabilities": 1217000000,
+                "change_in_other_working_capital": null,
+                "change_in_payable": 2210000000,
+                "change_in_payables_and_accrued_expense": 9973000000,
+                "change_in_prepaid_assets": -983000000,
+                "change_in_receivables": -2243000000,
+                "change_in_tax_payable": null,
+                "change_in_working_capital": 3544000000,
+                "changes_in_account_receivables": -2243000000,
+                "changes_in_cash": 2632000000,
+                "classesof_cash_payments": null,
+                "classesof_cash_receiptsfrom_operating_activities": null,
+                "common_stock_dividend_paid": -243000000,
+                "common_stock_issuance": null,
+                "common_stock_payments": -19312000000,
+                "deferred_income_tax": 1584000000,
+                "deferred_tax": 1584000000,
+                "depletion": null,
+                "depreciation": null,
+                "depreciation_amortization_depletion": 997000000,
+                "depreciation_and_amortization": 997000000,
+                "dividend_paid_cfo": null,
+                "dividend_received_cfo": null,
+                "dividends_paid_direct": null,
+                "dividends_received_cfi": null,
+                "dividends_received_direct": null,
+                "domestic_sales": null,
+                "earnings_losses_from_equity_investments": null,
+                "effect_of_exchange_rate_changes": null,
+                "end_cash_position": 13237000000,
+                "excess_tax_benefit_from_stock_based_compensation": null,
+                "financing_cash_flow": -21283000000,
+                "foreign_sales": null,
+                "free_cash_flow": 48587000000,
+                "gain_loss_on_investment_securities": -15936000000,
+                "gain_loss_on_sale_of_business": null,
+                "gain_loss_on_sale_of_ppe": null,
+                "income_tax_paid_supplemental_data": null,
+                "interest_paid_cff": null,
+                "interest_paid_cfo": null,
+                "interest_paid_direct": null,
+                "interest_paid_supplemental_data": null,
+                "interest_received_cfi": null,
+                "interest_received_cfo": null,
+                "interest_received_direct": null,
+                "investing_cash_flow": -26429000000,
+                "issuance_of_capital_stock": null,
+                "issuance_of_debt": null,
+                "long_term_debt_issuance": null,
+                "long_term_debt_payments": null,
+                "net_business_purchase_and_sale": -87000000,
+                "net_common_stock_issuance": -19312000000,
+                "net_foreign_currency_exchange_gain_loss": null,
+                "net_income_from_continuing_operations": 58321000000,
+                "net_intangibles_purchase_and_sale": null,
+                "net_investment_properties_purchase_and_sale": null,
+                "net_investment_purchase_and_sale": -24585000000,
+                "net_issuance_payments_of_debt": null,
+                "net_long_term_debt_issuance": null,
+                "net_other_financing_charges": -2243000000,
+                "net_other_investing_changes": null,
+                "net_ppe_purchase_and_sale": -1757000000,
+                "net_preferred_stock_issuance": null,
+                "net_short_term_debt_issuance": null,
+                "operating_cash_flow": 50344000000,
+                "operating_gains_losses": -15936000000,
+                "other_cash_adjustment_inside_changein_cash": null,
+                "other_cash_adjustment_outside_changein_cash": null,
+                "other_cash_paymentsfrom_operating_activities": null,
+                "other_cash_receiptsfrom_operating_activities": null,
+                "other_non_cash_items": -94000000,
+                "paymentson_behalfof_employees": null,
+                "paymentsto_suppliersfor_goodsand_services": null,
+                "pension_and_employee_benefit_expense": null,
+                "preferred_stock_dividend_paid": null,
+                "preferred_stock_issuance": null,
+                "preferred_stock_payments": null,
+                "proceeds_from_stock_option_exercised": 515000000,
+                "provisionand_write_offof_assets": null,
+                "purchase_of_business": -87000000,
+                "purchase_of_intangibles": null,
+                "purchase_of_investment": -26582000000,
+                "purchase_of_investment_properties": null,
+                "purchase_of_ppe": -1757000000,
+                "receiptsfrom_customers": null,
+                "receiptsfrom_government_grants": null,
+                "repayment_of_debt": null,
+                "repurchase_of_capital_stock": -19312000000,
+                "sale_of_business": null,
+                "sale_of_intangibles": null,
+                "sale_of_investment": 1997000000,
+                "sale_of_investment_properties": null,
+                "sale_of_ppe": null,
+                "short_term_debt_issuance": null,
+                "short_term_debt_payments": null,
+                "stock_based_compensation": 1928000000,
+                "taxes_refund_paid": null,
+                "taxes_refund_paid_direct": null,
+                "unrealized_gain_loss_on_investment_securities": null,
+                "interval": "quarterly",
+                "date": "2026-04-30"
+            },
+            {
+                "report_key": "trailing|2026-06-19",
+                "type": "cash_flow",
+                "adjusted_geography_segment_data": null,
+                "amortization_cash_flow": null,
+                "amortization_of_intangibles": null,
+                "amortization_of_securities": null,
+                "asset_impairment_charge": null,
+                "beginning_cash_position": 15234000000,
+                "capital_expenditure": -6572000000,
+                "capital_expenditure_reported": null,
+                "cash_dividends_paid": -973000000,
+                "cash_flow_from_continuing_financing_activities": -54204000000,
+                "cash_flow_from_continuing_investing_activities": -73441000000,
+                "cash_flow_from_continuing_operating_activities": 125648000000,
+                "cash_flow_from_discontinued_operation": null,
+                "cash_flowsfromusedin_operating_activities_direct": null,
+                "cash_from_discontinued_financing_activities": null,
+                "cash_from_discontinued_investing_activities": null,
+                "cash_from_discontinued_operating_activities": null,
+                "change_in_account_payable": 4365000000,
+                "change_in_accrued_expense": 5892000000,
+                "change_in_dividend_payable": null,
+                "change_in_income_tax_payable": null,
+                "change_in_interest_payable": null,
+                "change_in_inventory": -14486000000,
+                "change_in_other_current_assets": null,
+                "change_in_other_current_liabilities": 2711000000,
+                "change_in_other_working_capital": null,
+                "change_in_payable": 4365000000,
+                "change_in_payables_and_accrued_expense": 10257000000,
+                "change_in_prepaid_assets": -966000000,
+                "change_in_receivables": -18575000000,
+                "change_in_tax_payable": null,
+                "change_in_working_capital": -21059000000,
+                "changes_in_account_receivables": -18575000000,
+                "changes_in_cash": -1997000000,
+                "classesof_cash_payments": null,
+                "classesof_cash_receiptsfrom_operating_activities": null,
+                "common_stock_dividend_paid": -973000000,
+                "common_stock_issuance": null,
+                "common_stock_payments": -45303000000,
+                "deferred_income_tax": 2337000000,
+                "deferred_tax": 2337000000,
+                "depletion": null,
+                "depreciation": null,
+                "depreciation_amortization_depletion": 3229000000,
+                "depreciation_and_amortization": 3229000000,
+                "dividend_paid_cfo": null,
+                "dividend_received_cfo": null,
+                "dividends_paid_direct": null,
+                "dividends_received_cfi": null,
+                "dividends_received_direct": null,
+                "domestic_sales": null,
+                "earnings_losses_from_equity_investments": null,
+                "effect_of_exchange_rate_changes": null,
+                "end_cash_position": 13237000000,
+                "excess_tax_benefit_from_stock_based_compensation": null,
+                "financing_cash_flow": -54204000000,
+                "foreign_sales": null,
+                "free_cash_flow": 119076000000,
+                "gain_loss_on_investment_securities": -25029000000,
+                "gain_loss_on_sale_of_business": null,
+                "gain_loss_on_sale_of_ppe": null,
+                "income_tax_paid_supplemental_data": null,
+                "interest_paid_cff": null,
+                "interest_paid_cfo": null,
+                "interest_paid_direct": null,
+                "interest_paid_supplemental_data": null,
+                "interest_received_cfi": null,
+                "interest_received_cfo": null,
+                "interest_received_direct": null,
+                "investing_cash_flow": -73441000000,
+                "issuance_of_capital_stock": null,
+                "issuance_of_debt": null,
+                "long_term_debt_issuance": null,
+                "long_term_debt_payments": null,
+                "net_business_purchase_and_sale": -14239000000,
+                "net_common_stock_issuance": -45303000000,
+                "net_foreign_currency_exchange_gain_loss": null,
+                "net_income_from_continuing_operations": 159613000000,
+                "net_intangibles_purchase_and_sale": null,
+                "net_investment_properties_purchase_and_sale": null,
+                "net_investment_purchase_and_sale": -52630000000,
+                "net_issuance_payments_of_debt": null,
+                "net_long_term_debt_issuance": null,
+                "net_other_financing_charges": -8717000000,
+                "net_other_investing_changes": null,
+                "net_ppe_purchase_and_sale": -6572000000,
+                "net_preferred_stock_issuance": null,
+                "net_short_term_debt_issuance": null,
+                "operating_cash_flow": 125648000000,
+                "operating_gains_losses": -25029000000,
+                "other_cash_adjustment_inside_changein_cash": null,
+                "other_cash_adjustment_outside_changein_cash": null,
+                "other_cash_paymentsfrom_operating_activities": null,
+                "other_cash_receiptsfrom_operating_activities": null,
+                "other_non_cash_items": -283000000,
+                "paymentson_behalfof_employees": null,
+                "paymentsto_suppliersfor_goodsand_services": null,
+                "pension_and_employee_benefit_expense": null,
+                "preferred_stock_dividend_paid": null,
+                "preferred_stock_issuance": null,
+                "preferred_stock_payments": null,
+                "proceeds_from_stock_option_exercised": 789000000,
+                "provisionand_write_offof_assets": null,
+                "purchase_of_business": -14239000000,
+                "purchase_of_intangibles": null,
+                "purchase_of_investment": -77505000000,
+                "purchase_of_investment_properties": null,
+                "purchase_of_ppe": -6572000000,
+                "receiptsfrom_customers": null,
+                "receiptsfrom_government_grants": null,
+                "repayment_of_debt": null,
+                "repurchase_of_capital_stock": -45303000000,
+                "sale_of_business": null,
+                "sale_of_intangibles": null,
+                "sale_of_investment": 24875000000,
+                "sale_of_investment_properties": null,
+                "sale_of_ppe": null,
+                "short_term_debt_issuance": null,
+                "short_term_debt_payments": null,
+                "stock_based_compensation": 6840000000,
                 "taxes_refund_paid": null,
                 "taxes_refund_paid_direct": null,
                 "unrealized_gain_loss_on_investment_securities": null,
                 "interval": "trailing",
-                "date": "2026-01-30"
+                "date": "2026-06-19"
             }
         ]
     }

@@ -1,12 +1,12 @@
 ---
-title: Top 10 Holdings
+title: Top 10 ETF &amp; Mutual Fund Holdings API
 created: 2026-01-12
-updated: 2026-03-16
+updated: 2026-11-05
 endpoint: POST v1/holdings/top-holdings
 auth: Bearer Token
 ---
 
-# Top 10 Holdings
+# Top 10 ETF &amp; Mutual Fund Holdings API
 
 Returns the list of top 10 holdings for a fund-like asset, including ETFs and mutual funds.
 
@@ -28,37 +28,42 @@ This endpoint provides a ranked breakdown of the 10 most significant underlying 
 
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
+- **limit**   
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires `%` as a wildcard)
-    - `not_like` - pattern does not match (requires `%` as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
+    - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
     - `startswith` - string starts with value
     - `endswith` - string ends with value
      
-     `%` *usage examples:*
-    - `%abc%` - matches any string containing "abc"
-    - `abc%` - matches any string starting with "abc"
-    - `%abc` - matches any string ending with "abc"
+     *`%` usage examples:*
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": ["holding_name", "like", "Amazon%"]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., holding_percent).
     - `desc` - Sorting direction (*true* for descending, *false* for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "holding_percent", "desc": true } ]`
-- **limit**   
-     `integer` *(optional)* — Maximum number of matched items returned (1-10).
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -73,6 +78,17 @@ curl --location "https://api.finimpulse.com/v1/holdings/top-holdings" \
   -d '{
       "symbol": "SPY",
       "limit": 10,
+      "filters": [
+          "holding_name",
+          "like",
+          "Amazon%"
+      ],
+      "sort_by": [
+          {
+              "selector": "holding_percent",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -92,6 +108,17 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 var json = @"{
     ""symbol"": ""SPY"",
     ""limit"": 10,
+    ""filters"": [
+        ""holding_name"",
+        ""like"",
+        ""Amazon%""
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""holding_percent"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -118,6 +145,17 @@ curl_setopt_array($curl, [
 [
       "symbol" => "SPY",
       "limit" => 10,
+      "filters" => [
+        "holding_name",
+        "like",
+        "Amazon%"
+      ],
+      "sort_by" => [
+        [
+          "selector" => "holding_percent",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -142,6 +180,17 @@ headers = {
 data = {
     "symbol": "SPY",
     "limit": 10,
+    "filters": [
+        "holding_name",
+        "like",
+        "Amazon%"
+    ],
+    "sort_by": [
+        {
+            "selector": "holding_percent",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -162,6 +211,17 @@ const https = require('https');
 const data = JSON.stringify({
     "symbol": "SPY",
     "limit": 10,
+    "filters": [
+        "holding_name",
+        "like",
+        "Amazon%"
+    ],
+    "sort_by": [
+        {
+            "selector": "holding_percent",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -193,22 +253,22 @@ The response contains a paginated list of holdings records for the requested ass
 
 
 - **total_count**   
-     `integer` — Total number of holdings records available.
+     `integer` — Total number of matching holdings records.
 - **items_count**   
-     `integer` — Number of holdings returned in the current response.
+     `integer` — Number of holdings records returned.
 - **items**   
-     `array` — Array of top 10 holding records. Each record represents a single underlying security held by the fund.
+     `array` — Array of top 10 holding records.
 
 
 ### Record Fields
 
 
 - **holding_symbol**   
-     `string` — Ticker symbol of the underlying holding.
+     `string` — Asset identifier (ticker symbol) of the holding.
 - **holding_name**   
-     `string` — Full name of the underlying security.
+     `string` — Full name of the holding.
 - **holding_percent**   
-     `number` — Weight of the holding as a proportion of the total fund assets.
+     `number` — Percentage of fund assets allocated to the holding.
 
 
 ### Example Response
@@ -216,21 +276,6 @@ The response contains a paginated list of holdings records for the requested ass
 
 ```json
 {
-    "task_id": "75157e2a-6dff-452f-8a92-8bf96c801513",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0004,
-    "data": {
-        "symbol": "SPY",
-        "limit": 10,
-        "offset": 0,
-        "sort_by": [
-            {
-                "selector": "holding_percent",
-                "desc": true
-            }
-        ]
-    },
     "result": {
         "total_count": 10,
         "items_count": 10,

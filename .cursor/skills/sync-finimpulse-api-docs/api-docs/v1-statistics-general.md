@@ -1,12 +1,12 @@
 ---
-title: General
+title: Statistics API for Stocks, ETFs &amp; Mutual Funds
 created: 2026-01-28
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/statistics/general
 auth: Bearer Token
 ---
 
-# General
+# Statistics API for Stocks, ETFs &amp; Mutual Funds
 
 Returns a consolidated set of key statistics and performance indicators for an asset.
 
@@ -159,26 +159,24 @@ The response is an array containing a single statistics object for the requested
 
 
 - **symbol**   
-     `string` — Asset symbol.
+     `string` — Asset identifier (ticker symbol).
 - **quote_type**   
-     `string` — Asset type (stock, ETF, mutual fund).
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **currency**   
      `string` — Trading currency.
 - **update_time**   
-     `string` — Last data update timestamp.
+     `string` — Timestamp of the most recent data update (ISO 8601).
 - **price_hint**   
-     `integer` — Price precision hint.
+     `integer` — Price precision hint (decimal places).
 
 
 ### Price and Market Data
 
-Real-time and reference price information.
-
 
 - **current_price**   
-     `number` — Current market price.
+     `number` — Most recent traded price. May reflect a delay of up to one hour.
 - **previous_close**   
-     `number` — Previous closing price.
+     `number` — Previous close price.
 - **open**   
      `number` — Opening price.
 - **day_low**   
@@ -186,19 +184,19 @@ Real-time and reference price information.
 - **day_high**   
      `number` — Intraday high price.
 - **regular_market_previous_close**   
-     `number` — Regular market previous close.
+     `number` — Closing price of the most recent completed regular session.
 - **regular_market_open**   
-     `number` — Regular market opening price.
+     `number` — Price of the first trade of the current regular session.
 - **regular_market_day_low**   
      `number` — Regular market intraday low.
 - **regular_market_day_high**   
      `number` — Regular market intraday high.
 - **fifty_two_week_low**   
-     `number` — 52-week low price.
+     `number` — Lowest price in the last 52 weeks.
 - **fifty_two_week_high**   
-     `number` — 52-week high price.
+     `number` — Highest price in the last 52 weeks.
 - **fifty_two_week_change**   
-     `number` — Asset 52-week price change.
+     `number` — Change in price over the last 52 weeks.
 - **sand_p_fifty_two_week_change**   
      `number` — S&amp;P 500 52-week price change.
 - **all_time_low**   
@@ -213,46 +211,42 @@ Real-time and reference price information.
 
 ### Trading Volume and Liquidity
 
-Trading activity and order book indicators.
-
 
 - **volume**   
-     `integer` — Current trading volume.
+     `integer` — Trading volume.
 - **regular_market_volume**   
-     `integer` — Regular market trading volume.
+     `integer` — Trading volume for the regular market session.
 - **average_volume**   
-     `integer` — Average daily trading volume.
+     `integer` — Average trading volume.
 - **average_volume_10days**   
-     `integer` — 10-day average trading volume.
+     `integer` — Average volume over the last 10 trading days.
 - **average_daily_volume_10_day**   
-     `integer` — Average daily volume (last 10 days).
+     `integer` — Average volume over the last 10 trading days (duplicate of `average_volume_10days`).
 - **bid**   
-     `number` — Best bid price.
+     `number` — Bid price.
 - **ask**   
-     `number` — Best ask price.
+     `number` — Ask price.
 - **bid_size**   
-     `integer` — Bid size.
+     `integer` — Bid size (shares/units).
 - **ask_size**   
-     `integer` — Ask size.
+     `integer` — Ask size (shares/units).
 
 
 ### Dividends
 
-Cash distribution metrics and dividend history indicators.
-
 
 - **dividend_rate**   
-     `number` — Annual dividend rate.
+     `number` — Forward dividend rate.
 - **dividend_yield**   
-     `number` — Dividend yield.
+     `number` — Forward dividend yield.
 - **ex_dividend_date**   
      `string` — Ex-dividend date.
 - **payout_ratio**   
      `number` — Dividend payout ratio.
 - **trailing_annual_dividend_rate**   
-     `number` — Trailing annual dividend rate.
+     `number` — Trailing 12-month dividend rate.
 - **trailing_annual_dividend_yield**   
-     `number` — Trailing annual dividend yield.
+     `number` — Trailing 12-month dividend yield.
 - **five_year_avg_dividend_yield**   
      `number` — Five-year average dividend yield.
 - **last_dividend_value**   
@@ -263,38 +257,36 @@ Cash distribution metrics and dividend history indicators.
 
 ### Valuation and Ratios
 
-High-level valuation indicators and market ratios.
-
 
 - **market_cap**   
      `integer` — Market capitalization.
 - **enterprise_value**   
-     `integer` — Enterprise value.
+     `integer` — Enterprise value (EV).
 - **trailing_pe**   
-     `number` — Trailing price-to-earnings ratio.
+     `number` — Trailing Price-to-Earnings (P/E) ratio.
 - **forward_pe**   
-     `number` — Forward price-to-earnings ratio.
+     `number` — Forward Price-to-Earnings (P/E) ratio.
 - **price_to_book**   
-     `number` — Price-to-book ratio.
+     `number` — Price-to-book (P/B) ratio.
 - **price_to_sales_trailing_12_months**   
-     `number` — Price-to-sales ratio (TTM).
+     `number` — Price-to-sales (P/S) ratio (TTM).
 - **enterprise_to_revenue**   
-     `number` — Enterprise value to revenue ratio.
+     `number` — Enterprise value-to-revenue (EV/Revenue) ratio.
 - **enterprise_to_ebitda**   
-     `number` — Enterprise value to EBITDA ratio.
+     `number` — Enterprise value-to-EBITDA (EV/EBITDA) ratio.
 - **beta**   
-     `number` — Beta (market sensitivity).
+     `number` — Beta.
 - **book_value**   
      `number` — Book value per share.
 - **profit_margins**   
-     `number` — Net profit margin.
+     `number` — Profit margin.
 - **forward_eps**   
-     `number` — Forward earnings per share.
+     `number` — Forward earnings per share (EPS) estimate.
 - **trailing_eps**   
-     `number` — Trailing earnings per share.
+     `number` — Trailing earnings per share (EPS).
 
 
-### Ownership and Trading Metrics (Stocks)
+### Ownership and Trading Metrics
 
 Equity-specific ownership and short-interest indicators.
 
@@ -302,44 +294,44 @@ Equity-specific ownership and short-interest indicators.
 - **shares_outstanding**   
      `integer` — Shares outstanding.
 - **float_shares**   
-     `integer` — Public float shares.
+     `integer` — Float shares.
 - **shares_short**   
      `integer` — Shares sold short.
 - **shares_short_prior_month**   
-     `integer` — Short interest (previous month).
+     `integer` — Shares sold short as of the prior month.
 - **shares_short_previous_month_date**   
-     `string` — Short interest reference date.
+     `string` — Reference date for the prior month's short interest figure.
 - **shares_percent_shares_out**   
-     `number` — Short interest as % of shares outstanding.
+     `number` — Short interest as a percentage of shares outstanding
 - **short_ratio**   
-     `number` — Short interest ratio (days to cover).
+     `number` — Short interest ratio.
 - **short_percent_of_float**   
-     `number` — Short interest as % of float.
+     `number` — Short interest as a percentage of float shares.
 - **held_percent_insiders**   
-     `number` — Insider ownership percentage.
+     `number` — Percentage of shares held by insiders.
 - **held_percent_institutions**   
-     `number` — Institutional ownership percentage.
+     `number` — Percentage of shares held by institutions.
 - **date_short_interest**   
-     `string` — Short interest reporting date.
+     `string` — Reference date for the current short interest figure.
 - **implied_shares_outstanding**   
      `integer` — Implied shares outstanding.
 
 
-### Financial Performance (Stocks)
+### Financial Performance
 
 Fundamental company performance and profitability metrics.
 
 
 - **total_revenue**   
-     `integer` — Total revenue.
+     `integer` — Total revenue for the period.
 - **revenue_per_share**   
      `number` — Revenue per share.
 - **revenue_growth**   
-     `number` — Revenue growth rate.
+     `number` — Revenue growth.
 - **net_income_to_common**   
-     `integer` — Net income to common shareholders.
+     `integer` — Net income available to common shareholders.
 - **earnings_growth**   
-     `number` — Earnings growth rate.
+     `number` — Earnings growth.
 - **earnings_quarterly_growth**   
      `number` — Quarterly earnings growth (YoY).
 - **gross_profits**   
@@ -351,91 +343,87 @@ Fundamental company performance and profitability metrics.
 - **ebitda_margins**   
      `number` — EBITDA margin.
 - **ebitda**   
-     `integer` — EBITDA.
+     `integer` — Earnings before interest, taxes, depreciation, and amortization (EBITDA).
 - **free_cashflow**   
-     `integer` — Free cash flow.
+     `integer` — Free cash flow (FCF).
 - **operating_cashflow**   
-     `integer` — Operating cash flow.
+     `integer` — Operating cash flow (OCF).
 - **return_on_assets**   
-     `number` — Return on assets.
+     `number` — Return on Assets (ROA).
 - **return_on_equity**   
-     `number` — Return on equity.
+     `number` — Return on Equity (ROE).
 - **last_fiscal_year_end**   
-     `string` — Last fiscal year end date.
+     `string` — End date of the last fiscal year.
 - **next_fiscal_year_end**   
-     `string` — Next fiscal year end date.
+     `string` — End date of the next fiscal year.
 - **most_recent_quarter**   
-     `string` — Most recent reported fiscal quarter.
+     `string` — End date of the most recent quarter (MRQ).
 
 
-### Balance Sheet and Liquidity (Stocks)
+### Balance Sheet and Liquidity
 
 
 - **total_cash**   
-     `integer` — Total cash.
+     `integer` — Total cash and cash equivalents.
 - **total_cash_per_share**   
-     `number` — Cash per share.
+     `number` — Cash and cash equivalents per share.
 - **total_debt**   
      `integer` — Total debt.
 - **debt_to_equity**   
-     `number` — Debt-to-equity ratio.
+     `number` — Debt-to-Equity (D/E).
 - **current_ratio**   
      `number` — Current ratio.
 - **quick_ratio**   
      `number` — Quick ratio.
 
 
-### Trailing Performance (Funds and ETFs)
-
-Historical performance over standardized trailing horizons.
+### Trailing Performance
 
 
 - **trailing_ytd**   
-     `number` — Year-to-date return.
+     `number` — Trailing year-to-date (YTD) return.
 - **trailing_one_month**   
-     `number` — 1-month trailing return.
+     `number` — Trailing 1-month return.
 - **trailing_three_month**   
-     `number` — 3-month trailing return.
+     `number` — Trailing 3-month return.
 - **trailing_one_year**   
-     `number` — 1-year trailing return.
+     `number` — Trailing 1-year return.
 - **trailing_three_year**   
-     `number` — 3-year trailing return.
+     `number` — Trailing 3-year return.
 - **trailing_five_year**   
-     `number` — 5-year trailing return.
+     `number` — Trailing 5-year return.
 - **trailing_ten_year**   
-     `number` — 10-year trailing return.
+     `number` — Trailing 10-year return.
 - **trailing_last_bull_mkt**   
-     `number` — Return during the last bull market.
+     `number` — Trailing return during the last bull market period.
 - **trailing_last_bear_mkt**   
-     `number` — Return during the last bear market.
+     `number` — Trailing return during the last bear market period.
 
 
-### Category-Relative Performance (Funds and ETFs)
-
-Performance compared to peer category benchmarks.
+### Category-Relative Performance
 
 
 - **trailing_category_ytd**   
-     `number` — Category YTD return.
+     `number` — Category trailing year-to-date (YTD) return.
 - **trailing_category_one_month**   
-     `number` — Category 1-month return.
+     `number` — Category trailing 1-month return.
 - **trailing_category_three_month**   
-     `number` — Category 3-month return.
+     `number` — Category trailing 3-month return.
 - **trailing_category_one_year**   
-     `number` — Category 1-year return.
+     `number` — Category trailing 1-year return.
 - **trailing_category_three_year**   
-     `number` — Category 3-year return.
+     `number` — Category trailing 3-year return.
 - **trailing_category_five_year**   
-     `number` — Category 5-year return.
+     `number` — Category trailing 5-year return.
 - **trailing_category_ten_year**   
-     `number` — Category 10-year return.
+     `number` — Category trailing 10-year return.
 - **trailing_category_last_bull_mkt**   
-     `number` — Category return during the last bull market.
+     `number` — Category trailing return during the last bull market.
 - **trailing_category_last_bear_mkt**   
-     `number` — Category return during the last bear market.
+     `number` — Category trailing return during the last bear market.
 
 
-### Load-Adjusted Returns and Rankings (Mutual Funds)
+### Load-Adjusted Returns and Rankings
 
 Mutual fund–specific performance adjustments and rankings.
 
@@ -449,60 +437,58 @@ Mutual fund–specific performance adjustments and rankings.
 - **load_adjusted_ten_year**   
      `number` — Load-adjusted 10-year return.
 - **rank_ytd**   
-     `integer` — Category rank (YTD).
+     `integer` — Category rank, year-to-date (YTD).
 - **rank_one_month**   
-     `integer` — Category rank (1 month).
+     `integer` — Category rank, 1-month.
 - **rank_three_month**   
-     `integer` — Category rank (3 months).
+     `integer` — Category rank, 3-month.
 - **rank_one_year**   
-     `integer` — Category rank (1 year).
+     `integer` — Category rank, 1-year.
 - **rank_three_year**   
-     `integer` — Category rank (3 years).
+     `integer` — Category rank, 3-year.
 - **rank_five_year**   
-     `integer` — Category rank (5 years).
+     `integer` — Category rank, 5-year.
 - **num_years_up**   
-     `integer` — Number of positive-return years.
+     `integer` — Number of years with a positive return.
 - **num_years_down**   
-     `integer` — Number of negative-return years.
+     `integer` — Number of years with a negative return.
 - **best_one_yr_total_return**   
-     `number` — Best single-year total return.
+     `number` — Best 1-year total return.
 
 
 ### Risk Indicators
-
-Governance and risk-related scores.
 
 
 - **audit_risk**   
      `integer` — Audit risk score.
 - **board_risk**   
-     `integer` — Board governance risk score.
+     `integer` — Board risk score.
 - **compensation_risk**   
-     `integer` — Executive compensation risk score.
+     `integer` — Compensation risk score.
 - **share_holder_rights_risk**   
      `integer` — Shareholder rights risk score.
 - **overall_risk**   
-     `integer` — Overall governance risk score.
+     `integer` — Overall risk score.
 
 
-### Asset Classification (Funds and ETFs)
+### Asset Classification
 
 
 - **category**   
-     `string` — Asset category.
+     `string` — Fund category classification.
 - **fund_family**   
      `string` — Fund family.
 - **legal_type**   
-     `string` — Legal structure.
+     `string` — Legal structure/type.
 
 
-### Analyst Data and Corporate Actions (Stocks)
+### Analyst Data and Corporate Actions
 
 
 - **last_split_factor**   
-     `string` — Last stock split ratio.
+     `string` — Ratio of the last stock split (e.g. "4:1").
 - **last_split_date**   
-     `string` — Last stock split date.
+     `string` — Date of the last stock split.
 - **target_high_price**   
      `number` — Analyst target high price.
 - **target_low_price**   
@@ -512,9 +498,9 @@ Governance and risk-related scores.
 - **target_median_price**   
      `number` — Analyst target median price.
 - **recommendation_mean**   
-     `number` — Analyst recommendation score.
+     `number` — Average analyst recommendation score.
 - **recommendation_key**   
-     `string` — Analyst consensus recommendation.
+     `string` — Recommendation label (e.g., strong_buy).
 - **number_of_analyst_opinions**   
      `integer` — Number of analyst opinions.
 
@@ -524,14 +510,6 @@ Governance and risk-related scores.
 
 ```json
 {
-    "task_id": "2df55d35-1f96-4ecc-b1d7-bb1133b3a7a7",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0015,
-    "data": {
-        "symbol": "NVDA",
-        "tag": "just tag"
-    },
     "result": [
         {
             "symbol": "NVDA",

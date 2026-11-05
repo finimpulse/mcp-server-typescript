@@ -1,32 +1,52 @@
 ---
-title: Summary
+title: Summary Data API for Stocks, ETFs &amp; Mutual Funds
 created: 2026-01-15
-updated: 2026-02-06
+updated: 2026-11-04
 endpoint: POST v1/summary
 auth: Bearer Token
 ---
 
-# Summary
+# Summary Data API for Stocks, ETFs &amp; Mutual Funds
 
-Returns a unified snapshot of identity, profile, market data, fundamentals, ownership, analyst coverage, and fund metrics for a single asset symbol.
+Returns a combined snapshot of profile, market, fundamental, ownership, analyst, and fund data for one asset symbol.
 
-The */v1/summary* endpoint is the most comprehensive single-call snapshot in FinImpulse. It aggregates a broad set of fields used across Summary, Profile, Statistics &amp; Risk, and fund performance views. Use it when you need fast, accurate, high-coverage data for a ticker without orchestrating multiple endpoints.
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/) · [n8n](https://n8n.io/integrations/finimpulse/) · [Make](https://www.make.com/en/integrations/finimpulse)
+
+This endpoint retrieves a comprehensive snapshot for a single stock, ETF, or mutual fund, including profile, pricing, valuation, financial highlights, ownership, analyst coverage, and fund performance and holdings.
+
+For a focused field set covering core identification, pricing, and key fundamentals only, use the [Lightweight Summary API](https://developers.finimpulse.com/v1/summary-lite/).
+
+## Coverage 
+
+Asset TypesStocks, ETFs, mutual fundsMarket Regions~55Listings~650,000
+
+Coverage figures are approximate and may change over time.
+
+## Data Freshness
+
+Data is returned as a snapshot. The time of the latest update is indicated by **insert_time** and varies between assets, so price and volume fields may not reflect current market data. For current prices, use the [Market Price API](https://developers.finimpulse.com/v1/market-price/).
 
 ## Asset Type Compatibility
-The returned field set varies by asset class.
 
-- **Stocks —** Returns a company snapshot: profile and classification, real-time/regular-market pricing, dividends, valuation multiples, share statistics, ownership, analyst targets, and high-level financial highlights.
-- **ETFs —** Returns a fund snapshot: description/objective, NAV/yield/AUM, trailing return series, category fields, and portfolio exposure breakdown (sector weights). Company-specific fields are generally not applicable.
-- **Mutual funds —** Returns a fund snapshot: description/objective, fees and Morningstar fields (when available), trailing returns and category comparisons, and portfolio exposure breakdown. Real-time trading fields can be unavailable.
+This endpoint uses one response schema for stocks, ETFs, and mutual funds. Available data depends on the asset type:
 
-This endpoint uses a unified schema across stocks, ETFs, and mutual funds. Fields that are not relevant for a given asset type are returned as null (or empty strings in some legacy feed cases).
+- **Stocks:** company profile, pricing, dividends, valuation, share and ownership data, analyst coverage, and financial highlights.
+- **ETFs:** fund profile, pricing and NAV, dividends, yield, total assets, trailing returns with category comparisons, and holdings breakdown.
+- **Mutual funds:** fund profile, pricing, yield, total assets, fees, Morningstar ratings, trailing returns with category comparisons and ranks, and holdings breakdown.
 
-## **When to Use This Endpoint**
-- Retrieve a full ticker summary in a single call (fast entry into dashboards, widgets, and AI flows).
-- Populate the Asset Summary view (header, price block, key ratios, profile excerpt, and highlights).
-- Provide quick, accurate data for ticker autocomplete and post-selection details (after /search).
-- Support cross-asset comparisons where available (e.g., USD-normalized amounts, fund returns, and standard ratios).
-- Feed downstream analytics pipelines that need a broad snapshot without multiple joins.
+## Data Availability &amp; Limitations
+
+- Some fields may return **null** or an **empty string** if a specific value is not available for a given asset. This does not indicate an error. Some numeric fields may also return 0 when no value is available (e.g., **morning_star_return_rating**), while in other fields 0 is a valid value (e.g., **bond_position**).
+- Fields prefixed with **valuation_measures_** come from a separate dataset and may differ from the corresponding main fields due to data timing or methodology (e.g., **valuation_measures_pe_ratio** and **trailing_pe**).
+- For listings quoted in minor currency units (for example, pence on the London Stock Exchange), **price_to_book** and **trailing_annual_dividend_yield** may differ significantly from the actual values.
+- This endpoint returns a general snapshot and does not include complete data for every block. For full financial statements, holdings, or events, use the dedicated endpoints.
+
+## When to Use This Endpoint
+
+- Build asset overview pages with profile, valuation, and analyst data for stocks, ETFs, and mutual funds.
+- Display fund details such as total assets, trailing returns, sector allocation, and Morningstar ratings.
+- Add sector, industry, and dividend data to watchlists and portfolio views.
+- Feed a structured asset snapshot into AI assistants and analytics pipelines.
 
 ## Request Parameters
 **POST** `v1/summary` 
@@ -156,36 +176,34 @@ req.end();
 
 
 ## Response
-The response returns a single summary object for the requested symbol. Below, its fields are grouped by functional area.
-
-Because the ***/summary*** is unified across asset types, **empty/null** values do not indicate an error. They reflect asset-specific applicability and/or upstream coverage for that dataset.
+The response returns a single summary object for the requested symbol.
 
 ### Identity &amp; Classification
 
-Core identification and classification data for the asset.
-
 
 - **symbol**   
-     `string` — Asset symbol (ticker).
+     `string` — Asset identifier (ticker symbol).
+- **display_name**   
+     `string` — Asset display name.
+- **logo**   
+     `string` — URL of the company or fund logo image.
 - **quote_type**   
-     `string` — Asset type classification returned by the provider (e.g., equity, etf, mutualfund).
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **currency**   
-     `string` — Trading currency for the asset.
+     `string` — Trading currency.
 - **financial_currency**   
-     `string` — Reporting currency used for financial statement metrics (stock).
+     `string` — Reporting currency used for financial statement metrics.
 - **category**   
-     `string` — Fund category label (provider taxonomy).
+     `string` — Fund category classification.
 - **fund_category_name**   
-     `string` — Fund category name used for trailing/category comparisons.
+     `string` — Fund category name.
 - **fund_family**   
-     `string` — Fund family/sponsor name.
+     `string` — Fund family.
 - **legal_type**   
-     `string` — Legal structure/type (e.g., Exchange Traded Fund).
+     `string` — Legal structure/type.
 
 
 ### Address &amp; Contact
-
-Location and contact information. Primarily applicable to stocks.
 
 
 - **address_1**   
@@ -203,22 +221,20 @@ Location and contact information. Primarily applicable to stocks.
 - **website**   
      `string` — Official website URL.
 - **ir_website**   
-     `string` — Investor relations website URL (stocks).
+     `string` — Investor relations website URL.
 
 
 ### Sector &amp; Industry Classification
 
-Industry taxonomy and sector classification used for grouping, filtering, and analytics. Mainly applicable to stocks.
-
 
 - **sector**   
-     `string` — Sector name.
+     `string` — Sector classification.
 - **sector_key**   
      `string` — Normalized sector key.
 - **sector_disp**   
      `string` — Display-friendly sector label.
 - **industry**   
-     `string` — Industry name.
+     `string` — Industry classification.
 - **industry_key**   
      `string` — Normalized industry key.
 - **industry_disp**   
@@ -233,14 +249,12 @@ Industry taxonomy and sector classification used for grouping, filtering, and an
 - **full_time_employees**   
      `integer` — Number of full-time employees.
 - **founded_date**   
-     `string` — Date used as inception/founding metadata in the upstream feed.
+     `string` — Date of the first available price record (ISO 8601).
 - **fund_inception_date**   
-     `string` — Fund inception date (ETFs and mutual funds).
+     `string` — Fund inception date.
 
 
 ### Governance &amp; Risk Indicators
-
-These fields are primarily applicable to stocks.
 
 
 - **audit_risk**   
@@ -252,7 +266,7 @@ These fields are primarily applicable to stocks.
 - **share_holder_rights_risk**   
      `integer` — Shareholder rights risk score.
 - **overall_risk**   
-     `integer` — Overall governance risk score.
+     `integer` — Overall risk score.
 - **governance_epoch_date**   
      `string` — Governance dataset reference date.
 - **compensation_as_of_epoch_date**   
@@ -265,114 +279,118 @@ These fields are primarily applicable to stocks.
 - **previous_close**   
      `number` — Previous close price.
 - **open**   
-     `number` — Market open price (stock and ETF).
+     `number` — Market open price.
 - **day_low**   
-     `number` — Day low price (stock and ETF).
+     `number` — Intraday low price.
 - **day_high**   
-     `number` — Day high price (stock and ETF).
+     `number` — Intraday high price.
 - **regular_market_previous_close**   
-     `number` — Previous close for the regular market session.
+     `number` — Closing price of the most recent completed regular session.
 - **regular_market_open**   
-     `number` — Regular session open price (stock and ETF).
+     `number` — Price of the first trade of the current regular session.
 - **regular_market_day_low**   
-     `number` — Regular session low price (stock and ETF).
+     `number` — Regular market intraday low.
 - **regular_market_day_high**   
-     `number` — Regular session high price (stock and ETF).
+     `number` — Regular market intraday high.
 - **volume**   
-     `integer` — Trading volume (stock and ETF).
+     `integer` — Trading volume.
 - **regular_market_volume**   
-     `integer` — Trading volume for the regular market session (stock and ETF).
+     `integer` — Trading volume for the regular market session.
 - **average_volume**   
-     `integer` — Average volume (provider-defined window).
+     `integer` — Average trading volume.
 - **average_volume_10days**   
      `integer` — Average volume over the last 10 trading days.
 - **average_daily_volume_10_day**   
-     `integer` — Alias of average_volume_10days in some feeds.
+     `integer` — Average volume over the last 10 trading days (duplicate of `average_volume_10days`).
 - **bid**   
-     `number` — Current bid price (stock and ETF).
+     `number` — Bid price.
 - **ask**   
-     `number` — Current ask price (stock and ETF).
+     `number` — Ask price.
 - **bid_size**   
-     `integer` — Bid size (shares/units) where available (stock and ETF).
+     `integer` — Bid size (shares/units).
 - **ask_size**   
-     `integer` — Ask size (shares/units) where available (stock and ETF).
+     `integer` — Ask size (shares/units).
 - **price_hint**   
-     `integer` — Provider price precision hint (decimal places).
+     `integer` — Price precision hint (decimal places).
 - **current_price**   
-     `number` — Current price for a stock (provider field; often regular market price).
+     `number` — Most recent traded price. May reflect a delay of up to one hour.
+- **current_price_usd**   
+     `number` — Most recent traded price, normalized to USD. May reflect a delay of up to one hour.
+- **regular_market_price_usd**   
+     `number` — Active price during the regular trading session and at market close, normalized to USD. For US-listed assets, returns the closing price during pre-market and post-market hours.
+- **pre_market_price_usd**   
+     `number` — Active price during the pre-market session, normalized to USD. Outside pre-market hours, returns the last traded pre-market price. Returns *null* if no pre-market data is available.
+- **post_market_price_usd**   
+     `number` — Active price during the post-market session, normalized to USD. Outside post-market hours, returns the last traded post-market price. Returns *null* if no post-market data is available.
 - **nav_price**   
-     `number` — Net asset value price (NAV) for an ETF when available.
+     `number` — Net asset value price (NAV).
 - **yield**   
-     `number` — Fund distribution yield (ETFs and mutual funds, when available).
+     `number` — Fund distribution yield.
 
 
 ### Price Ranges
 
 
 - **fifty_two_week_low**   
-     `number` — 52-week low price.
+     `number` — Lowest price in the last 52 weeks.
 - **fifty_two_week_high**   
-     `number` — 52-week high price.
+     `number` — Highest price in the last 52 weeks.
 - **all_time_low**   
-     `number` — All-time low price (provider-defined based on available history).
+     `number` — All-time low price.
 - **all_time_high**   
-     `number` — All-time high price (provider-defined based on available history).
+     `number` — All-time high price.
 - **fifty_day_average**   
-     `number` — 50-day average price.
+     `number` — 50-day moving average.
 - **two_hundred_day_average**   
-     `number` — 200-day average price.
+     `number` — 200-day moving average.
 
 
 ### Dividends &amp; Distributions
 
-Availability depends on asset type (primarily applicable to dividend-paying stocks and funds).
-
 
 - **dividend_rate**   
-     `number` — Forward annual dividend rate (provider estimate).
+     `number` — Forward dividend rate.
 - **dividend_yield**   
-     `number` — Forward dividend yield (as a fraction, not percent).
+     `number` — Forward dividend yield.
 - **trailing_annual_dividend_rate**   
-     `number` — Trailing annual dividend/distribution rate.
+     `number` — Trailing 12-month dividend rate.
 - **trailing_annual_dividend_yield**   
-     `number` — Trailing annual dividend/distribution yield (fraction).
+     `number` — Trailing 12-month dividend yield.
 - **ex_dividend_date**   
      `string` — Ex-dividend date.
 - **last_dividend_value**   
-     `number` — Last dividend/distribution amount.
+     `number` — Last dividend amount.
 - **last_dividend_date**   
-     `string` — Last dividend date.
+     `string` — Ex-dividend date of the last dividend.
 - **five_year_avg_dividend_yield**   
-     `number` — Five-year average dividend yield (provider).
+     `number` — Five-year average dividend yield.
 - **payout_ratio**   
      `number` — Dividend payout ratio.
 
 
 ### Valuation &amp; Multiples
 
-High-level valuation indicators, used to assess relative pricing and market expectations.
-
 
 - **market_cap**   
-     `number` — Market capitalization (stocks).
+     `number` — Market capitalization.
 - **enterprise_value**   
-     `number` — Enterprise value.
+     `number` — Enterprise value (EV).
 - **trailing_pe**   
-     `number` — Trailing price-to-earnings ratio.
+     `number` — Trailing Price-to-Earnings (P/E) ratio.
 - **forward_pe**   
-     `number` — Forward price-to-earnings ratio.
+     `number` — Forward Price-to-Earnings (P/E) ratio.
 - **price_to_sales_trailing_12_months**   
-     `number` — Price-to-sales (TTM).
+     `number` — Price-to-sales (P/S) ratio (TTM).
 - **book_value**   
      `number` — Book value per share.
 - **price_to_book**   
-     `number` — Price-to-book ratio (provider; for funds can be holdings weighted).
+     `number` — Price-to-book (P/B) ratio.
 - **enterprise_to_revenue**   
-     `number` — Enterprise value to revenue ratio.
+     `number` — Enterprise value-to-revenue (EV/Revenue) ratio.
 - **enterprise_to_ebitda**   
-     `number` — Enterprise value to EBITDA ratio.
+     `number` — Enterprise value-to-EBITDA (EV/EBITDA) ratio.
 - **default_methodology**   
-     `string` — Methodology tag for some derived valuation fields (e.g., GAAP/nonGAAP).
+     `string` — Methodology tag (e.g., GAAP/nonGAAP).
 
 
 ### Shares &amp; Ownership
@@ -383,81 +401,106 @@ High-level valuation indicators, used to assess relative pricing and market expe
 - **shares_outstanding**   
      `integer` — Shares outstanding.
 - **implied_shares_outstanding**   
-     `integer` — Implied shares outstanding (provider derived).
+     `integer` — Implied shares outstanding.
 - **shares_short**   
      `integer` — Shares sold short.
 - **shares_short_prior_month**   
-     `integer` — Shares short in the prior month.
+     `integer` — Shares sold short as of the prior month.
 - **shares_short_previous_month_date**   
-     `string` — Reference date for shares_short_prior_month.
+     `string` — Reference date for the prior month's short interest figure.
 - **date_short_interest**   
-     `string` — Short interest settlement/reference date.
+     `string` — Reference date for the current short interest figure.
 - **shares_percent_shares_out**   
-     `number` — Short shares as a fraction of shares outstanding.
+     `number` — Short interest as a percentage of shares outstanding.
 - **short_ratio**   
-     `number` — Short ratio (days to cover).
+     `number` — Short interest ratio.
 - **short_percent_of_float**   
-     `number` — Short shares as a fraction of float shares.
+     `number` — Short interest as a percentage of float shares.
 - **held_percent_insiders**   
-     `number` — Insider ownership fraction.
+     `number` — Percentage of shares held by insiders.
 - **held_percent_institutions**   
-     `number` — Institutional ownership fraction.
+     `number` — Percentage of shares held by institutions.
 - **insiders_percent_held**   
-     `number` — Alias/duplicate insider ownership fraction.
+     `number` — Percentage of shares held by insiders (duplicate of `held_percent_insiders`).
 - **institutions_percent_held**   
-     `number` — Alias/duplicate institutional ownership fraction.
+     `number` — Percentage of shares held by institutions (duplicate of `held_percent_institutions`).
 - **institutions_float_percent_held**   
-     `number` — Institutions' ownership as a fraction of float.
+     `number` — Percentage of float shares held by institutions.
 - **institutions_count**   
-     `integer` — Number of institutional holders in the provider dataset.
+     `integer` — Number of institutional holders.
 - **beta**   
-     `number` — Beta vs benchmark (provider).
+     `number` — Beta.
 - **beta_3_year**   
-     `number` — 3-year beta for funds where available.
+     `number` — 3-year beta.
 - **beta_5_year**   
-     `number` — 5-year beta for funds where available.
+     `number` — 5-year beta.
+
+
+### Insider Transactions
+
+
+- **period**   
+     `string` — Reporting period for the insider transaction fields.
+- **buy_info_count**   
+     `integer` — Number of insider buy transactions during `period`.
+- **buy_info_shares**   
+     `integer` — Total shares bought by insiders during `period`.
+- **buy_percent_insider_shares**   
+     `number` — Insider buys during `period`, as a fraction of total insider shares.
+- **sell_info_count**   
+     `integer` — Number of insider sell transactions during `period`.
+- **sell_info_shares**   
+     `integer` — Total shares sold by insiders during `period`.
+- **sell_percent_insider_shares**   
+     `number` — Insider sells during `period`, as a fraction of total insider shares.
+- **net_info_count**   
+     `integer` — Total insider transactions (buy + sell) during `period`.
+- **net_info_shares**   
+     `integer` — Net insider shares (buys - sells) during `period`.
+- **net_percent_insider_shares**   
+     `number` — Net insider shares during `period`, as a fraction of total insider shares.
+- **total_insider_shares**   
+     `integer` — Total insider shares held.
 
 
 ### Corporate Actions
 
 
 - **last_split_factor**   
-     `string` — Last stock split factor (e.g., "10:1").
+     `string` — Ratio of the last stock split (e.g. "4:1").
 - **last_split_date**   
-     `string` — Last stock split date as UNIX timestamp (seconds).
+     `string` — Date of the last stock split.
 
 
 ### Fiscal Dates &amp; Reporting Periods
 
-Key fiscal timeline markers used to align financial metrics. These fields do not apply to funds.
-
 
 - **last_fiscal_year_end**   
-     `string` — Last fiscal year end date.
+     `string` — End date of the last fiscal year.
 - **next_fiscal_year_end**   
-     `string` — Next fiscal year end date.
+     `string` — End date of the next fiscal year.
 - **most_recent_quarter**   
-     `string` — Most recent quarter end date (MRQ).
+     `string` — End date of the most recent quarter (MRQ).
 
 
-### Earnings &amp; Growth (Stocks)
+### Earnings &amp; Growth
 
 
 - **earnings_quarterly_growth**   
-     `number` — Quarterly earnings growth (YoY) as a fraction.
+     `number` — Quarterly earnings growth (YoY).
 - **earnings_growth**   
-     `number` — Earnings growth (provider timeframe) as a fraction.
+     `number` — Earnings growth.
 - **revenue_growth**   
-     `number` — Revenue growth (provider timeframe) as a fraction.
+     `number` — Revenue growth.
 - **net_income_to_common**   
      `number` — Net income available to common shareholders.
 - **trailing_eps**   
      `number` — Trailing earnings per share (EPS).
 - **forward_eps**   
-     `number` — Forward EPS estimate (provider).
+     `number` — Forward earnings per share (EPS) estimate.
 
 
-### Financial Highlights (Stocks)
+### Financial Highlights
 
 
 - **total_cash**   
@@ -465,7 +508,7 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
 - **total_cash_per_share**   
      `number` — Cash and cash equivalents per share.
 - **ebitda**   
-     `number` — EBITDA.
+     `number` — Earnings before interest, taxes, depreciation, and amortization (EBITDA).
 - **total_debt**   
      `number` — Total debt.
 - **quick_ratio**   
@@ -473,32 +516,32 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
 - **current_ratio**   
      `number` — Current ratio.
 - **total_revenue**   
-     `number` — Total revenue (provider timeframe, typically TTM).
+     `number` — Total revenue for the period.
 - **debt_to_equity**   
-     `number` — Debt-to-equity ratio.
+     `number` — Debt-to-Equity (D/E).
 - **revenue_per_share**   
      `number` — Revenue per share.
 - **return_on_assets**   
-     `number` — Return on assets (ROA) as a fraction.
+     `number` — Return on assets (ROA).
 - **return_on_equity**   
-     `number` — Return on equity (ROE) as a fraction.
+     `number` — Return on equity (ROE).
 - **gross_profits**   
      `number` — Gross profit.
 - **free_cashflow**   
-     `number` — Free cash flow.
+     `number` — Free cash flow (FCF).
 - **operating_cashflow**   
-     `number` — Operating cash flow.
+     `number` — Operating cash flow (OCF).
 - **profit_margins**   
-     `number` — Profit margin as a fraction.
+     `number` — Profit margin.
 - **gross_margins**   
-     `number` — Gross margin as a fraction.
+     `number` — Gross margin.
 - **ebitda_margins**   
-     `number` — EBITDA margin as a fraction.
+     `number` — EBITDA margin.
 - **operating_margins**   
-     `number` — Operating margin as a fraction.
+     `number` — Operating margin.
 
 
-### Analyst Coverage (Stocks)
+### Analyst Coverage
 
 
 - **target_high_price**   
@@ -510,45 +553,45 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
 - **target_median_price**   
      `number` — Analyst target median price.
 - **recommendation_mean**   
-     `number` — Mean recommendation score (provider scale). Lower is typically more bullish depending on provider scale.
+     `number` — Average analyst recommendation score.
 - **recommendation_key**   
-     `string` — Recommendation label (e.g., strong_buy), provider-defined taxonomy.
+     `string` — Recommendation label (e.g., strong_buy).
 - **number_of_analyst_opinions**   
-     `integer` — Number of analyst opinions included in recommendation/targets.
+     `integer` — Number of analyst opinions.
 
 
 ### Fund Size &amp; Fee-related Fields
 
 
 - **total_assets**   
-     `number` — Total net assets/AUM, where available.
+     `number` — Total assets.
 - **annual_report_expense_ratio**   
-     `number` — Annual report expense ratio (fund fee).
+     `number` — Annual report expense ratio.
 - **annual_holdings_turnover**   
-     `number` — Annual holdings turnover (fraction).
+     `number` — Annual holdings turnover.
 - **last_cap_gain**   
-     `number` — Last capital gains distribution amount, where available.
+     `number` — Last capital gains distribution amount.
 - **morning_star_overall_rating**   
-     `integer` — Morningstar overall rating (stars), where available.
+     `integer` — Morningstar overall rating (stars).
 - **morning_star_risk_rating**   
-     `integer` — Morningstar risk rating where available.
+     `integer` — Morningstar risk rating.
 
 
 ### Fund Performance - Trailing Returns
 
 
 - **ytd_return**   
-     `number` — Year-to-date return (provider).
+     `number` — Year-to-date (YTD) return.
 - **ytd_return_pct**   
-     `number` — Year-to-date return (alternate/percentage field in provider feed).
+     `number` — Year-to-date (YTD) return.
 - **five_yr_avg_return_pct**   
-     `number` — Five-year average return (provider).
+     `number` — Five-year average return.
 - **one_year_total_return**   
-     `number` — One-year total return (provider).
+     `number` — One-year total return.
 - **three_year_total_return**   
-     `number` — Three-year total return (provider).
+     `number` — Three-year total return.
 - **trailing_ytd**   
-     `number` — Trailing YTD return.
+     `number` — Trailing year-to-date (YTD) return.
 - **trailing_one_month**   
      `number` — Trailing 1-month return.
 - **trailing_three_month**   
@@ -562,11 +605,11 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
 - **trailing_ten_year**   
      `number` — Trailing 10-year return.
 - **trailing_last_bull_mkt**   
-     `number` — Return during last bull market period (provider-defined).
+     `number` — Trailing return during the last bull market period.
 - **trailing_last_bear_mkt**   
-     `number` — Return during last bear market period (provider-defined).
+     `number` — Trailing return during the last bear market period.
 - **trailing_category_ytd**   
-     `number` — Category trailing YTD return.
+     `number` — Category trailing year-to-date (YTD) return.
 - **trailing_category_one_month**   
      `number` — Category trailing 1-month return.
 - **trailing_category_three_month**   
@@ -580,181 +623,159 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
 - **trailing_category_ten_year**   
      `number` — Category trailing 10-year return.
 - **trailing_category_last_bull_mkt**   
-     `number` — Category return during last bull market (provider-defined).
+     `number` — Category trailing return during the last bull market.
 - **trailing_category_last_bear_mkt**   
-     `number` — Category return during last bear market (provider-defined).
+     `number` — Category trailing return during the last bear market.
 - **load_adjusted_one_year**   
-     `number` — Load-adjusted 1-year return (mutual funds).
+     `number` — Load-adjusted 1-year return.
 - **load_adjusted_three_year**   
-     `number` — Load-adjusted 3-year return (mutual funds).
+     `number` — Load-adjusted 3-year return.
 - **load_adjusted_five_year**   
-     `number` — Load-adjusted 5-year return (mutual funds).
+     `number` — Load-adjusted 5-year return.
 - **load_adjusted_ten_year**   
-     `number` — Load-adjusted 10-year return (mutual funds).
+     `number` — Load-adjusted 10-year return.
 
 
 ### Fund Ranks and Ratings
 
 
 - **rank_ytd**   
-     `integer` — Rank in category for YTD return (provider).
+     `integer` — Category rank, year-to-date (YTD).
 - **rank_one_month**   
-     `integer` — Rank in category for 1-month return.
+     `integer` — Category rank, 1-month.
 - **rank_three_month**   
-     `integer` — Rank in category for 3-month return.
+     `integer` — Category rank, 3-month.
 - **rank_one_year**   
-     `integer` — Rank in category for 1-year return.
+     `integer` — Category rank, 1-year.
 - **rank_three_year**   
-     `integer` — Rank in category for 3-year return.
+     `integer` — Category rank, 3-year.
 - **rank_five_year**   
-     `integer` — Rank in category for 5-year return.
+     `integer` — Category rank, 5-year.
 - **morning_star_return_rating**   
-     `integer` — Morningstar return rating where available.
+     `integer` — Morningstar return rating.
 - **risk_rating**   
-     `integer` — Fund risk rating where available (provider-defined scale).
+     `integer` — Fund risk rating.
 - **num_years_up**   
-     `integer` — Number of years with positive returns in the evaluated window.
+     `integer` — Number of years with a positive return.
 - **num_years_down**   
-     `integer` — Number of years with negative returns in the evaluated window.
+     `integer` — Number of years with a negative return.
 - **best_one_yr_total_return**   
-     `number` — Best 1-year total return in the evaluated period.
+     `number` — Best 1-year total return.
 - **best_three_yr_total_return**   
-     `number` — Best 3-year total return in the evaluated period.
+     `number` — Best 3-year total return.
 - **worst_one_yr_total_return**   
-     `number` — Worst 1-year total return in the evaluated period.
+     `number` — Worst 1-year total return.
 - **worst_three_yr_total_return**   
-     `number` — Worst 3-year total return in the evaluated period.
+     `number` — Worst 3-year total return.
 
 
 ### Fund Holdings - Exposure Breakdown
 
 
 - **cash_position**   
-     `number` — Portfolio allocation to cash.
+     `number` — Percentage of fund assets held in cash.
 - **stock_position**   
-     `number` — Portfolio allocation to equities.
+     `number` — Percentage of fund assets held in stocks.
 - **bond_position**   
-     `number` — Portfolio allocation to bonds.
+     `number` — Percentage of fund assets held in bonds.
 - **other_position**   
-     `number` — Portfolio allocation to other asset classes.
+     `number` — Percentage of fund assets held in other instruments.
 - **preferred_position**   
-     `number` — Portfolio allocation to preferred shares.
+     `number` — Percentage of fund assets held in preferred stock.
 - **convertible_position**   
-     `number` — Portfolio allocation to convertibles.
+     `number` — Percentage of fund assets held in convertible securities.
 - **price_to_earnings**   
-     `number` — Holdings-weighted P/E for the fund portfolio.
+     `number` — Price-to-earnings (P/E) ratio.
 - **price_to_book_holding**   
-     `number` — Holdings-weighted P/B for the fund portfolio.
+     `number` — Holdings-weighted price-to-book (P/B) ratio.
 - **price_to_sales**   
-     `number` — Holdings-weighted P/S for the fund portfolio.
+     `number` — Price-to-sales (P/S) ratio
 - **price_to_cashflow**   
-     `number` — Holdings-weighted P/CF for the fund portfolio.
+     `number` — Price-to-cash flow (P/CF) ratio.
 - **median_market_cap**   
-     `number` — Median market cap of holdings (provider).
+     `number` — Median market capitalization of fund holdings. .
 - **three_year_earnings_growth**   
-     `number` — Holdings-weighted 3-year earnings growth (provider).
+     `number` — 3-year earnings growth.
 - **realestate**   
-     `number` — Sector weight - Real Estate.
+     `number` — Percentage of fund assets in the real estate sector.
 - **consumer_cyclical**   
-     `number` — Sector weight - Consumer Cyclical.
+     `number` — Percentage of fund assets in the consumer cyclical sector.
 - **basic_materials**   
-     `number` — Sector weight - Basic Materials.
+     `number` — Percentage of fund assets in the basic materials sector.
 - **consumer_defensive**   
-     `number` — Sector weight - Consumer Defensive.
+     `number` — Percentage of fund assets in the consumer defensive sector.
 - **technology**   
-     `number` — Sector weight - Technology.
+     `number` — Percentage of fund assets in the technology sector.
 - **communication_services**   
-     `number` — Sector weight - Communication Services.
+     `number` — Percentage of fund assets in the communication services sector.
 - **financial_services**   
-     `number` — Sector weight - Financial Services.
+     `number` — Percentage of fund assets in the financial services sector.
 - **utilities**   
-     `number` — Sector weight - Utilities.
+     `number` — Percentage of fund assets in the utilities sector.
 - **industrials**   
-     `number` — Sector weight - Industrials.
+     `number` — Percentage of fund assets in the industrials sector.
 - **energy**   
-     `number` — Sector weight - Energy.
+     `number` — Percentage of fund assets in the energy sector.
 - **healthcare**   
-     `number` — Sector weight - Healthcare.
+     `number` — Percentage of fund assets in the healthcare sector.
 
 
-### Estimates &amp; Earnings Calendar (Stocks)
+### Estimates &amp; Earnings Calendar
 
 
 - **current_quarter_estimate**   
-     `number` — Current quarter EPS estimate (provider).
+     `number` — Consensus EPS estimate for the current quarter.
 - **current_quarter_estimate_date**   
-     `string` — Quarter label for the estimate (e.g., “4Q”).
+     `string` — Label of the quarter used for the estimate (e.g. "4Q").
 - **current_calendar_quarter**   
-     `string` — Calendar quarter label (e.g., "4Q2025").
+     `string` — Current calendar quarter label (e.g. "4Q2025").
 - **current_quarter_estimate_year**   
-     `integer` — Year component for the estimate.
+     `integer` — Year component of the current quarter estimate.
 - **current_fiscal_quarter**   
-     `string` — Fiscal quarter label (e.g., "4Q2026").
+     `string` — Current fiscal quarter label (e.g. "4Q2026").
 - **earnings_date**   
-     `string` — Next earnings date/time.
+     `string` — Earnings announcement date.
 - **is_earnings_date_estimate**   
-     `boolean` — Indicates whether earnings_date is estimated.
+     `boolean` — Indicates whether `earnings_date` is estimated
 
 
-### Market Performance Deltas (Stocks)
+### Market Performance Deltas
 
 
 - **52_week_change**   
-     `number` — 52-week price change (fraction).
+     `number` — 52-week price change.
 - **sand_p_52_week_change**   
-     `number` — S&amp;P 500 52-week change (fraction) used for comparison (provider field; not a benchmark series).
+     `number` — S&amp;P 500 52-week price change.
 
 
-### Valuation Measures - Internal Snapshot (Stocks)
+### Valuation Measures
 
 
 - **valuation_measures_enterprise_value**   
-     `number` — Enterprise value from valuation measures dataset. May differ from enterprise_value due to dataset timing/methodology.
+     `number` — Enterprise value (EV) from valuation measures dataset.
 - **valuation_measures_enterprises_value_ebitda_ratio**   
-     `number` — EV/EBITDA ratio from valuation measures dataset.
+     `number` — Enterprise value-to-EBITDA (EV/EBITDA) ratio from valuation measures dataset.
 - **valuation_measures_enterprises_value_revenue_ratio**   
-     `number` — EV/Revenue ratio from valuation measures dataset.
+     `number` — Enterprise value-to-revenue (EV/Revenue) ratio from valuation measures dataset.
 - **valuation_measures_forward_pe_ratio**   
-     `number` — Forward P/E ratio from valuation measures dataset.
+     `number` — Forward price-to-earnings (P/E) ratio from valuation measures dataset.
 - **valuation_measures_market_cap**   
-     `number` — Market cap from valuation measures dataset.
+     `number` — Market capitalization from valuation measures dataset.
 - **valuation_measures_pb_ratio**   
-     `number` — Price-to-book ratio from valuation measures dataset.
+     `number` — Price-to-book (P/B) ratio from valuation measures dataset.
 - **valuation_measures_pe_ratio**   
-     `number` — P/E ratio from valuation measures dataset.
+     `number` — Price-to-earnings (P/E) ratio from valuation measures dataset.
 - **valuation_measures_peg_ratio**   
-     `number` — PEG ratio from valuation measures dataset.
+     `number` — Price/earnings-to-growth (PEG) ratio from valuation measures dataset.
 - **valuation_measures_ps_ratio**   
-     `number` — Price-to-sales ratio from valuation measures dataset.
+     `number` — Price-to-sales (P/S) ratio from valuation measures dataset.
 
 
 ### Metadata
 
 
 - **insert_time**   
-     `string` — Timestamp when this summary record was inserted/updated in FinImpulse storage.
-- **period**   
-     `string` — Provider period label used for some fund sub-blocks (often an empty string).
-- **buy_info_count**   
-     `integer` — Number of insider buy transactions in the provider window (stocks).
-- **buy_info_shares**   
-     `integer` — Total shares bought by insiders in the provider window (stocks).
-- **buy_percent_insider_shares**   
-     `number` — Insider buys as a fraction of insider shares (stocks).
-- **sell_info_count**   
-     `integer` — Number of insider sell transactions in the provider window (stocks).
-- **sell_info_shares**   
-     `integer` — Total shares sold by insiders in the provider window (stocks).
-- **sell_percent_insider_shares**   
-     `number` — Insider sells as a fraction of insider shares (stocks).
-- **net_info_count**   
-     `integer` — Total insider transactions count (buy + sell) in the provider window (stocks).
-- **net_info_shares**   
-     `integer` — Net insider shares (buys minus sells) in the provider window (stocks).
-- **net_percent_insider_shares**   
-     `number` — Net insider shares as a fraction of insider shares (stocks).
-- **total_insider_shares**   
-     `integer` — Total insider shares (provider; stocks).
+     `string` — Timestamp of the most recent data update (ISO 8601).
 
 
 ### Example Response
@@ -762,17 +783,11 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
 
 ```json
 {
-    "task_id": "603e849d-fc60-4337-91df-8e7b1fc7447d",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0023,
-    "data": {
-        "symbol": "NVDA",
-        "tag": "just tag"
-    },
     "result": {
         "symbol": "NVDA",
-        "quote_type": "equity",
+        "display_name": "NVIDIA",
+        "quote_type": "stock",
+        "logo": "https://cdn.finimpulse.com/f77c41e6-f5cd-653b-1d73-b179528f1095",
         "currency": "USD",
         "address_1": "2788 San Tomas Expressway",
         "city": "Santa Clara",
@@ -787,88 +802,88 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
         "sector": "Technology",
         "sector_key": "technology",
         "sector_disp": "Technology",
-        "long_business_summary": "NVIDIA Corporation, a computing infrastructure company, provides graphics and compute and networking solutions in the United States, Singapore, Taiwan, China, Hong Kong, and internationally. The Compute & Networking segment includes its Data Centre accelerated computing platforms and artificial intelligence solutions and software; networking; automotive platforms and autonomous and electric vehicle solutions; Jetson for robotics and other embedded platforms; and DGX Cloud computing services. The Graphics segment offers GeForce GPUs for gaming and PCs, the GeForce NOW game streaming service and related infrastructure, and solutions for gaming platforms; Quadro/NVIDIA RTX GPUs for enterprise workstation graphics; virtual GPU or vGPU software for cloud-based visual and virtual computing; automotive platforms for infotainment systems; and Omniverse software for building and operating industrial AI and digital twin applications. It also customized agentic solutions designed in collaboration with NVIDIA to accelerate enterprise AI adoption. The company's products are used in gaming, professional visualization, data center, and automotive markets. It sells its products to original equipment manufacturers, original device manufacturers, system integrators and distributors, independent software vendors, cloud service providers, consumer internet companies, add-in board manufacturers, distributors, automotive manufacturers and tier-1 automotive suppliers, and other ecosystem participants. The company has a strategic partnership with Siemens Aktiengesellschaft to develop industrial and physical AI solutions for AI-driven innovation to every industry and industrial workflow. NVIDIA Corporation was incorporated in 1993 and is headquartered in Santa Clara, California.",
-        "full_time_employees": 36000,
+        "long_business_summary": "NVIDIA Corporation operates as a data center scale AI infrastructure company in the United States, Taiwan, China, Hong Kong, Europe, and internationally. It operates through Compute & Networking, and Graphics segments. The Compute & Networking segment provides data center accelerated computing and networking platforms and artificial intelligence solutions and software, and automotive platforms and autonomous and electric vehicle solutions, including software. The Graphics segment offers GeForce GPUs for gaming and PCs; Quadro/NVIDIA RTX GPUs for enterprise workstation graphics. The company's products are used in gaming, professional visualization, data center, and automotive markets. It sells its products to original equipment manufacturers, original device manufacturers, system integrators and distributors, independent software vendors, cloud service providers, add-in board manufacturers, distributors, automotive manufacturers and tier-1 automotive suppliers, and other ecosystem participants. It has a collaboration with Cisco to develop Ultra-Dense Small Form Factor Pluggable (USFP), a high-density optical module pluggable transceiver. It has a collaboration with ChipAgents to develop Build-A-Chip-Bench, a benchmark for AI agents carrying chip design tasks and The Company has a strategic alliance with MediaTek to build the next generations of AI computing platforms. NVIDIA Corporation was incorporated in 1993 and is headquartered in Santa Clara, California.",
+        "full_time_employees": 42000,
         "audit_risk": 5,
-        "board_risk": 9,
+        "board_risk": 10,
         "compensation_risk": 4,
-        "share_holder_rights_risk": 8,
+        "share_holder_rights_risk": 6,
         "overall_risk": 8,
-        "governance_epoch_date": "2026-02-01T00:00:00Z",
-        "compensation_as_of_epoch_date": "2025-12-31T00:00:00Z",
+        "governance_epoch_date": "2026-10-01T00:00:00Z",
+        "compensation_as_of_epoch_date": "2026-12-31T00:00:00Z",
         "ir_website": "http://phx.corporate-ir.net/phoenix.zhtml?c=116466&p=irol-IRHome",
-        "previous_close": 191.13,
-        "open": 187.2,
-        "day_low": 184.88,
-        "day_high": 190.3,
-        "regular_market_previous_close": 191.13,
-        "regular_market_open": 187.2,
-        "regular_market_day_low": 184.88,
-        "regular_market_day_high": 190.3,
-        "dividend_rate": 0.04,
-        "dividend_yield": 0.0002,
-        "ex_dividend_date": "2025-12-04T00:00:00Z",
-        "payout_ratio": 0.0099,
-        "five_year_avg_dividend_yield": 0.05,
-        "trailing_pe": 45.829628,
-        "volume": 160114156,
-        "regular_market_volume": 160114156,
-        "average_volume": 181422162,
-        "average_volume_10days": 163937740,
-        "average_daily_volume_10_day": 163937740,
-        "bid": 185.52,
-        "ask": 185.67,
-        "bid_size": 500,
-        "ask_size": 400,
-        "market_cap": 4519046938624,
-        "fifty_two_week_low": 86.62,
-        "fifty_two_week_high": 212.19,
-        "all_time_high": 212.19,
+        "previous_close": 213.66,
+        "open": 208.88,
+        "day_low": 200.9199,
+        "day_high": 209.05,
+        "regular_market_previous_close": 213.66,
+        "regular_market_open": 208.88,
+        "regular_market_day_low": 200.9199,
+        "regular_market_day_high": 209.05,
+        "dividend_rate": 1,
+        "dividend_yield": 0.0049,
+        "ex_dividend_date": "2026-09-10T00:00:00Z",
+        "payout_ratio": 0.0354,
+        "five_year_avg_dividend_yield": 0.03,
+        "trailing_pe": 25.87105,
+        "volume": 165923799,
+        "regular_market_volume": 165923799,
+        "average_volume": 114133204,
+        "average_volume_10days": 98524360,
+        "average_daily_volume_10_day": 98524360,
+        "bid": 203.5,
+        "ask": 205.03,
+        "bid_size": 100,
+        "ask_size": 200,
+        "market_cap": 4879142617088,
+        "fifty_two_week_low": 164.27,
+        "fifty_two_week_high": 243.37,
+        "all_time_high": 243.37,
         "all_time_low": 0.033333,
-        "price_to_sales_trailing_12_months": 24.14769,
-        "fifty_day_average": 183.9022,
-        "two_hundred_day_average": 168.1236,
-        "trailing_annual_dividend_rate": 0.04,
-        "trailing_annual_dividend_yield": 0.00020928,
+        "price_to_sales_trailing_12_months": 16.310003,
+        "fifty_day_average": 221.7486,
+        "two_hundred_day_average": 204.38455,
+        "trailing_annual_dividend_rate": 0.28,
+        "trailing_annual_dividend_yield": 0.00131049,
         "nav_price": null,
         "yield": null,
         "price_hint": 2,
-        "enterprise_value": 4460536922112,
-        "forward_pe": 24.218866,
-        "profit_margins": 0.53007,
-        "float_shares": 23330673000,
-        "shares_outstanding": 24305000000,
-        "shares_short": 261838673,
-        "shares_short_prior_month": 264294883,
-        "shares_short_previous_month_date": "2025-12-15T00:00:00Z",
-        "date_short_interest": "2026-01-15T00:00:00Z",
-        "shares_percent_shares_out": 0.0108,
-        "held_percent_insiders": 0.0433,
-        "held_percent_institutions": 0.69654,
-        "short_ratio": 1.64,
-        "short_percent_of_float": 0.0112,
-        "beta": 2.314,
-        "implied_shares_outstanding": 24347000000,
+        "enterprise_value": 4908214910976,
+        "forward_pe": 12.858633,
+        "profit_margins": 0.63663,
+        "float_shares": 23133108000,
+        "shares_outstanding": 24147000000,
+        "shares_short": 301622687,
+        "shares_short_prior_month": 294225803,
+        "shares_short_previous_month_date": "2026-09-15T00:00:00Z",
+        "date_short_interest": "2026-10-15T00:00:00Z",
+        "shares_percent_shares_out": 0.0125,
+        "held_percent_insiders": 0.04007,
+        "held_percent_institutions": 0.71519995,
+        "short_ratio": 2.84,
+        "short_percent_of_float": 0.01299999,
+        "beta": 2.216,
+        "implied_shares_outstanding": 24147000000,
         "category": "",
-        "book_value": 4.892,
-        "price_to_book": 37.941536,
+        "book_value": 9.483,
+        "price_to_book": 21.57967,
         "fund_family": "",
         "legal_type": "",
-        "last_fiscal_year_end": "2025-01-26T00:00:00Z",
-        "next_fiscal_year_end": "2026-01-26T00:00:00Z",
-        "most_recent_quarter": "2025-10-26T00:00:00Z",
-        "earnings_quarterly_growth": 0.653,
-        "net_income_to_common": 99198001152,
-        "trailing_eps": 4.05,
-        "forward_eps": 7.66386,
+        "last_fiscal_year_end": "2026-01-25T00:00:00Z",
+        "next_fiscal_year_end": "2027-01-25T00:00:00Z",
+        "most_recent_quarter": "2026-07-26T00:00:00Z",
+        "earnings_quarterly_growth": 1.259,
+        "net_income_to_common": 192880001024,
+        "trailing_eps": 7.91,
+        "forward_eps": 15.9146,
         "last_split_factor": "10:1",
         "last_split_date": "2024-06-10T00:00:00Z",
-        "enterprise_to_revenue": 23.835,
-        "enterprise_to_ebitda": 39.58,
-        "52_week_change": 0.56434894,
-        "sand_p_52_week_change": 0.15544534,
-        "last_dividend_value": 0.01,
-        "last_dividend_date": "2025-12-04T00:00:00Z",
+        "enterprise_to_revenue": 16.2,
+        "enterprise_to_ebitda": 24.387,
+        "52_week_change": -0.01082754,
+        "sand_p_52_week_change": 0.10626137,
+        "last_dividend_value": 0.25,
+        "last_dividend_date": "2026-09-10T00:00:00Z",
         "morning_star_overall_rating": null,
         "morning_star_risk_rating": null,
         "annual_report_expense_ratio": null,
@@ -880,33 +895,37 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
         "annual_holdings_turnover": null,
         "ytd_return": null,
         "beta_5_year": null,
-        "current_price": 185.61,
-        "target_high_price": 352,
-        "target_low_price": 140,
-        "target_mean_price": 253.62138,
-        "target_median_price": 250,
-        "recommendation_mean": 1.34375,
+        "current_price": 207.31,
+        "current_price_usd": 207.31,
+        "regular_market_price_usd": 202.06,
+        "pre_market_price_usd": 205.33,
+        "post_market_price_usd": 203.85,
+        "target_high_price": 515,
+        "target_low_price": 180,
+        "target_mean_price": 328.95346,
+        "target_median_price": 315,
+        "recommendation_mean": 1.29032,
         "recommendation_key": "strong_buy",
         "number_of_analyst_opinions": 58,
-        "total_cash": 60608000000,
-        "total_cash_per_share": 2.494,
-        "ebitda": 112696000512,
-        "total_debt": 10821999616,
-        "quick_ratio": 3.605,
-        "current_ratio": 4.468,
-        "total_revenue": 187141996544,
-        "debt_to_equity": 9.102,
-        "revenue_per_share": 7.668,
-        "return_on_assets": 0.53528,
-        "return_on_equity": 1.07359,
-        "gross_profits": 131092996096,
-        "free_cashflow": 53282873344,
-        "operating_cashflow": 83158999040,
-        "earnings_growth": 0.667,
-        "revenue_growth": 0.625,
-        "gross_margins": 0.7005,
-        "ebitda_margins": 0.60220003,
-        "operating_margins": 0.63168997,
+        "total_cash": 62469001216,
+        "total_cash_per_share": 2.592,
+        "ebitda": 201266003968,
+        "total_debt": 38860001280,
+        "quick_ratio": 2.918,
+        "current_ratio": 4.589,
+        "total_revenue": 302970011648,
+        "debt_to_equity": 16.971,
+        "revenue_per_share": 12.48,
+        "return_on_assets": 0.53572,
+        "return_on_equity": 1.17211,
+        "gross_profits": 226241003520,
+        "free_cashflow": 41809874944,
+        "operating_cashflow": 134359998464,
+        "earnings_growth": 1.278,
+        "revenue_growth": 1.059,
+        "gross_margins": 0.74674004,
+        "ebitda_margins": 0.66431,
+        "operating_margins": 0.66236997,
         "fund_category_name": null,
         "trailing_ytd": null,
         "trailing_one_month": null,
@@ -948,21 +967,21 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
         "one_year_total_return": null,
         "three_year_total_return": null,
         "risk_rating": null,
-        "insiders_percent_held": 0.0433,
-        "institutions_percent_held": 0.69654,
-        "institutions_float_percent_held": 0.72807,
-        "institutions_count": 7010,
+        "insiders_percent_held": 0.04007,
+        "institutions_percent_held": 0.71519995,
+        "institutions_float_percent_held": 0.74504995,
+        "institutions_count": 7728,
         "period": "6m",
-        "buy_info_count": 9,
-        "buy_info_shares": 4415192,
-        "buy_percent_insider_shares": 0.004,
-        "sell_info_count": 43,
-        "sell_info_shares": 7101141,
-        "sell_percent_insider_shares": 0.00699999,
-        "net_info_count": 52,
-        "net_info_shares": -2685949,
-        "net_percent_insider_shares": -0.003,
-        "total_insider_shares": 1052189952,
+        "buy_info_count": 18,
+        "buy_info_shares": 2613243,
+        "buy_percent_insider_shares": 0.003,
+        "sell_info_count": 9,
+        "sell_info_shares": 6198325,
+        "sell_percent_insider_shares": 0.006,
+        "net_info_count": 27,
+        "net_info_shares": -3585082,
+        "net_percent_insider_shares": -0.004,
+        "total_insider_shares": 965687040,
         "cash_position": null,
         "stock_position": null,
         "bond_position": null,
@@ -986,32 +1005,56 @@ Key fiscal timeline markers used to align financial metrics. These fields do not
         "industrials": null,
         "energy": null,
         "healthcare": null,
-        "current_quarter_estimate": 1.52289,
-        "current_quarter_estimate_date": "4Q",
-        "current_calendar_quarter": "DatePeriod { Date = 10/01/2025, PeriodType = Quarter }",
-        "current_quarter_estimate_year": 2025,
-        "current_fiscal_quarter": "DatePeriod { Date = 10/01/2026, PeriodType = Quarter }",
-        "earnings_date": "2026-02-25T21:00:00Z",
+        "current_quarter_estimate": null,
+        "current_quarter_estimate_date": "",
+        "current_calendar_quarter": "",
+        "current_quarter_estimate_year": null,
+        "current_fiscal_quarter": "",
+        "earnings_date": "2026-11-17T21:00:00Z",
         "is_earnings_date_estimate": false,
         "financial_currency": "USD",
-        "default_methodology": "nongaap",
-        "valuation_measures_enterprise_value": 2910691390000,
-        "valuation_measures_enterprises_value_ebitda_ratio": 38.8756,
-        "valuation_measures_enterprises_value_revenue_ratio": 25.6972,
-        "valuation_measures_forward_pe_ratio": 28.0899,
-        "valuation_measures_market_cap": 2938953390000,
-        "valuation_measures_pb_ratio": 44.597845,
-        "valuation_measures_pe_ratio": 47.40229,
-        "valuation_measures_peg_ratio": 0.8605,
-        "valuation_measures_ps_ratio": 26.355582,
-        "insert_time": "2026-02-03T14:02:10Z"
+        "default_methodology": "",
+        "valuation_measures_enterprise_value": 5421271970000,
+        "valuation_measures_enterprises_value_ebitda_ratio": 23.1783,
+        "valuation_measures_enterprises_value_revenue_ratio": 17.8938,
+        "valuation_measures_forward_pe_ratio": 24.8756,
+        "valuation_measures_market_cap": 5445389970000,
+        "valuation_measures_pb_ratio": 23.780657,
+        "valuation_measures_pe_ratio": 28.509482,
+        "valuation_measures_peg_ratio": 0.4791,
+        "valuation_measures_ps_ratio": 18.159819,
+        "insert_time": "2026-11-01T08:22:49Z"
     }
 }
 ```
 
 
-## Notes 
+## Units and Formats
 
-- Some provider feeds return empty strings ('') instead of null for non-applicable text fields, especially for fund address/contact fields.
-- Percent-like fields are generally returned as fractions (e.g., 0.02 = 2%).
-- If you need guaranteed completeness for a specific functional block (e.g., full financial statements, full holdings, or events), use the dedicated endpoint for that block.
+- Percent-like fields are returned as decimal values (e.g., 0.0614 represents 6.14%), except **five_year_avg_dividend_yield**, **debt_to_equity**, and **three_year_earnings_growth**, which are expressed as percentages (e.g., 6.55 represents 6.55%).
+- For ETFs and mutual funds, **price_to_earnings**, **price_to_book**, **price_to_book_holding**, **price_to_sales**, and **price_to_cashflow** are returned as inverse values (e.g., 0.0413 corresponds to a P/E of approximately 24.2).
+- For listings quoted in minor currency units (e.g., GBp), **market_cap** and **dividend_rate** are expressed in the major unit (e.g., GBP).
+
+## Related APIs
+
+- [Lightweight Summary API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/summary-lite/)
+- [Market Price API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/market-price/)
+- [Search API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/search/)
+- [Company, ETF &amp; Mutual Fund Profile API](https://developers.finimpulse.com/v1/profile/)
+- [Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/histories/)
+- [Financial News API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/news/)
+- [Stock Financial Statements &amp; Valuation APIs](https://developers.finimpulse.com/financial-statements/)
+- [Institutional &amp; Insider Ownership API](https://developers.finimpulse.com/v1/holders/general/)
+- [Analyst Coverage, Ratings &amp; Price Targets API](https://developers.finimpulse.com/v1/analysis/analysts/)
+- [ETF &amp; Mutual Fund Holdings Overview API](https://developers.finimpulse.com/v1/holdings/general/)
+
+## Build with this API
+
+- [Build Asset Overview Pages Using Summary API](https://finimpulse.com/rest-api-use-cases/ticker-summary-api/)
+
+## Related Resources
+
+- [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
+- [Glossary](https://finimpulse.com/glossary/)
+- [API Pricing](https://finimpulse.com/api/pricing/)

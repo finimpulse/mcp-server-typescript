@@ -1,16 +1,22 @@
 ---
-title: Recommendations
+title: Stock Analyst Recommendations API
 created: 2026-03-04
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/analysis/recommendations
 auth: Bearer Token
 ---
 
-# Recommendations
+# Stock Analyst Recommendations API
 
 Returns analyst recommendation breakdown for a ticker over time (rating distribution), including counts for Strong Buy/Buy/Hold/Sell/Strong Sell.
 
-This endpoint provides the data to power “**Recommendations**” charts and tables in the Analysis section.
+This endpoint provides the data to power **Recommendations** charts and tables in the Analysis section.
+
+Analyst estimates, ratings, and price targets are sourced from third parties and provided for informational purposes only. FinImpulse does not guarantee their accuracy and does not present them as its own investment recommendations.
+
+## Data Freshness
+
+Analyst data is refreshed daily.
 
 ## Asset Type Compatibility
 
@@ -31,24 +37,29 @@ This endpoint provides the data to power “**Recommendations**” charts and ta
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires % as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
     - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
@@ -56,17 +67,17 @@ This endpoint provides the data to power “**Recommendations**” charts and ta
     - `endswith` - string ends with value
      
      *`%` usage examples:*
-    - %abc% - matches any string containing "abc"
-    - abc% - matches any string starting with "abc"
-    - %abc - matches any string ending with "abc"
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ ["buy", "=", 24], "and", ["hold", "<>", 10] ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "date", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -84,6 +95,25 @@ curl --location "https://api.finimpulse.com/v1/analysis/recommendations" \
       "end_date": "2026-01-30",
       "limit": 3,
       "offset": 0,
+      "filters": [
+          [
+              "buy",
+              "=",
+              24
+          ],
+          "and",
+          [
+              "hold",
+              "<>",
+              10
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -106,6 +136,25 @@ var json = @"{
     ""end_date"": ""2026-01-30"",
     ""limit"": 3,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""buy"",
+            ""="",
+            24
+        ],
+        ""and"",
+        [
+            ""hold"",
+            ""<>"",
+            10
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -135,6 +184,25 @@ curl_setopt_array($curl, [
       "end_date" => "2026-01-30",
       "limit" => 3,
       "offset" => 0,
+      "filters" => [
+        [
+          "buy",
+          "=",
+          24
+        ],
+        "and",
+        [
+          "hold",
+          "<>",
+          10
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -162,6 +230,25 @@ data = {
     "end_date": "2026-01-30",
     "limit": 3,
     "offset": 0,
+    "filters": [
+        [
+            "buy",
+            "=",
+            24
+        ],
+        "and",
+        [
+            "hold",
+            "<>",
+            10
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -185,6 +272,25 @@ const data = JSON.stringify({
     "end_date": "2026-01-30",
     "limit": 3,
     "offset": 0,
+    "filters": [
+        [
+            "buy",
+            "=",
+            24
+        ],
+        "and",
+        [
+            "hold",
+            "<>",
+            10
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -217,9 +323,9 @@ The response contains pagination fields and a list of recommendation snapshot re
 
 
 - **total_count**   
-     `integer` — Total number of matching records available.
+     `integer` — Total number of matching records.
 - **items_count**   
-     `integer` — Number of records returned in the current response.
+     `integer` — Number of records returned.
 - **items**   
      `array` — Array of recommendation snapshot records.
 
@@ -246,40 +352,18 @@ The response contains pagination fields and a list of recommendation snapshot re
 
 ```json
 {
-    "task_id": "7391d91a-84f1-483c-b949-98ae05809663",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0,
-    "data": {
-        "symbol": "AAPL",
-        "limit": 3,
-        "offset": 0,
-        "filters": [
-            [
-                "buy",
-                "=",
-                24
-            ],
-            "and",
-            [
-                "hold",
-                "<>",
-                10
-            ]
-        ],
-        "start_date": "2025-01-01",
-        "end_date": "2026-01-30",
-        "sort_by": [
-            {
-                "selector": "date",
-                "desc": true
-            }
-        ]
-    },
     "result": {
-        "total_count": 3,
+        "total_count": 4,
         "items_count": 3,
         "items": [
+            {
+                "date": "2026-01-01",
+                "strong_buy": 6,
+                "buy": 24,
+                "hold": 15,
+                "sell": 1,
+                "strong_sell": 2
+            },
             {
                 "date": "2025-12-01",
                 "strong_buy": 5,
@@ -295,14 +379,6 @@ The response contains pagination fields and a list of recommendation snapshot re
                 "hold": 15,
                 "sell": 1,
                 "strong_sell": 3
-            },
-            {
-                "date": "2025-10-01",
-                "strong_buy": 5,
-                "buy": 24,
-                "hold": 15,
-                "sell": 1,
-                "strong_sell": 3
             }
         ]
     }
@@ -312,5 +388,5 @@ The response contains pagination fields and a list of recommendation snapshot re
 
 ## Notes
 
-- Recommendation values are **counts** (number of analysts), not percentages.
-- Records are typically returned as periodic snapshots (often monthly), depending on provider coverage.
+- Recommendation values are **counts** (number of analysts).
+- Records are typically returned as periodic snapshots (often monthly).

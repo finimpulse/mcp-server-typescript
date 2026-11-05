@@ -1,31 +1,39 @@
 ---
-title: Errors
+title: API Errors &amp; Status Codes
 created: 2026-02-05
-updated: 2026-04-16
+updated: 2026-10-30
 endpoint: GET v1/errors
 auth: Bearer Token
 ---
 
-# Errors
+# API Errors &amp; Status Codes
 
 FinImpulse API error reference: HTTP response codes, internal status codes, and how to retrieve the full error list via the errors endpoint.
 
-The FinImpulse API uses a combination of standard **HTTP response codes** and **internal status codes** to communicate the result of each request.
+The FinImpulse API uses a combination of standard **HTTP response codes** and **internal status codes** to communicate the result of each request.
 
 We recommend recording error-related information in your application logs and implementing a robust mechanism for handling exceptions or error conditions.
 
+Failed requests, along with their status codes and messages, are also listed on the Errors page in the API dashboard. For details, see the [Errors page guide](https://finimpulse.com/help/api-errors/).
+
 ## HTTP Response Codes
 
-**Code****Message****Description**200OKThe request was successfully processed.401UnauthorizedThe request is missing a valid **Bearer** token or the token has expired.  
-See the [**API Tokens Management &amp; Security Guide**](https://finimpulse.com/help/api-tokens/) for details.402Payment RequiredYour account has insufficient funds or billing issues. Please check your account balance.404Not FoundThe requested endpoint or resource does not exist. Verify the request URL.500Internal Server ErrorThe server encountered an unexpected condition. Please retry later.## Internal Status Codes and Messages
+**Code****Message****Description**200OKThe request was successfully processed.400Bad RequestThe request contains invalid parameters or a malformed JSON body.401UnauthorizedThe request is missing a valid **Bearer** token or the token has expired.  
+See the [**API Tokens Management &amp; Security Guide**](https://finimpulse.com/help/api-tokens/) for details.402Payment RequiredYour account has insufficient funds or billing issues. 403ForbiddenThe request originated from an IP address not whitelisted for this API token.   
+See the [**IP Whitelisting Guide**](https://finimpulse.com/help/api-tokens/#ip-whitelist) for details.404Not FoundThe requested endpoint or resource does not exist. Verify the request URL.429Too Many RequestsThe request rate limit has been exceeded. Reduce request frequency.500Internal Server ErrorThe server encountered an unexpected condition. Retry later.
+
+## Internal Status Codes and Messages
 
 Along with HTTP response codes, the system also generates internal status codes, which are returned in the ***status_code*** and ***status_message*** fields of the API response.
 
-**Code****Message****Description**20000OKThe request was processed successfully.40000Validation failedThe request contains invalid data or is missing required fields.40100UnauthorizedThe provided Bearer token is missing, invalid, or expired.40200Insufficient balanceThe account does not have sufficient funds to complete this request.40300Access ForbiddenThe request originated from an IP address not whitelisted for this API token.40400Not FoundThe requested resource could not be found. Check the request URL.42900Rate limit exceededThe number of requests per minute has exceeded. Reduce request frequency.50000Internal server errorAn unexpected server-side error occurred. Please contact support.Note that status messages may provide **additional context** in the API response and can **vary** depending on the conditions that triggered them.
+**Code****Message****Description**20000OkThe request was processed successfully.40000Validation failedThe request contains invalid data or is missing required fields.40001Invalid JSON bodyThe request body is not valid JSON or could not be parsed. 40100UnauthorizedThe provided Bearer token is missing, invalid, or expired.40200Insufficient balanceThe account does not have sufficient funds to complete this request.40300Access ForbiddenThe request originated from an IP address not whitelisted for this API token.40400Not FoundThe requested resource could not be found. Check the request URL.42900Rate limit exceededThe number of requests per minute has been exceeded.   
+Reduce request frequency.42901Daily credit limit exceededThe daily usage limit for API calls or credits has been reached.50000Internal server errorAn unexpected server-side error occurred. Please contact support.
+
+Note that status messages may provide **additional context** in the API response and can **vary** depending on the conditions that triggered them.
 
 ## Errors Endpoint
 
-You can retrieve the full list of internal error codes by calling the **v1/errors** endpoint. Your account will **not be charged** for accessing it.
+You can retrieve the full list of internal error codes by calling the **v1/errors** endpoint. Requests to this endpoint do not count toward your API usage.
 
 ### Request
 **GET** `v1/errors` 
@@ -120,7 +128,7 @@ req.end();
 
 ### Response
 - **result**   
-     `array` — Array of objects. Each object represents a specific internal status code returned for the request with the following fields: 
+     `array` — Array of objects. Each object describes one internal status code with the following fields: 
     - `code` - Internal status code of the error (integer).
     - `message` - Description of the error (string).
 
@@ -130,9 +138,10 @@ req.end();
 
 ```json
 {
-    "task_id": "771ec16c-6fcd-46f4-9a8d-c24a4eee5e15",
+    "task_id": "07211401-0022-0027-0000-d288e6390157",
     "status_code": 20000,
     "status_message": "OK",
+    "live": true,
     "cost": 0,
     "data": [],
     "result": [
@@ -143,6 +152,10 @@ req.end();
         {
             "code": 40000,
             "message": "Validation failed"
+        },
+        {
+            "code": 40001,
+            "message": "Invalid JSON body"
         },
         {
             "code": 40100,
@@ -163,6 +176,10 @@ req.end();
         {
             "code": 42900,
             "message": "Rate limit exceeded"
+        },
+        {
+            "code": 42901,
+            "message": "Daily credit limit exceeded"
         },
         {
             "code": 50000,

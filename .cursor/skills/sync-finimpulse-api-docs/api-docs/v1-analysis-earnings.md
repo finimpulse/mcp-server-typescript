@@ -1,16 +1,22 @@
 ---
-title: Earnings
+title: Stock Earnings &amp; Analyst Estimates API
 created: 2026-03-04
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/analysis/earnings
 auth: Bearer Token
 ---
 
-# Earnings
+# Stock Earnings &amp; Analyst Estimates API
 
 Returns earnings- and estimate-related analysis records for an asset, including earnings, revenue, EPS actuals, EPS trends, revisions, and growth metrics (depending on requested types).
 
 This endpoint provides data for the **Earnings &amp; Estimates** section of the Analysis module and supports derived analytics, including surprises, estimate revisions, and earnings/revenue history.
+
+Analyst estimates, ratings, and price targets are sourced from third parties and provided for informational purposes only. FinImpulse does not guarantee their accuracy and does not present them as its own investment recommendations.
+
+## Data Freshness
+
+Analyst data is refreshed daily.
 
 ## Asset Type Compatibility
 
@@ -31,7 +37,7 @@ This endpoint provides data for the **Earnings &amp; Estimates** section of the 
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **types**   
-     `array` *(optional)* — List of analysis record types to return. **Supported values:**
+     `array` *(optional)* — Analysis record types to return. **Supported values:**
     - `eps_actual`
     - `earnings_revenue`
     - `earnings`
@@ -40,34 +46,37 @@ This endpoint provides data for the **Earnings &amp; Estimates** section of the 
     - `eps_revisions`
     - `growth`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported types are returned. You can request any subset of types. Returned records will contain a `type` field, allowing you to mix types in a single response safely. **Example:** `"types": [ "eps_actual", "earnings_revenue" ]`
+     All parameters are of type **string** and are **optional**. If none are provided, all supported types are returned. You can request any subset of types. Returned records will contain a `type` field, allowing you to mix types in a single response safely.
 - **methodologies**   
-     `array` *(optional)* — Accounting methodologies to filter earnings data. 
-    - `GAAP`: Official earnings calculated according to Generally Accepted Accounting Principles.
+     `array` *(optional)* — Accounting methodologies. Applies to `eps_actual` and `earnings_revenue` records only. EPS values for all other record types are normalized and unaffected by this parameter. 
+    - `gaap`: Official earnings calculated according to Generally Accepted Accounting Principles.
     - `normalized`: Adjusted earnings, excluding one-time or non-recurring items.
-     
-     **Example:** `"methodologies": ["normalized", "gaap"]`
 - **comparison_symbols**   
-     `array` *(optional)* — Tickers or indices to include in growth estimates comparisons. Note that S&amp;P 500 is always included by default and does not need to be specified. **Example:** `"comparison_symbols": ["NDAQ", "DOW"],`
+     `array` *(optional)* — Tickers or indices to include in growth estimates comparisons. Note that S&amp;P 500 is always included by default and does not need to be specified.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires % as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
     - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
@@ -75,17 +84,17 @@ This endpoint provides data for the **Earnings &amp; Estimates** section of the 
     - `endswith` - string ends with value
      
      *`%` usage examples:*
-    - %abc% - matches any string containing "abc"
-    - abc% - matches any string starting with "abc"
-    - %abc - matches any string ending with "abc"
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ [ "actual", "=", 1.57 ], "and", [ "surprise_pct", "<>", 4.52 ] ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "date", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -99,10 +108,41 @@ curl --location "https://api.finimpulse.com/v1/analysis/earnings" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "AAPL",
+      "types": [
+          "eps_actual",
+          "earnings_revenue"
+      ],
+      "methodologies": [
+          "normalized",
+          "gaap"
+      ],
+      "comparison_symbols": [
+          "NDAQ",
+          "DOW"
+      ],
       "start_date": "2025-01-01",
       "end_date": "2026-01-30",
       "limit": 5,
       "offset": 0,
+      "filters": [
+          [
+              "actual",
+              "=",
+              1.57
+          ],
+          "and",
+          [
+              "surprise_pct",
+              "<>",
+              4.52
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -121,10 +161,41 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""AAPL"",
+    ""types"": [
+        ""eps_actual"",
+        ""earnings_revenue""
+    ],
+    ""methodologies"": [
+        ""normalized"",
+        ""gaap""
+    ],
+    ""comparison_symbols"": [
+        ""NDAQ"",
+        ""DOW""
+    ],
     ""start_date"": ""2025-01-01"",
     ""end_date"": ""2026-01-30"",
     ""limit"": 5,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""actual"",
+            ""="",
+            1.57
+        ],
+        ""and"",
+        [
+            ""surprise_pct"",
+            ""<>"",
+            4.52
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -150,10 +221,41 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "AAPL",
+      "types" => [
+        "eps_actual",
+        "earnings_revenue"
+      ],
+      "methodologies" => [
+        "normalized",
+        "gaap"
+      ],
+      "comparison_symbols" => [
+        "NDAQ",
+        "DOW"
+      ],
       "start_date" => "2025-01-01",
       "end_date" => "2026-01-30",
       "limit" => 5,
       "offset" => 0,
+      "filters" => [
+        [
+          "actual",
+          "=",
+          1.57
+        ],
+        "and",
+        [
+          "surprise_pct",
+          "<>",
+          4.52
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -177,10 +279,41 @@ headers = {
 }
 data = {
     "symbol": "AAPL",
+    "types": [
+        "eps_actual",
+        "earnings_revenue"
+    ],
+    "methodologies": [
+        "normalized",
+        "gaap"
+    ],
+    "comparison_symbols": [
+        "NDAQ",
+        "DOW"
+    ],
     "start_date": "2025-01-01",
     "end_date": "2026-01-30",
     "limit": 5,
     "offset": 0,
+    "filters": [
+        [
+            "actual",
+            "=",
+            1.57
+        ],
+        "and",
+        [
+            "surprise_pct",
+            "<>",
+            4.52
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -200,10 +333,41 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "AAPL",
+    "types": [
+        "eps_actual",
+        "earnings_revenue"
+    ],
+    "methodologies": [
+        "normalized",
+        "gaap"
+    ],
+    "comparison_symbols": [
+        "NDAQ",
+        "DOW"
+    ],
     "start_date": "2025-01-01",
     "end_date": "2026-01-30",
     "limit": 5,
     "offset": 0,
+    "filters": [
+        [
+            "actual",
+            "=",
+            1.57
+        ],
+        "and",
+        [
+            "surprise_pct",
+            "<>",
+            4.52
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -230,7 +394,7 @@ req.end();
 
 ## Response
 
-The response contains metafields and a list of earnings records. The fields within each record may vary depending on its type.
+The response contains **meta**  fields and a list of earnings records. The fields within each record may vary depending on its **type**.
 
 ### Meta Fields
 
@@ -238,32 +402,36 @@ The response contains metafields and a list of earnings records. The fields with
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **target_price**   
-     `number` — Price target.
+     `number` — Current market price of the asset.
 - **target_average_price**   
-     `number` — Average price target.
+     `number` — Average analyst target price across all estimates.
 - **target_low_price**   
-     `number` — Lowest price target.
+     `number` — Analyst target low price.
 - **target_high_price**   
-     `number` — Highest price target.
+     `number` — Analyst target high price.
 - **total_count**   
-     `integer` — Total number of matching records available.
+     `integer` — Total number of matching records.
 - **items_count**   
-     `integer` — Number of records returned in the current response.
+     `integer` — Number of records returned.
 - **items**   
      `array` — Array of earnings records.
 
 
-### EPS Actual
+### Earnings Per Share (EPS) Actual
 
 
 - **type**   
      `string` — Record type ("eps_actual" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **methodology**   
-     `string` — Indicates the accounting basis used for calculation (normalized / GAAP).
+     `string` — Accounting methodology (normalized or gaap).
 - **actual**   
      `number` — EPS actual.
 - **estimate**   
@@ -271,7 +439,7 @@ The response contains metafields and a list of earnings records. The fields with
 - **surprise**   
      `number` — EPS surprise.
 - **surprise_pct**   
-     `number` — Surprise percentage.
+     `number` — EPS surprise, expressed as a percentage.
 
 
 ### Earnings vs. Revenue
@@ -280,11 +448,15 @@ The response contains metafields and a list of earnings records. The fields with
 - **type**   
      `string` — Record type ("earnings_revenue" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **methodology**   
-     `string` — Indicates the accounting basis used for calculation (normalized / GAAP).
+     `string` — Accounting methodology (normalized or gaap).
 - **revenue**   
      `number` — Total revenue for the period.
 - **earnings**   
@@ -297,23 +469,27 @@ The response contains metafields and a list of earnings records. The fields with
 - **type**   
      `string` — Record type ("earnings" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **analysts**   
      `integer` — Number of analysts contributing to the estimate.
 - **avg**   
      `number` — Average EPS estimate.
 - **low**   
-     `number` — Low EPS estimate.
+     `number` — Lowest EPS estimate.
 - **high**   
-     `number` — High EPS estimate.
+     `number` — Highest EPS estimate.
 - **year_ago_eps**   
-     `number` — EPS from the comparable prior-year period (null if not available).
+     `number` — EPS from the comparable prior-year period.
 - **year_ago_revenue**   
-     `number` — Comparable prior-year revenue (not used for EPS estimates; may be null).
+     `number` — Revenue from the comparable prior-year period.
 - **growth**   
-     `number` — Growth value for the period.
+     `number` — Growth value for the period (calculated as avg / year_ago_eps − 1).
 
 
 ### Revenue
@@ -322,21 +498,25 @@ The response contains metafields and a list of earnings records. The fields with
 - **type**   
      `string` — Record type ("revenue" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **analysts**   
      `integer` — Number of analysts contributing to the estimate.
 - **avg**   
      `number` — Average revenue estimate.
 - **low**   
-     `number` — Low revenue estimate.
+     `number` — Lowest revenue estimate.
 - **high**   
-     `number` — High revenue estimate.
+     `number` — Highest revenue estimate.
 - **year_ago_eps**   
-     `number` — Comparable prior-year EPS (not used for revenue estimates; may be null).
+     `number` — EPS from the comparable prior-year period.
 - **year_ago_revenue**   
-     `number` — Revenue from the comparable prior-year period (null if not available).
+     `number` — Revenue from the comparable prior-year period.
 - **growth**   
      `number` — Growth value for the period.
 
@@ -347,11 +527,15 @@ The response contains metafields and a list of earnings records. The fields with
 - **type**   
      `string` — Record type ("eps_trend" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **current**   
-     `number` — EPS value as of the record date.
+     `number` — Current EPS value.
 - **seven_days_ago**   
      `number` — EPS estimate 7 days ago.
 - **thirty_days_ago**   
@@ -368,17 +552,21 @@ The response contains metafields and a list of earnings records. The fields with
 - **type**   
      `string` — Record type ("eps_revisions" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **up_last7days**   
-     `integer` — Number of upward revisions in last 7 days.
+     `integer` — Number of upward EPS revisions in the last 7 days.
 - **up_last30days**   
-     `integer` — Number of upward revisions in last 30 days.
+     `integer` — Number of upward EPS revisions in the last 30 days.
 - **down_last7days**   
-     `integer` — Number of downward revisions in last 7 days.
+     `integer` — Number of downward EPS revisions in the last 7 days.
 - **down_last30days**   
-     `integer` — Number of downward revisions in last 30 days.
+     `integer` — Number of downward EPS revisions in the last 30 days.
 
 
 ### Growth
@@ -387,15 +575,19 @@ The response contains metafields and a list of earnings records. The fields with
 - **type**   
      `string` — Record type ("growth" expected).
 - **date**   
-     `string` — Record date (YYYY-MM-DD).
+     `string` — The reporting period associated with the analyst data (YYYY-MM-DD). 
+    - For `date_type = quarter`, the value identifies a quarterly reporting period.
+    - For `date_type = year`, it identifies an annual reporting period.
+     
+     Dates are aligned to calendar periods and should not be interpreted as the fiscal period start date, fiscal period end date, or earnings announcement date.
 - **date_type**   
-     `string` — Date granularity (quarter/year).
+     `string` — Date granularity (quarter/year). The result set may include records of the same `type` with different `date_type` values. Filter or group data based on `date_type`.
 - **growth**   
-     `number` — Growth value.
+     `number` — Growth value for the period.
 - **growth_benchmark**   
-     `number` — Benchmark growth value (null if not available).
+     `number` — Benchmark growth value.
 - **symbol_benchmark**   
-     `string` — Benchmark symbol identifier (if available).
+     `string` — Benchmark symbol identifier.
 
 
 ### Example Response
@@ -403,50 +595,12 @@ The response contains metafields and a list of earnings records. The fields with
 
 ```json
 {
-    "task_id": "2a40aeee-8e92-43bf-8ba1-70d9b8e124c4",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0,
-    "data": {
-        "symbol": "AAPL",
-        "limit": 5,
-        "offset": 0,
-        "filters": [
-            [
-                "actual",
-                "=",
-                1.57
-            ],
-            "and",
-            [
-                "surprise_pct",
-                "<>",
-                4.52
-            ]
-        ],
-        "start_date": "2025-01-01",
-        "end_date": "2026-01-30",
-        "sort_by": [
-            {
-                "selector": "date",
-                "desc": true
-            }
-        ],
-        "types": [
-            "eps_actual",
-            "earnings_revenue"
-        ],
-        "methodologies": [
-            "normalized",
-            "gaap"
-        ]
-    },
     "result": {
         "symbol": "AAPL",
-        "target_price": 264.72,
-        "target_average_price": 293.06952,
-        "target_low_price": 205,
-        "target_high_price": 350,
+        "target_price": 324.72,
+        "target_average_price": 316.75714,
+        "target_low_price": 215,
+        "target_high_price": 400,
         "total_count": 4,
         "items_count": 4,
         "items": [
@@ -492,7 +646,10 @@ The response contains metafields and a list of earnings records. The fields with
 ```
 
 
-## Notes
+## Note
 
-- The result set may include records of the same **type** with different **date_type** values (quarter and annual). Filter or group data based on **date_type**.
-- Percent values are returned as fractions (e.g., 0.69359 = 69.359%).
+- This endpoint does not currently expose explicit fiscal calendar metadata such as fiscal year, fiscal quarter, period start date, or period end date. Companies may use non-calendar fiscal years or 52/53-week fiscal calendars, so fiscal periods should not be derived from items\[\].date alone. 
+    
+    The endpoint also does not provide a stable key linking individual estimate records to a specific earnings release. The [Summary Data API](https://developers.finimpulse.com/v1/summary/) returns earnings calendar fields, but there is no documented mapping between those fields and records returned by this endpoint. A record should not be labeled as the estimate for the next earnings release based on items\[\].date alone.
+- Monetary values (prices, EPS, revenue) are returned in the asset’s trading currency, e.g., USD for NASDAQ-listed stocks.
+- Percent values are returned as fractions (e.g., 0.69359 = 69.359%), except surprise_pct, which is returned in percent (e.g., 2.9 = 2.9%).

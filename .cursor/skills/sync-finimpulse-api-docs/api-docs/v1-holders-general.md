@@ -1,12 +1,12 @@
 ---
-title: General
+title: Institutional &amp; Insider Ownership API for Stocks
 created: 2026-01-13
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/holders/general
 auth: Bearer Token
 ---
 
-# General
+# Institutional &amp; Insider Ownership API for Stocks
 
 Returns a high-level ownership snapshot for an asset, focused on institutional and insider holdings where available.
 
@@ -151,23 +151,23 @@ req.end();
 Returns a single object with the ownership summary fields.
 
 - **symbol**   
-     `string` — Asset symbol.
+     `string` — Asset identifier (ticker symbol).
 - **insiders_percent_held**   
-     `number` — Insiders percent held.
+     `number` — Percentage of shares held by insiders.
 - **institutions_percent_held**   
-     `number` — Institutions percent held.
+     `number` — Percentage of shares held by institutions.
 - **institutions_float_percent_held**   
-     `number` — Institutions float percent held.
+     `number` — Percentage of float shares held by institutions.
 - **institutions_count**   
-     `integer` — Institutions count.
+     `integer` — Number of institutional holders.
 - **buy_info_shares**   
-     `integer` — Insider buy shares (aggregated).
+     `integer` — Total shares bought by insiders.
 - **sell_info_shares**   
-     `integer` — Insider sell shares (aggregated).
+     `integer` — Total shares sold by insiders.
 - **net_info_shares**   
-     `integer` — Net insider shares (buy - sell).
+     `integer` — Net insider shares (buys - sells).
 - **net_percent_insider_shares**   
-     `number` — Net insider shares as % (normalized indicator).
+     `number` — Net insider shares, as a fraction of total insider shares.
 - **total_insider_shares**   
      `integer` — Total insider shares held.
 
@@ -177,25 +177,17 @@ Returns a single object with the ownership summary fields.
 
 ```json
 {
-    "task_id": "9217d708-1152-4971-a019-b0a54253401f",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.01,
-    "data": {
-        "symbol": "NVDA",
-        "tag": "just tag"
-    },
     "result": {
         "symbol": "NVDA",
-        "insiders_percent_held": 0.0433,
-        "institutions_percent_held": 0.69654,
-        "institutions_float_percent_held": 0.72807,
-        "institutions_count": 7010,
-        "buy_info_shares": 4415192,
-        "sell_info_shares": 7101141,
-        "net_info_shares": -2685949,
-        "net_percent_insider_shares": -0.003,
-        "total_insider_shares": 1052189952
+        "insiders_percent_held": 0.03983999,
+        "institutions_percent_held": 0.70805,
+        "institutions_float_percent_held": 0.73743,
+        "institutions_count": 7503,
+        "buy_info_shares": 61772597,
+        "sell_info_shares": 3148137,
+        "net_info_shares": 58624460,
+        "net_percent_insider_shares": 0.065,
+        "total_insider_shares": 964127936
     }
 }
 ```

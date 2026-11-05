@@ -1,16 +1,16 @@
 ---
-title: Insiders
+title: Company Insider Roster &amp; Activity API
 created: 2026-01-13
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/holders/insiders
 auth: Bearer Token
 ---
 
-# Insiders
+# Company Insider Roster &amp; Activity API
 
 Returns a paginated list of insider transaction records for an asset, including recent insider actions, roles, and reported positions.
 
-This endpoint is **applicable only to stocks**. For **ETFs** and **mutual funds**, insider transactions do not exist in this model, so the endpoint returns an empty result:
+This endpoint is **applicable only to stocks**. For **ETFs** and **mutual funds**, insider transactions do not exist in this model, so the endpoint returns an empty result:
 
 ```
 "result": {
@@ -32,40 +32,45 @@ This is expected behavior, as insider ownership and insider trading disclosures 
 **POST** `v1/holders/insiders` 
 
 - **symbol**   
-     `string` *(required)* — Asset identifier (ticker symbol). Must be a stock symbol.
+     `string` *(required)* — Asset identifier (ticker symbol).
 - **limit**   
-     `integer` *(optional)* — Maximum number of insider records to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched insider records returned (user-defined).
+- **offset**   
+     `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires `%` as a wildcard)
-    - `not_like` - pattern does not match (requires `%` as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
+    - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
     - `startswith` - string starts with value
     - `endswith` - string ends with value
      
-     `%` *usage examples:*
-    - `%abc%` - matches any string containing "abc"
-    - `abc%` - matches any string starting with "abc"
-    - `%abc` - matches any string ending with "abc"
+     *`%` usage examples:*
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": ["relation", "like", "Chief%"]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., position_report_date).
     - `desc` - Sorting direction (*true* for descending, *false* for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "position_report_date", "desc": true } ]`
-- **offset**   
-     `integer` *(optional)* — Pagination offset (0-based).
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -81,6 +86,17 @@ curl --location "https://api.finimpulse.com/v1/holders/insiders" \
       "symbol": "NVDA",
       "limit": 3,
       "offset": 0,
+      "filters": [
+          "relation",
+          "like",
+          "Chief%"
+      ],
+      "sort_by": [
+          {
+              "selector": "position_report_date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -101,6 +117,17 @@ var json = @"{
     ""symbol"": ""NVDA"",
     ""limit"": 3,
     ""offset"": 0,
+    ""filters"": [
+        ""relation"",
+        ""like"",
+        ""Chief%""
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""position_report_date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -128,6 +155,17 @@ curl_setopt_array($curl, [
       "symbol" => "NVDA",
       "limit" => 3,
       "offset" => 0,
+      "filters" => [
+        "relation",
+        "like",
+        "Chief%"
+      ],
+      "sort_by" => [
+        [
+          "selector" => "position_report_date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -153,6 +191,17 @@ data = {
     "symbol": "NVDA",
     "limit": 3,
     "offset": 0,
+    "filters": [
+        "relation",
+        "like",
+        "Chief%"
+    ],
+    "sort_by": [
+        {
+            "selector": "position_report_date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -174,6 +223,17 @@ const data = JSON.stringify({
     "symbol": "NVDA",
     "limit": 3,
     "offset": 0,
+    "filters": [
+        "relation",
+        "like",
+        "Chief%"
+    ],
+    "sort_by": [
+        {
+            "selector": "position_report_date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -205,11 +265,11 @@ Returns pagination metadata and a list of insider transaction records.
 
 
 - **total_count**   
-     `integer` — Total number of insider records available.
+     `integer` — Total number of matching insider records.
 - **items_count**   
-     `integer` — Number of records returned in the current response.
+     `integer` — Number of insider records returned.
 - **items**   
-     `array` — Array of insider transaction entries.
+     `array` — Array of insider transaction records.
 
 
 ### Insider Transaction Entry Item
@@ -224,9 +284,9 @@ Returns pagination metadata and a list of insider transaction records.
 - **latest_trans_date**   
      `string` — Date of the most recent reported insider transaction.
 - **position_direct**   
-     `integer` — Number of shares directly owned after the transaction (if reported).
+     `integer` — Shares held in a direct position. May be **null** when the filing reports a transaction but not an updated position.
 - **position_report_date**   
-     `string` — Reporting date of the insider’s position.
+     `string` — Date of the insider’s position report.
 
 
 ### Example Response
@@ -234,27 +294,6 @@ Returns pagination metadata and a list of insider transaction records.
 
 ```json
 {
-    "task_id": "103d7806-245a-4ff8-90c3-f5bc19983b33",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0012,
-    "data": {
-        "symbol": "NVDA",
-        "limit": 3,
-        "offset": 0,
-        "filters": [
-            "relation",
-            "like",
-            "Chief%"
-        ],
-        "tag": "just tag",
-        "sort_by": [
-            {
-                "selector": "position_report_date",
-                "desc": true
-            }
-        ]
-    },
     "result": {
         "total_count": 2,
         "items_count": 2,
@@ -283,5 +322,4 @@ Returns pagination metadata and a list of insider transaction records.
 
 ## Notes
 - A single insider may appear multiple times across pages if multiple filings have been made historically.
-- **position_direct** may be **null** when the filing reports a transaction but not an updated position.
 - Dates reflect filing/reporting timelines, not trade execution timestamps.

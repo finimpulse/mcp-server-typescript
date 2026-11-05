@@ -1,16 +1,22 @@
 ---
-title: Analysts
+title: Analyst Coverage, Ratings &amp; Price Targets API
 created: 2026-03-04
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/analysis/analysts
 auth: Bearer Token
 ---
 
-# Analysts
+# Analyst Coverage, Ratings &amp; Price Targets API
 
 Returns a paginated list of analyst-level coverage records for an asset, including per-analyst scores, current rating, sentiment, price target, and the latest announcement date.
 
-This endpoint is typically used to populate an **“Analysts” table** in the Analysis module.
+This endpoint is typically used to populate an **Analysts** table in the Analysis module.
+
+Analyst estimates, ratings, and price targets are sourced from third parties and provided for informational purposes only. FinImpulse does not guarantee their accuracy and does not present them as its own investment recommendations.
+
+## Data Freshness
+
+Analyst data is refreshed daily.
 
 ## Asset Type Compatibility
 
@@ -31,20 +37,25 @@ This endpoint is typically used to populate an **“Analysts” table** in the A
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires % as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
     - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
@@ -52,17 +63,17 @@ This endpoint is typically used to populate an **“Analysts” table** in the A
     - `endswith` - string ends with value
      
      *`%` usage examples:*
-    - %abc% - matches any string containing "abc"
-    - abc% - matches any string starting with "abc"
-    - %abc - matches any string ending with "abc"
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ ["rating_sentiment", "=", 1], "and", ["analyst", "<>", "Wedbush"] ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., announcement_date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "announcement_date", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -78,6 +89,25 @@ curl --location "https://api.finimpulse.com/v1/analysis/analysts" \
       "symbol": "AAPL",
       "limit": 10,
       "offset": 0,
+      "filters": [
+          [
+              "rating_sentiment",
+              "=",
+              1
+          ],
+          "and",
+          [
+              "analyst",
+              "<>",
+              "Wedbush"
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "announcement_date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -98,6 +128,25 @@ var json = @"{
     ""symbol"": ""AAPL"",
     ""limit"": 10,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""rating_sentiment"",
+            ""="",
+            1
+        ],
+        ""and"",
+        [
+            ""analyst"",
+            ""<>"",
+            ""Wedbush""
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""announcement_date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -125,6 +174,25 @@ curl_setopt_array($curl, [
       "symbol" => "AAPL",
       "limit" => 10,
       "offset" => 0,
+      "filters" => [
+        [
+          "rating_sentiment",
+          "=",
+          1
+        ],
+        "and",
+        [
+          "analyst",
+          "<>",
+          "Wedbush"
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "announcement_date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -150,6 +218,25 @@ data = {
     "symbol": "AAPL",
     "limit": 10,
     "offset": 0,
+    "filters": [
+        [
+            "rating_sentiment",
+            "=",
+            1
+        ],
+        "and",
+        [
+            "analyst",
+            "<>",
+            "Wedbush"
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "announcement_date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -171,6 +258,25 @@ const data = JSON.stringify({
     "symbol": "AAPL",
     "limit": 10,
     "offset": 0,
+    "filters": [
+        [
+            "rating_sentiment",
+            "=",
+            1
+        ],
+        "and",
+        [
+            "analyst",
+            "<>",
+            "Wedbush"
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "announcement_date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -203,22 +309,24 @@ The response contains pagination fields and a list of analyst coverage records.
 
 
 - **total_count**   
-     `integer` — Total number of matching records available.
+     `integer` — Total number of matching records.
 - **items_count**   
-     `integer` — Number of records returned in the current response.
+     `integer` — Number of records returned.
 - **items**   
      `array` — Array of analyst coverage records.
 
 
 ### Analysts Item Fields
 
+Each item represents one analyst/firm’s coverage record.
+
 
 - **uuid**   
-     `string` — Unique analyst record identifier.
+     `string` — Unique identifier for the analyst record.
 - **analyst**   
-     `string` — Analyst/firm name.
+     `string` — Analyst or firm name.
 - **direct_score**   
-     `number` — Direct score metric for the analyst record.
+     `number` — Direct score metric.
 - **mean_move**   
      `number` — Mean move metric.
 - **price_score**   
@@ -228,13 +336,16 @@ The response contains pagination fields and a list of analyst coverage records.
 - **data_points**   
      `integer` — Number of observations used in scoring.
 - **rating_current**   
-     `string` — Current analyst rating label.
+     `string` — Current analyst rating label (e.g., "Buy", "Hold", "Sell")
 - **rating_sentiment**   
-     `integer` — Normalized sentiment indicator for rating (1 = positive, 0 = neutral, -1 = negative).
+     `integer` — Normalized sentiment indicator for rating. 
+    - 1 = positive
+    - 0 = neutral
+    - -1 = negative
 - **price_score_current**   
-     `number` — Current price target value for this analyst record.
+     `number` — Current price target.
 - **announcement_date**   
-     `string` — Date of the rating/target announcement (YYYY-MM-DD).
+     `string` — Rating/target announcement date (YYYY-MM-DD).
 
 
 ### Example Response
@@ -242,167 +353,139 @@ The response contains pagination fields and a list of analyst coverage records.
 
 ```json
 {
-    "task_id": "d95b4ee6-85f2-4029-8b8c-11a687c31597",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0,
-    "data": {
-        "symbol": "AAPL",
-        "limit": 10,
-        "offset": 0,
-        "filters": [
-            [
-                "rating_sentiment",
-                "=",
-                1
-            ],
-            "and",
-            [
-                "analyst",
-                "<>",
-                "Wedbush"
-            ]
-        ],
-        "sort_by": [
-            {
-                "selector": "announcement_date",
-                "desc": true
-            }
-        ]
-    },
     "result": {
-        "total_count": 15,
+        "total_count": 28,
         "items_count": 10,
         "items": [
             {
-                "uuid": "d5a511dc-a595-5140-8c57-1778e28e3e38",
-                "analyst": "JP Morgan",
-                "direct_score": 66.026398,
-                "mean_move": 48.08615,
-                "price_score": 88.683164,
-                "overall_score": 65.175677,
-                "data_points": 68,
-                "rating_current": "Overweight",
-                "rating_sentiment": 1,
-                "price_score_current": 325,
-                "announcement_date": "2026-01-30"
-            },
-            {
-                "uuid": "b5159968-f245-59c4-ad75-dbd17093a948",
-                "analyst": "JP Morgan",
-                "direct_score": 65.78087,
-                "mean_move": 47.522318,
-                "price_score": 88.610841,
-                "overall_score": 64.869298,
-                "data_points": 66,
-                "rating_current": "Overweight",
-                "rating_sentiment": 1,
-                "price_score_current": 315,
-                "announcement_date": "2026-01-26"
-            },
-            {
-                "uuid": "b1055bad-35ff-5c6c-9fba-a8b5562d4272",
+                "uuid": "2da928c8-8fbc-58f1-aa3d-e13575b26358",
                 "analyst": "Evercore ISI Group",
-                "direct_score": 54.872635,
-                "mean_move": 31.653071,
-                "price_score": 98.673265,
-                "overall_score": 56.666892,
-                "data_points": 41,
+                "direct_score": 56.651166,
+                "mean_move": 30.786328,
+                "price_score": 98.734843,
+                "overall_score": 57.30845,
+                "data_points": 43,
                 "rating_current": "Outperform",
                 "rating_sentiment": 1,
-                "price_score_current": 330,
-                "announcement_date": "2026-01-21"
+                "price_score_current": 365,
+                "announcement_date": "2026-06-25"
             },
             {
-                "uuid": "485d536e-378f-5237-b981-24b31cccd4bd",
-                "analyst": "Citigroup",
-                "direct_score": 63.12757,
-                "mean_move": 46.82659,
-                "price_score": 94.763126,
-                "overall_score": 64.564387,
-                "data_points": 60,
-                "rating_current": "Buy",
-                "rating_sentiment": 1,
-                "price_score_current": 315,
-                "announcement_date": "2026-01-20"
-            },
-            {
-                "uuid": "903ab15b-87f0-5bc6-b831-b591af167234",
-                "analyst": "Morgan Stanley",
-                "direct_score": 68.740161,
-                "mean_move": 43.028528,
-                "price_score": 94.348187,
-                "overall_score": 66.148276,
-                "data_points": 106,
-                "rating_current": "Overweight",
-                "rating_sentiment": 1,
-                "price_score_current": 315,
-                "announcement_date": "2025-12-18"
-            },
-            {
-                "uuid": "30da3bfb-0667-50b4-a723-6776b24999f3",
-                "analyst": "CLSA",
-                "direct_score": 80.719431,
-                "mean_move": 39.908218,
-                "price_score": 62.678631,
-                "overall_score": 64.867907,
-                "data_points": 5,
-                "rating_current": "Outperform",
-                "rating_sentiment": 1,
-                "price_score_current": 330,
-                "announcement_date": "2025-12-06"
-            },
-            {
-                "uuid": "c05b1f8b-4d98-57b3-a0f3-9b4ac9c8f029",
-                "analyst": "Loop Capital",
-                "direct_score": 40.228689,
-                "mean_move": 40.907123,
-                "price_score": 85.029399,
-                "overall_score": 49.392361,
-                "data_points": 26,
-                "rating_current": "Buy",
-                "rating_sentiment": 1,
-                "price_score_current": 325,
-                "announcement_date": "2025-12-03"
-            },
-            {
-                "uuid": "89026b8b-2c22-5f73-a4ba-91d60648fed7",
-                "analyst": "Wells Fargo",
-                "direct_score": 48.4881,
-                "mean_move": 48.392653,
-                "price_score": 55.956145,
-                "overall_score": 49.953075,
-                "data_points": 34,
-                "rating_current": "Overweight",
-                "rating_sentiment": 1,
-                "price_score_current": 300,
-                "announcement_date": "2025-11-01"
-            },
-            {
-                "uuid": "c0902c99-889f-59aa-973f-896f13192feb",
+                "uuid": "ffdbbb30-16b0-5bc1-b0ca-855169567b3d",
                 "analyst": "B of A Securities",
-                "direct_score": 42.520934,
-                "mean_move": 48.921606,
-                "price_score": 85.129199,
-                "overall_score": 52.962789,
-                "data_points": 118,
+                "direct_score": 45.194874,
+                "mean_move": 48.626565,
+                "price_score": 85.514777,
+                "overall_score": 54.288362,
+                "data_points": 122,
                 "rating_current": "Buy",
                 "rating_sentiment": 1,
-                "price_score_current": 325,
-                "announcement_date": "2025-11-01"
+                "price_score_current": 380,
+                "announcement_date": "2026-06-18"
             },
             {
-                "uuid": "801c6269-519a-57a8-9f8d-87ebe764ad63",
-                "analyst": "Argus Research",
-                "direct_score": 60.70149,
-                "mean_move": 38.440176,
-                "price_score": 98.550705,
-                "overall_score": 61.592938,
+                "uuid": "ee7aeed2-0cb4-5fb2-a2ba-12d3502fffec",
+                "analyst": "Morgan Stanley",
+                "direct_score": 69.170373,
+                "mean_move": 43.636651,
+                "price_score": 94.502845,
+                "overall_score": 66.576751,
+                "data_points": 109,
+                "rating_current": "Overweight",
+                "rating_sentiment": 1,
+                "price_score_current": 360,
+                "announcement_date": "2026-06-10"
+            },
+            {
+                "uuid": "53b629b0-ae8a-5e4b-9b9b-4ac9085a53ef",
+                "analyst": "TD Cowen",
+                "direct_score": 47.52634,
+                "mean_move": 27.479961,
+                "price_score": 100,
+                "overall_score": 52.007159,
                 "data_points": 8,
                 "rating_current": "Buy",
                 "rating_sentiment": 1,
-                "price_score_current": 325,
-                "announcement_date": "2025-10-31"
+                "price_score_current": 350,
+                "announcement_date": "2026-06-09"
+            },
+            {
+                "uuid": "c7ad99ef-eb2e-5786-b5dd-c7acaf776e6f",
+                "analyst": "B of A Securities",
+                "direct_score": 44.784053,
+                "mean_move": 48.937181,
+                "price_score": 85.409987,
+                "overall_score": 54.155178,
+                "data_points": 121,
+                "rating_current": "Buy",
+                "rating_sentiment": 1,
+                "price_score_current": 380,
+                "announcement_date": "2026-05-26"
+            },
+            {
+                "uuid": "4b6c31b6-833e-58e5-9877-34e3ca594dea",
+                "analyst": "Tigress Financial",
+                "direct_score": 69.628915,
+                "mean_move": 43.084814,
+                "price_score": 99.779968,
+                "overall_score": 67.695895,
+                "data_points": 12,
+                "rating_current": "Strong Buy",
+                "rating_sentiment": 1,
+                "price_score_current": 375,
+                "announcement_date": "2026-05-15"
+            },
+            {
+                "uuid": "6931ed6d-288f-5103-ac39-e53c4989a59d",
+                "analyst": "Evercore ISI Group",
+                "direct_score": 56.155942,
+                "mean_move": 29.490036,
+                "price_score": 98.725806,
+                "overall_score": 56.670143,
+                "data_points": 42,
+                "rating_current": "Outperform",
+                "rating_sentiment": 1,
+                "price_score_current": 365,
+                "announcement_date": "2026-05-15"
+            },
+            {
+                "uuid": "8d76f143-cd0b-5225-86b8-7b8d030bb446",
+                "analyst": "Morgan Stanley",
+                "direct_score": 68.9767,
+                "mean_move": 43.712388,
+                "price_score": 94.472109,
+                "overall_score": 66.496488,
+                "data_points": 108,
+                "rating_current": "Overweight",
+                "rating_sentiment": 1,
+                "price_score_current": 330,
+                "announcement_date": "2026-05-02"
+            },
+            {
+                "uuid": "87bbf7f8-ba1b-55e7-9420-24529ab6245c",
+                "analyst": "TD Cowen",
+                "direct_score": 44.262995,
+                "mean_move": 24.698699,
+                "price_score": 100,
+                "overall_score": 49.541107,
+                "data_points": 7,
+                "rating_current": "Buy",
+                "rating_sentiment": 1,
+                "price_score_current": 335,
+                "announcement_date": "2026-05-01"
+            },
+            {
+                "uuid": "884e1cce-3184-5163-a2b1-7d384c0b5227",
+                "analyst": "Wells Fargo",
+                "direct_score": 46.051518,
+                "mean_move": 49.099306,
+                "price_score": 56.404109,
+                "overall_score": 49.036373,
+                "data_points": 35,
+                "rating_current": "Overweight",
+                "rating_sentiment": 1,
+                "price_score_current": 310,
+                "announcement_date": "2026-05-01"
             }
         ]
     }

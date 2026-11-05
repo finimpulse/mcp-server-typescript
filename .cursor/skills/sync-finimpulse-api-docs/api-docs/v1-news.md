@@ -1,12 +1,12 @@
 ---
-title: News
+title: Financial News API for Stocks, ETFs &amp; Mutual Funds
 created: 2026-02-09
-updated: 2026-03-09
+updated: 2026-11-03
 endpoint: POST v1/news
 auth: Bearer Token
 ---
 
-# News
+# Financial News API for Stocks, ETFs &amp; Mutual Funds
 
 Returns the latest news and press releases for financial assets.
 
@@ -38,13 +38,13 @@ This endpoint aggregates news and press releases for stocks, ETFs, and mutual fu
     - `news`
     - `press_release`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported types are returned. **Example:** `"types": ["news"]`
+     All parameters are of type **string** and are **optional**. If none are provided, all supported types are returned.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
@@ -60,14 +60,12 @@ This endpoint aggregates news and press releases for stocks, ETFs, and mutual fu
     - %abc% - matches any string containing "abc"
     - abc% - matches any string starting with "abc"
     - %abc - matches any string ending with "abc"
-     
-     **Example:** `"filters": [ [ "title", "<>", null ], "and", [ "content_type", "<>", null ] ]`
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., pub_date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "pub_date", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -81,10 +79,32 @@ curl --location "https://api.finimpulse.com/v1/news" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "NVDA",
+      "types": [
+          "news"
+      ],
       "start_date": "2025-02-03",
       "end_date": "2026-02-03",
       "limit": 3,
       "offset": 0,
+      "filters": [
+          [
+              "title",
+              "<>",
+              null
+          ],
+          "and",
+          [
+              "content_type",
+              "<>",
+              null
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "pub_date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -103,10 +123,32 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""NVDA"",
+    ""types"": [
+        ""news""
+    ],
     ""start_date"": ""2025-02-03"",
     ""end_date"": ""2026-02-03"",
     ""limit"": 3,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""title"",
+            ""<>"",
+            null
+        ],
+        ""and"",
+        [
+            ""content_type"",
+            ""<>"",
+            null
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""pub_date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -132,10 +174,32 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "NVDA",
+      "types" => [
+        "news"
+      ],
       "start_date" => "2025-02-03",
       "end_date" => "2026-02-03",
       "limit" => 3,
       "offset" => 0,
+      "filters" => [
+        [
+          "title",
+          "<>",
+          null
+        ],
+        "and",
+        [
+          "content_type",
+          "<>",
+          null
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "pub_date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -159,10 +223,32 @@ headers = {
 }
 data = {
     "symbol": "NVDA",
+    "types": [
+        "news"
+    ],
     "start_date": "2025-02-03",
     "end_date": "2026-02-03",
     "limit": 3,
     "offset": 0,
+    "filters": [
+        [
+            "title",
+            "<>",
+            None
+        ],
+        "and",
+        [
+            "content_type",
+            "<>",
+            None
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "pub_date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -182,10 +268,32 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "NVDA",
+    "types": [
+        "news"
+    ],
     "start_date": "2025-02-03",
     "end_date": "2026-02-03",
     "limit": 3,
     "offset": 0,
+    "filters": [
+        [
+            "title",
+            "<>",
+            null
+        ],
+        "and",
+        [
+            "content_type",
+            "<>",
+            null
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "pub_date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -216,13 +324,13 @@ req.end();
 
 
 - **total_count**   
-     `integer` — Total number of items matching filters.
+     `integer` — Total number of matching items.
 - **items_count**   
      `integer` — Number of items returned.
 - **search_after_token**   
      `string` — Token for pagination. Pass it in the next request to fetch the next page. **Format:** `"search_after_token": "token_here"`
 - **items**   
-     `array` — An array of news items.
+     `array` — Array of news items.
 
 
 ### News Item Fields
@@ -243,9 +351,9 @@ req.end();
 - **canonical_url**   
      `string` — Direct link to the source.
 - **content_type**   
-     `string` — Internal content type categorization (e.g., STORY).
+     `string` — Content type categorization (e.g., STORY).
 - **related_tickers**   
-     `array` — List of related ticker symbols.
+     `array` — Array of related ticker symbols.
 - **provider_display_name**   
      `string` — Display-friendly name of the news provider.
 - **provider_url**   
@@ -261,111 +369,76 @@ req.end();
 
 ```json
 {
-    "task_id": "541d39a3-0c81-4cb0-80bf-9c68bc11d495",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0,
-    "data": {
-        "symbol": "NVDA",
-        "limit": 3,
-        "offset": 0,
-        "filters": [
-            [
-                "title",
-                "<>",
-                null
-            ],
-            "and",
-            [
-                "content_type",
-                "<>",
-                null
-            ]
-        ],
-        "tag": "just tag",
-        "start_date": "2025-02-03",
-        "end_date": "2026-02-03",
-        "sort_by": [
-            {
-                "selector": "pub_date",
-                "desc": true
-            }
-        ],
-        "types": [
-            "news"
-        ]
-    },
     "result": {
-        "total_count": 1159,
+        "total_count": 1157,
         "items_count": 3,
-        "search_after_token": "eyJSZXF1ZXN0RGF0YSI6eyJzeW1ib2wiOiJOVkRBIiwidHlwZXMiOlsibmV3cyJdLCJzdGFydF9kYXRlIjoiMjAyNS0wMi0wM1QwMDowMDowMCIsImVuZF9kYXRlIjoiMjAyNi0wMi0wM1QwMDowMDowMCIsInF1ZXJ5Ijp7InR5cGUiOiJhbmQiLCJsZWZ0Ijp7InR5cGUiOiJub3QiLCJzdWJxdWVyeSI6eyJmaWVsZCI6InRpdGxlIiwidHlwZSI6ImVxIiwidmFsdWUiOm51bGx9fSwicmlnaHQiOnsidHlwZSI6Im5vdCIsInN1YnF1ZXJ5Ijp7ImZpZWxkIjoiY29udGVudF90eXBlIiwidHlwZSI6ImVxIiwidmFsdWUiOm51bGx9fX0sIm9yZGVyX2J5Ijp7Im9yZGVyX2ZpZWxkIjoicHViX2RhdGUiLCJvcmRlcl90eXBlIjoiRGVzYyIsIm5leHQiOm51bGx9LCJsaW1pdCI6Mywib2Zmc2V0IjowLCJ1aWQiOm51bGx9LCJTZWFyY2hBZnRlckRhdGEiOnsiVmVyc2lvbiI6MSwiU2VhcmNoQWZ0ZXJWYWx1ZXMiOnsicHViX2RhdGUiOiIyMDI2LTAyLTAyVDIzOjAxOjExKzAwOjAwIn0sIlRva2VuUmVhbE9mZnNldCI6MywiVG90YWxDb3VudCI6MTE1OX19",
+        "search_after_token": "eyJSZXF1ZXN0RGF0YSI6eyJzeW1ib2wiOiJOVkRBIiwidHlwZXMiOlsibmV3cyJdLCJzdGFydF9kYXRlIjoiMjAyNS0wMi0wM1QwMDowMDowMCIsImVuZF9kYXRlIjoiMjAyNi0wMi0wM1QwMDowMDowMCIsInF1ZXJ5Ijp7InR5cGUiOiJhbmQiLCJsZWZ0Ijp7InR5cGUiOiJub3QiLCJzdWJxdWVyeSI6eyJmaWVsZCI6InRpdGxlIiwidHlwZSI6ImVxIiwidmFsdWUiOm51bGx9fSwicmlnaHQiOnsidHlwZSI6Im5vdCIsInN1YnF1ZXJ5Ijp7ImZpZWxkIjoiY29udGVudF90eXBlIiwidHlwZSI6ImVxIiwidmFsdWUiOm51bGx9fX0sIm9yZGVyX2J5Ijp7Im9yZGVyX2ZpZWxkIjoicHViX2RhdGUiLCJvcmRlcl90eXBlIjoiRGVzYyIsIm5leHQiOm51bGx9LCJsaW1pdCI6Mywib2Zmc2V0IjowLCJ1aWQiOm51bGx9LCJTZWFyY2hBZnRlckRhdGEiOnsiVmVyc2lvbiI6MSwiU2VhcmNoQWZ0ZXJWYWx1ZXMiOnsicHViX2RhdGUiOiIyMDI2LTAyLTAyVDIzOjAxOjExKzAwOjAwIn0sIlRva2VuUmVhbE9mZnNldCI6MywiVG90YWxDb3VudCI6MTE1N319",
         "items": [
             {
                 "id": "25c9a5aa-205e-36c3-8f91-99cc1d7e7676",
                 "type": "news",
                 "title": "Oracle said it was ‘highly confident in OpenAI’s ability to raise funds and meet its commitments.’ Cue the stock fall",
                 "description": "Oracle’s plan to raise $50 billion had shares rising. Then a tweet about its confidence in OpenAI triggered a selloff that spoke volumes.",
-                "pub_date": "2026-02-02T23:39:13Z",
-                "display_time": "2026-02-02T23:39:13Z",
+                "pub_date": "2026-02-02 23:39:13",
+                "display_time": "2026-02-02 23:39:13",
                 "canonical_url": "https://finance.yahoo.com/news/oracle-said-highly-confident-openai-233913053.html",
                 "content_type": "STORY",
                 "related_tickers": [
-                    "0R1Z.L",
-                    "NVDA01.BK",
-                    "ORCD.XC",
-                    "ORC.DE",
-                    "NVD.HA",
-                    "NVDA.SN",
-                    "NVDG.F",
-                    "NVD.DE",
-                    "NVD.DU",
-                    "NVDA03.BK",
-                    "NVDD.XD",
-                    "NVDC34.SA",
-                    "NVD.HM",
-                    "ORCLD.BA",
-                    "NVDA06.BK",
-                    "ORC.F",
-                    "NVD.MU",
-                    "NVDG.SG",
-                    "NVDA.MX",
-                    "NVDA.CL",
-                    "ORCD.XD",
-                    "NVD0.F",
-                    "NVD.SG",
-                    "NVDA80.BK",
-                    "NVDAD.BA",
-                    "ORC.HA",
                     "ORCLC.BA",
-                    "ORCLCL.SN",
-                    "ORC1.F",
-                    "ORCL06.BK",
-                    "ZNVD.NE",
                     "ORC.DU",
                     "NVDAC.BA",
+                    "ORCL.MX",
+                    "NVDA80.BK",
+                    "NVD.DU",
+                    "NVDG.F",
                     "NVDA-USD.SW",
-                    "NVDD.XC",
-                    "ORCL34.SA",
-                    "NVDA.VI",
-                    "ORCL",
-                    "ORAC.TO",
-                    "ORCL.BA",
-                    "0R1I.IL",
-                    "NVDA",
-                    "NVDG.DU",
-                    "NVDA.SW",
-                    "NVD.F",
+                    "NVDG.HM",
+                    "ORC.F",
+                    "NVDA.BA",
+                    "NVDA.MX",
+                    "NVD.MU",
+                    "ORCLCL.SN",
+                    "ORCL06.BK",
+                    "NVDAD.BA",
+                    "ORC1.F",
                     "ORC.MU",
+                    "ORC.DE",
+                    "NVDD.XC",
+                    "NVDA03.BK",
+                    "ORC.HA",
+                    "NVDA.WA",
+                    "ORCL",
+                    "NVDC34.SA",
+                    "0R1I.IL",
+                    "NVD.HA",
+                    "NVDA.VI",
+                    "ORCD.XC",
+                    "ZNVD.NE",
+                    "ORCL.BA",
+                    "NVDA19.BK",
+                    "NVD.F",
+                    "0R1Z.L",
+                    "NVDA06.BK",
+                    "NVD.DE",
+                    "NVDA01.BK",
+                    "NVDA.SW",
+                    "NVDA.SN",
+                    "1NVDA.MI",
+                    "ORCL34.SA",
+                    "NVD0.F",
+                    "NVD.SG",
+                    "ORAC.TO",
                     "ORCL19.BK",
-                    "NVDACL.SN",
+                    "NVDA",
+                    "NVD.HM",
                     "ORC.HM",
                     "ORCL.VI",
-                    "NVDG.HM",
-                    "NVDA.BA",
-                    "ORCL.MX",
-                    "NVDA19.BK",
-                    "1NVDA.MI",
-                    "NVDA.WA"
+                    "ORCD.XD",
+                    "NVDACL.SN",
+                    "NVDD.XD",
+                    "NVDG.SG",
+                    "ORCLD.BA",
+                    "NVDG.DU"
                 ],
                 "provider_display_name": "Fortune",
                 "provider_url": "http://fortune.com/",
@@ -377,121 +450,119 @@ req.end();
                 "type": "news",
                 "title": "Stock Market Today, Feb. 2: Stocks Recover and Micron Technology Soars Again",
                 "description": "Today, Feb. 2, 2026, volatility continues in commodities while manufacturing data boosts markets.",
-                "pub_date": "2026-02-02T23:12:08Z",
-                "display_time": "2026-02-02T23:12:08Z",
+                "pub_date": "2026-02-02 23:12:08",
+                "display_time": "2026-02-02 23:12:08",
                 "canonical_url": "https://www.fool.com/coverage/stock-market-today/2026/02/02/stock-market-today-feb-2-stocks-recover-and-micron-technology-soars-again/",
                 "content_type": "STORY",
                 "related_tickers": [
-                    "DISCL.SN",
-                    "MUC.BA",
-                    "WDP.HA",
-                    "NVDA01.BK",
-                    "WDP.HM",
+                    "WDP0.MU",
+                    "ZDIS.NE",
+                    "1T.MI",
+                    "NVDAC.BA",
                     "SOBA.SG",
-                    "L1MN34.SA",
-                    "MTED.XD",
-                    "MU.TO",
+                    "NVDA80.BK",
+                    "CYTH.DU",
                     "ZMIC.NE",
-                    "MTE1.F",
-                    "ATT.VI",
-                    "NVD.HA",
-                    "NVDA.SN",
-                    "DISNC.BA",
-                    "SOBA.DU",
-                    "WDP.MU",
-                    "T-PA",
-                    "CYTH.MU",
-                    "US5502411037.SG",
-                    "MTE.MU",
-                    "0R2T.IL",
-                    "NVDG.F",
-                    "NVD.DE",
-                    "MUD.BA",
-                    "TD.BA",
-                    "WDPD.XC",
-                    "SOBAD.XD",
-                    "T.BA",
                     "NVD.DU",
-                    "CYTH.F",
-                    "LUMN",
-                    "NVDA03.BK",
-                    "NVDD.XD",
-                    "NVDC34.SA",
-                    "NVD.HM",
+                    "MUC.BA",
+                    "WDP.DU",
+                    "NVDG.F",
+                    "US5502411037.SG",
+                    "SOBA.DE",
+                    "NVDA-USD.SW",
+                    "DIS.TO",
+                    "0QZO.L",
+                    "DISCL.SN",
                     "0QZ1.L",
                     "MU",
-                    "MUTC34.SA",
-                    "MTE.SG",
-                    "NVDA06.BK",
-                    "1T.MI",
-                    "DIS.VI",
-                    "NVD.MU",
-                    "NVDG.SG",
-                    "NVDA.MX",
-                    "MTE.DU",
-                    "NVDA.CL",
-                    "DISB34.SA",
-                    "ATTB34.SA",
-                    "NVD0.F",
-                    "NVD.SG",
-                    "NVDA80.BK",
-                    "NVDAD.BA",
-                    "DIS.MX",
+                    "WDPD.XD",
+                    "NVDG.HM",
                     "MU.MX",
-                    "MTE.HA",
-                    "ZDIS.NE",
-                    "0QZO.L",
-                    "DIS.TO",
-                    "1DIS.MI",
-                    "ZNVD.NE",
-                    "MU.SW",
-                    "WDP0.F",
-                    "NVDAC.BA",
-                    "WDP0.DU",
-                    "SOBA.DE",
+                    "NVDA.BA",
+                    "CYTH.HM",
+                    "CYTH.F",
+                    "LUMN",
                     "1CYTH.MI",
                     "DIS",
-                    "NVDA-USD.SW",
-                    "TC.BA",
-                    "CYTH.DU",
-                    "WDP3.F",
-                    "NVDA19.BK",
-                    "1NVDA.MI",
-                    "NVDA.WA",
-                    "LUMN.MX",
-                    "MU.VI",
-                    "SOBA.HA",
-                    "WDP.F",
-                    "NVDD.XC",
-                    "WDPD.XD",
-                    "NVDA.VI",
-                    "MU.BA",
-                    "DISNEY19.BK",
-                    "SOBA.F",
-                    "WDP0.MU",
-                    "1MU.MI",
+                    "NVDA.MX",
+                    "ATTB34.SA",
                     "MTE0.F",
+                    "DIS.MX",
+                    "DIS.VI",
+                    "NVD.MU",
+                    "NVDAD.BA",
+                    "TC.BA",
+                    "WDP0.DU",
+                    "1MU.MI",
+                    "SOBA.F",
+                    "DISNEY19.BK",
+                    "MTE.HA",
+                    "NVDA.WA",
+                    "NVDD.XC",
+                    "WDP.HM",
+                    "NVDA03.BK",
+                    "MTE.DU",
+                    "DISND.BA",
+                    "MTE.HM",
+                    "MTE.DE",
+                    "NVD.HA",
+                    "MU.BA",
+                    "NVDC34.SA",
+                    "MU.SW",
+                    "WDP0.F",
+                    "0R1I.IL",
+                    "WDPD.XC",
+                    "WDP.HA",
+                    "1DIS.MI",
+                    "WDP3.F",
+                    "MTE.MU",
+                    "T-PA",
+                    "NVDA.VI",
+                    "ZNVD.NE",
+                    "NVDA19.BK",
+                    "NVD.DE",
+                    "NVD.F",
+                    "DISNC.BA",
+                    "MUTC34.SA",
+                    "NVDA06.BK",
+                    "MU.TO",
+                    "WDP.F",
+                    "NVDA01.BK",
+                    "T.BA",
+                    "MUD.BA",
+                    "NVDA.SW",
+                    "ATT.VI",
+                    "LUMN.MX",
+                    "CYTH.MU",
+                    "NVDA.SN",
+                    "1NVDA.MI",
+                    "SOBA.HA",
+                    "SOBA.DU",
+                    "0R2T.IL",
+                    "WDP.MU",
+                    "MU.VI",
+                    "TD.BA",
+                    "MTED.XD",
+                    "L1MN34.SA",
+                    "MTE1.F",
+                    "NVD0.F",
+                    "NVD.SG",
                     "MTED.XC",
-                    "NVDACL.SN",
-                    "NVDG.HM",
-                    "NVDA.BA",
+                    "WDP.SG",
+                    "WDP.DE",
+                    "NVDA",
+                    "T-PC",
+                    "NVD.HM",
                     "MTE.F",
                     "SOBA.HM",
-                    "MTE.HM",
-                    "NVDA",
-                    "NVDG.DU",
-                    "NVDA.SW",
-                    "NVD.F",
+                    "NVDACL.SN",
+                    "DISB34.SA",
+                    "NVDD.XD",
+                    "NVDG.SG",
+                    "MTE.SG",
+                    "SOBAD.XD",
                     "DISN.BA",
-                    "T-PC",
-                    "WDP.DU",
-                    "WDP.DE",
-                    "MTE.DE",
-                    "0R1I.IL",
-                    "CYTH.HM",
-                    "DISND.BA",
-                    "WDP.SG",
-                    "SOBA.MU"
+                    "NVDG.DU"
                 ],
                 "provider_display_name": "Motley Fool",
                 "provider_url": "http://www.fool.com/",
@@ -503,116 +574,115 @@ req.end();
                 "type": "news",
                 "title": "Ford, Xiaomi Deny JV Talks Even As Jim Farley Expressed Admiration For Chinese EVs While Flagging Them As Competitive Threat",
                 "description": "Ford Motor Co. (NYSE:F) and Chinese tech giant Xiaomi (OTC:XIACF) have both denied reports of a potential collaboration to produce electric vehicles in the United States. Ford Reportedly Held Preliminary Talks With Xiaomi The Financial Times reported that Ford had preliminary discussions with Xiaomi about a joint venture, aiming to facilitate Chinese carmakers’ entry into the U.S. market. However, both companies have refuted these claims. A Ford spokesperson stated, "This story is completely fal",
-                "pub_date": "2026-02-02T23:01:11Z",
-                "display_time": "2026-02-02T23:01:11Z",
+                "pub_date": "2026-02-02 23:01:11",
+                "display_time": "2026-02-02 23:01:11",
                 "canonical_url": "https://finance.yahoo.com/news/ford-xiaomi-deny-jv-talks-230111582.html",
                 "content_type": "STORY",
                 "related_tickers": [
-                    "TSLA.BA",
-                    "TL0.F",
-                    "NVDA01.BK",
-                    "TSLA.WA",
-                    "NVD.HA",
-                    "NVDA.SN",
-                    "F.TO",
-                    "TL0.DU",
-                    "TL0.MU",
-                    "TL0D.XC",
-                    "NVDG.F",
-                    "NVD.DE",
-                    "FD.BA",
-                    "XIACF",
-                    "TL0.DE",
-                    "TSLA.MX",
-                    "FMC1.DE",
-                    "TSLA80.BK",
-                    "NVD.DU",
+                    "FMC1.HA",
                     "TSLA",
+                    "3CP.HM",
+                    "NVDAC.BA",
+                    "XIAOMI01.BK",
+                    "NVDA80.BK",
+                    "TSLA01.BK",
+                    "NVD.DU",
+                    "FMC1.SG",
+                    "HXXD.SI",
+                    "TSLA.VI",
+                    "NVDG.F",
+                    "TL00.F",
+                    "NVDA-USD.SW",
+                    "TSLAD.BA",
+                    "TL01.DU",
+                    "NVDG.HM",
+                    "NVDA.BA",
+                    "FMC1.F",
+                    "3CP.MU",
                     "F.BA",
-                    "NVDA03.BK",
-                    "NVDD.XD",
-                    "NVDC34.SA",
-                    "NVD.HM",
-                    "0R0X.L",
-                    "3CPA.DU",
-                    "NVDA06.BK",
+                    "1TSLA.MI",
+                    "TSLACO.CL",
+                    "F",
+                    "FMC1.DE",
+                    "TL0.SG",
+                    "NVDA.MX",
+                    "3CP2.F",
                     "XIAOMI23.BK",
                     "F.MX",
                     "NVD.MU",
-                    "NVDG.SG",
-                    "1TSLA.MI",
-                    "NVDA.MX",
-                    "TSLACO.CL",
-                    "TL01.F",
-                    "NVDA.CL",
-                    "3CPA.F",
-                    "1810N.MX",
-                    "3CP.DU",
-                    "TSLAD.BA",
-                    "FMC1.HA",
-                    "FMC1.SG",
-                    "TL00.F",
-                    "TL0.HA",
-                    "TL0.SG",
                     "TSLA34.SA",
-                    "3CP.MU",
-                    "F",
-                    "3CPA.HM",
-                    "ZNVD.NE",
-                    "0P4F.L",
-                    "NVDAC.BA",
-                    "NVDA-USD.SW",
+                    "NVDAD.BA",
                     "3CPA.SG",
-                    "FMC1.MU",
-                    "NVDA19.BK",
-                    "1NVDA.MI",
-                    "81810.HK",
-                    "NVDA.WA",
-                    "TL0.HM",
-                    "3CP.HA",
-                    "NVDD.XC",
-                    "3CPA.MU",
-                    "XIAOMI01.BK",
-                    "NVDA.VI",
-                    "1810.HK",
-                    "FORD.VI",
-                    "HXXD.SI",
-                    "TL01.DU",
-                    "0R1I.IL",
                     "FDMO34.SA",
-                    "TL01.MU",
-                    "3CP.HM",
-                    "FMC1D.XD",
                     "FMC1.HM",
-                    "XIAOMI19.BK",
-                    "NVDACL.SN",
-                    "TSLA.VI",
-                    "NVDG.HM",
-                    "TSLA01.BK",
-                    "NVDA.BA",
-                    "3CP.SG",
-                    "TSLACL.SN",
-                    "FMC.F",
-                    "NVDA",
-                    "NVDG.DU",
-                    "XIAOMI80.BK",
-                    "ZTSL.NE",
-                    "XIAOMI13.BK",
-                    "3CP.F",
-                    "NVDA.SW",
-                    "NVD.F",
-                    "TL0D.XD",
-                    "XIACY",
+                    "FMC1D.XD",
+                    "TL0.HA",
+                    "81810.HK",
+                    "TSLAC.BA",
+                    "3CPA.HM",
+                    "F.TO",
+                    "NVDD.XC",
+                    "TL0.F",
+                    "NVDA03.BK",
+                    "0P4F.L",
+                    "NVDA.WA",
                     "1F.MI",
+                    "TSLA.BA",
+                    "3CP.HA",
+                    "TL0.MU",
+                    "XIAOMI13.BK",
+                    "NVD.HA",
+                    "FORD.VI",
+                    "NVDC34.SA",
+                    "0R1I.IL",
+                    "3CPA.F",
                     "FMC1.DU",
+                    "3CP.F",
+                    "TL0.DE",
+                    "TL01.F",
+                    "NVDA.VI",
+                    "3CPA.DU",
+                    "ZNVD.NE",
+                    "NVDA19.BK",
+                    "NVD.DE",
+                    "NVD.F",
+                    "TSLA03.BK",
+                    "FMC1.MU",
+                    "NVDA06.BK",
+                    "3CPA.MU",
+                    "NVDA01.BK",
+                    "TSLA.MX",
+                    "NVDA.SW",
+                    "1810.HK",
+                    "TL0D.XC",
+                    "NVDA.SN",
+                    "1NVDA.MI",
+                    "FD.BA",
+                    "TSLA.WA",
+                    "TL0.DU",
+                    "TL0.HM",
                     "NVD0.F",
                     "NVD.SG",
-                    "NVDA80.BK",
-                    "NVDAD.BA",
-                    "TSLA03.BK",
-                    "TSLAC.BA",
-                    "FMC1.F",
-                    "3CP2.F"
+                    "TL01.MU",
+                    "XIAOMI19.BK",
+                    "NVDA",
+                    "NVD.HM",
+                    "3CP.SG",
+                    "3CP.DU",
+                    "TL0D.XD",
+                    "NVDACL.SN",
+                    "TSLA80.BK",
+                    "XIACY",
+                    "1810N.MX",
+                    "NVDD.XD",
+                    "NVDG.SG",
+                    "XIACF",
+                    "0R0X.L",
+                    "TSLACL.SN",
+                    "FMC.F",
+                    "NVDG.DU",
+                    "XIAOMI80.BK",
+                    "ZTSL.NE"
                 ],
                 "provider_display_name": "Benzinga",
                 "provider_url": "http://www.benzinga.com/",

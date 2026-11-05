@@ -1,18 +1,18 @@
 ---
-title: Mutual Funds
+title: Mutual Fund &amp; ETF Holders API for Stocks
 created: 2026-01-13
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/holders/mutual-funds
 auth: Bearer Token
 ---
 
-# Mutual Funds
+# Mutual Fund &amp; ETF Holders API for Stocks
 
 Returns a list of mutual funds and ETFs that hold a given stock, including their reported position size, percent held, and estimated value.
 
-This endpoint answers the question, “Which funds hold this stock?”
+This endpoint returns the mutual funds and ETFs that hold a given stock, including each fund's reported position size, percent held, and estimated value.
 
-It is **stock-centric** because insider transactions are not modeled for **ETFs** and **mutual funds**, so the endpoint returns an empty result:
+It is **stock-centric**, so for **ETFs** and **mutual funds** the endpoint returns an empty result:
 
 ```
 "result": {
@@ -22,7 +22,7 @@ It is **stock-centric** because insider transactions are not modeled for **ETFs*
 }
 ```
 
-This is expected behavior, not an error.
+This is expected behavior.
 
 ## When to Use This Endpoint
 - Show “Funds Holding This Stock” sections on equity profile pages.
@@ -34,40 +34,45 @@ This is expected behavior, not an error.
 **POST** `v1/holders/mutual-funds` 
 
 - **symbol**   
-     `string` *(required)* — Asset identifier (ticker symbol). Must be a stock symbol.
+     `string` *(required)* — Asset identifier (ticker symbol).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires `%` as a wildcard)
-    - `not_like` - pattern does not match (requires `%` as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
+    - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
     - `startswith` - string starts with value
     - `endswith` - string ends with value
      
-     `%` *usage examples:*
-    - `%abc%` - matches any string containing "abc"
-    - `abc%` - matches any string starting with "abc"
-    - `%abc` - matches any string ending with "abc"
+     *`%` usage examples:*
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ "name", "like", "VANGUARD%" ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., value).
     - `desc` - Sorting direction (*true* for descending, *false* for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "value", "desc": false } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -83,6 +88,17 @@ curl --location "https://api.finimpulse.com/v1/holders/mutual-funds" \
       "symbol": "NVDA",
       "limit": 20,
       "offset": 0,
+      "filters": [
+          "name",
+          "like",
+          "VANGUARD%"
+      ],
+      "sort_by": [
+          {
+              "selector": "value",
+              "desc": false
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -103,6 +119,17 @@ var json = @"{
     ""symbol"": ""NVDA"",
     ""limit"": 20,
     ""offset"": 0,
+    ""filters"": [
+        ""name"",
+        ""like"",
+        ""VANGUARD%""
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""value"",
+            ""desc"": false
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -130,6 +157,17 @@ curl_setopt_array($curl, [
       "symbol" => "NVDA",
       "limit" => 20,
       "offset" => 0,
+      "filters" => [
+        "name",
+        "like",
+        "VANGUARD%"
+      ],
+      "sort_by" => [
+        [
+          "selector" => "value",
+          "desc" => false
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -155,6 +193,17 @@ data = {
     "symbol": "NVDA",
     "limit": 20,
     "offset": 0,
+    "filters": [
+        "name",
+        "like",
+        "VANGUARD%"
+    ],
+    "sort_by": [
+        {
+            "selector": "value",
+            "desc": False
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -176,6 +225,17 @@ const data = JSON.stringify({
     "symbol": "NVDA",
     "limit": 20,
     "offset": 0,
+    "filters": [
+        "name",
+        "like",
+        "VANGUARD%"
+    ],
+    "sort_by": [
+        {
+            "selector": "value",
+            "desc": false
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -207,9 +267,9 @@ Returns pagination metadata and a list of fund holder records.
 
 
 - **total_count**   
-     `integer` — Total number of matching fund holders.
+     `integer` — Total number of matching holder records.
 - **items_count**   
-     `integer` — Number of items returned in the current page.
+     `integer` — Number of holder records returned.
 - **items**   
      `array` — Array of mutual fund/ETF holder records.
 
@@ -220,13 +280,13 @@ Returns pagination metadata and a list of fund holder records.
 - **name**   
      `string` — Fund or ETF name.
 - **position_direct**   
-     `integer` — Number of shares of the stock held by the fund.
+     `integer` — Shares held in a direct position.
 - **position_report_date**   
-     `string` — Reporting date of the fund’s holding.
+     `string` — Date of the fund’s holding report.
 - **pct_held**   
-     `number` — Percent of the company’s outstanding shares held by the fund (fraction; e.g., 0.0299 = 2.99%).
+     `number` — Percentage of shares held by the fund.
 - **value**   
-     `number` — Estimated market value of the fund’s position in the stock (typically USD).
+     `number` — Market value of the reported position.
 
 
 ### Example Response
@@ -234,27 +294,6 @@ Returns pagination metadata and a list of fund holder records.
 
 ```json
 {
-    "task_id": "54ddba11-eb8d-437b-8f40-883fff2f01dc",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0018,
-    "data": {
-        "symbol": "NVDA",
-        "limit": 20,
-        "offset": 0,
-        "filters": [
-            "name",
-            "like",
-            "VANGUARD%"
-        ],
-        "tag": "just tag",
-        "sort_by": [
-            {
-                "selector": "value",
-                "desc": false
-            }
-        ]
-    },
     "result": {
         "total_count": 5,
         "items_count": 5,

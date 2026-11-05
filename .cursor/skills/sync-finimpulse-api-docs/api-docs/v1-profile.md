@@ -1,29 +1,48 @@
 ---
-title: Profile
+title: Company, ETF &amp; Mutual Fund Profile API
 created: 2026-01-13
-updated: 2026-02-06
+updated: 2026-11-05
 endpoint: POST v1/profile
 auth: Bearer Token
 ---
 
-# Profile
+# Company, ETF &amp; Mutual Fund Profile API
 
-Returns a profile and descriptive metadata for an asset, including identity, classification, governance fields, and fund-specific attributes where applicable.
+Returns company or fund profile data for one asset symbol, including description, classification, key officers, and fund fees. 
 
-This endpoint acts as a unified profile snapshot. It combines company identity (for stocks), descriptive fund profile (for ETFs and mutual funds), and standardized governance placeholders where available.
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/) · [n8n](https://n8n.io/integrations/finimpulse/) · [Make](https://www.make.com/en/integrations/finimpulse)
+
+This endpoint retrieves descriptive profile data for a single stock, ETF, or mutual fund, including contact details, sector and industry, business or fund description, key officers and governance scores for companies, and style, size, and fee details for funds.
+
+## Coverage 
+
+Asset TypesStocks, ETFs, mutual fundsMarket Regions~54Listings~360,000
+
+Coverage figures are approximate and may change over time.
+
+## Data Freshness
+
+Data is returned as a snapshot. The time of the latest update is indicated by **update_time** and varies between assets.
 
 ## Asset Type Compatibility
-The set of returned profile fields varies by asset class.
 
-- **Stocks:** Returns a complete company profile, including headquarters, website, sector/industry classification, business summary, employee count, key officers, investor relations website, and governance risk scores.
-- **ETFs:** Returns a fund profile including fund description, style box, size/style classification, assets under management, yield, YTD return (when available), and fees/turnover fields. Company-specific fields (such as sector/industry, officers, and employee count) are generally not applicable.
-- **Mutual funds:** Returns a fund profile including fund description, style box, size/style classification, net assets, yield, last distribution values, Morningstar rating (when available), and detailed fee fields including category-relative comparisons.
+This endpoint uses one response schema for stocks, ETFs, and mutual funds. Available data depends on the asset type:
+
+- **Stocks**: address and contact details, sector and industry, business summary, employee count, key officers with compensation, and governance risk scores where available.
+- **ETFs**: fund description, style box and size/style classification, net assets, YTD return, yield, expense ratio, and holdings turnover.
+- **Mutual funds**: fund description, style box and size/style classification, net assets, YTD return, yield, last distributions, Morningstar rating, and expense ratios.
+
+## Data Availability &amp; Limitations
+
+Some fields may return **null**, an **empty string**, or an **empty array** if a specific value is not available for a given asset. This does not indicate an error. Some numeric fields may also return 0 when no value is available (e.g., **fees_expense_projection_3yr**).
 
 ## When to Use This Endpoint
-- Retrieve identity and descriptive metadata for an asset.
-- Populate the **Profile** tab (company/fund overview, description, classification).
-- Display fund characteristics, including net assets, yield, style box, and fees.
-- Display governance risk indicators and officer list for equities where available.
+
+- Build company profile pages for investment research platforms and brokerage apps.
+- Add leadership and executive overviews to equity research tools.
+- Power fund research and fund comparison tools for investors and financial advisors.
+- Enrich portfolio trackers and watchlists with company and fund background information.
+- Provide context for AI assistants and research copilots answering questions about specific assets.
 
 ## Request Parameters
 **POST** `v1/profile` 
@@ -153,31 +172,29 @@ req.end();
 
 
 ## Response
+The response returns an items array with a single profile record for the requested symbol.
+
 ### Pagination Fields
 
 
 - **total_count**   
      `integer` — Total number of matching items.
 - **items**   
-     `array` — Array of profile records (typically a single item for the requested symbol).
+     `array` — Array of profile records. Typically a single item for the requested symbol.
 
 
 ### General Information
 
-General identification and taxonomy fields.
-
 
 - **symbol**   
-     `string` — Asset symbol.
+     `string` — Asset identifier (ticker symbol).
 - **quote_type**   
-     `string` — Asset type classification (stock, ETF, mutual fund).
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **currency**   
-     `string` — Trading currency for the asset profile record.
+     `string` — Trading currency.
 
 
 ### Address and Contact Details
-
-Location and contact information (primarily for stocks). For funds, these fields may be *null*.
 
 
 - **address_1**   
@@ -198,17 +215,15 @@ Location and contact information (primarily for stocks). For funds, these fields
 
 ### Sector and Industry
 
-Company classification fields (primarily for stocks). For ETFs and mutual funds, these fields are typically *null*.
-
 
 - **industry**   
-     `string` — Industry name.
+     `string` — Industry classification.
 - **industry_key**   
      `string` — Normalized industry key.
 - **industry_disp**   
      `string` — Display-friendly industry label.
 - **sector**   
-     `string` — Sector name.
+     `string` — Sector classification.
 - **sector_key**   
      `string` — Normalized sector key.
 - **sector_disp**   
@@ -219,37 +234,33 @@ Company classification fields (primarily for stocks). For ETFs and mutual funds,
 
 
 - **long_business_summary**   
-     `string` — Company or fund long description/investment objective summary.
+     `string` — Long-form company description (stocks) or investment objective summary (funds).
 
 
 ### Company Size &amp; People
 
-Fields that describe organization size and key executives (stocks). Returned as *empty/null* for funds.
-
 
 - **full_time_employees**   
-     `integer` — Number of full-time employees (stocks).
+     `integer` — Number of full-time employees.
 - **company_officers**   
-     `array` — Array of company officer records (stocks). For ETFs and mutual funds is typically returned as an empty array. 
+     `array` — Array of company officer records. 
     - **name**   
          `string` — Officer name.
     - **age**   
          `integer` — Officer age.
     - **title**   
-         `string` — Officer title/role.
+         `string` — Officer role.
     - **year_born**   
          `integer` — Birth year.
     - **fiscal_year**   
-         `integer` — Fiscal year for compensation record.
+         `integer` — Fiscal year for record.
     - **total_pay**   
          `integer` — Total compensation for the fiscal year.
     - **exercised_value**   
-         `number` — Exercised option value (if available in source).
+         `number` — Exercised value.
 
 
 ### Governance Dates &amp; Links
-
-Governance, compensation, timestamps, and investor relations link. Some assets return placeholder epoch dates (e.g., 1900-01-01) when governance datasets are not available.
 
 
 - **governance_epoch_date**   
@@ -257,22 +268,20 @@ Governance, compensation, timestamps, and investor relations link. Some assets r
 - **compensation_as_of_epoch_date**   
      `string` — Compensation dataset reference date.
 - **ir_website**   
-     `string` — Investor relations website (stocks).
+     `string` — Investor relations website URL.
 
 
 ### Governance Risk Indicators
 
-Governance risk scores, when available (primarily for stocks). For funds, these are commonly *null*.
-
 
 - **governance_audit_risk**   
-     `integer` — Audit risk score.
+     `integer` — Governance audit risk score.
 - **governance_board_risk**   
-     `integer` — Board risk score.
+     `integer` — Governance board risk score.
 - **governance_compensation_risk**   
-     `integer` — Compensation risk score.
+     `integer` — Governance compensation risk score.
 - **governance_shareholder_rights_risk**   
-     `integer` — Shareholder rights risk score.
+     `integer` — Governance shareholder rights risk score.
 - **governance_overall_risk**   
      `integer` — Overall governance risk score.
 
@@ -285,29 +294,27 @@ Governance risk scores, when available (primarily for stocks). For funds, these 
 - **company_size**   
      `string` — Size classification (e.g., large, medium).
 - **investment_valuation_style**   
-     `string` — Style classification (e.g., value, blend).
+     `string` — Investment valuation style classification (e.g., value, blend).
 
 
 ### Fund Size &amp; Distribution
 
-Fund-level size and distribution metrics. Availability varies by fund type.
-
 
 - **net_assets**   
-     `integer` — Net assets/assets under management.
+     `integer` — Total net assets under management.
 - **ytd_return**   
-     `number` — Year-to-date return (when available).
+     `number` — Year-to-date (YTD) return.
 - **yield**   
-     `number` — Yield (fund distribution yield when available).
+     `number` — Fund distribution yield.
 - **last_dividend**   
-     `number` — Last dividend/distribution amount.
+     `number` — Last dividend amount.
 - **last_cap_gain**   
-     `number` — Last capital gains distribution amount (if applicable).
+     `number` — Last capital gains distribution amount.
 - **morning_star_rating**   
-     `integer` — Morningstar rating (if available).
+     `integer` — Morningstar rating.
 
 
-### Fees &amp; Expenses (Funds)
+### Fees &amp; Expenses
 
 
 - **fees_annual_report_expense_ratio**   
@@ -315,45 +322,52 @@ Fund-level size and distribution metrics. Availability varies by fund type.
 - **fees_annual_holdings_turnover**   
      `number` — Annual holdings turnover.
 - **fees_total_net_assets**   
-     `number` — Total net assets used in the fee dataset context.
+     `number` — Total net assets.
 - **fees_net_exp_ratio**   
      `number` — Net expense ratio.
 - **fees_gross_exp_ratio**   
      `number` — Gross expense ratio.
 - **fees_twelve_b_one**   
-     `number` — 12b-1 fee.
+     `number` — 12b-1 distribution fee.
 - **fees_front_end_sales_load**   
      `number` — Front-end sales load.
 - **fees_deferred_sales_load**   
      `number` — Deferred sales load.
 - **fees_expense_projection_3yr**   
-     `number` — Expense projection (3 years).
+     `number` — Projected cumulative expenses over 3 years.
 - **fees_expense_projection_5yr**   
-     `number` — Expense projection (5 years).
+     `number` — Projected cumulative expenses over 5 years.
 - **fees_expense_projection_10yr**   
-     `number` — Expense projection (10 years).
+     `number` — Projected cumulative expenses over 10 years.
 - **fees_annual_report_expense_ratio_cat**   
-     `number` — Category annual report expense ratio.
+     `number` — Category average annual report expense ratio.
 - **fees_annual_holdings_turnover_cat**   
-     `number` — Category annual holdings turnover.
+     `number` — Category average annual holdings turnover.
 - **fees_total_net_assets_cat**   
-     `number` — Category total net assets reference.
+     `number` — Category average total net assets.
 - **fees_net_exp_ratio_cat**   
-     `number` — Category net expense ratio.
+     `number` — Category average net expense ratio.
 - **fees_gross_exp_ratio_cat**   
-     `number` — Category gross expense ratio.
+     `number` — Category average gross expense ratio.
 - **fees_twelve_b_one_cat**   
-     `number` — Category 12b-1 fee.
+     `number` — Category average 12b-1 distribution fee.
 - **fees_front_end_sales_load_cat**   
-     `number` — Category front-end sales load.
+     `number` — Category average front-end sales load.
 - **fees_deferred_sales_load_cat**   
-     `number` — Category deferred sales load.
+     `number` — Category average deferred sales load.
 - **fees_expense_projection_3yr_cat**   
-     `number` — Category expense projection (3 years).
+     `number` — Category average projected cumulative expenses over 3 years.
 - **fees_expense_projection_5yr_cat**   
-     `number` — Category expense projection (5 years).
+     `number` — Category average projected cumulative expenses over 5 years.
 - **fees_expense_projection_10yr_cat**   
-     `number` — Category expense projection (10 years).
+     `number` — Category average projected cumulative expenses over 10 years.
+
+
+### Metadata
+
+
+- **update_time**   
+     `string` — Timestamp of the most recent data update (ISO 8601).
 
 
 ### Example Response
@@ -361,14 +375,6 @@ Fund-level size and distribution metrics. Availability varies by fund type.
 
 ```json
 {
-    "task_id": "46c212e6-ff5d-4f30-9d29-cd4acdeded52",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0004,
-    "data": {
-        "symbol": "NVDA",
-        "tag": "just tag"
-    },
     "result": {
         "total_count": 1,
         "items": [
@@ -530,6 +536,29 @@ Fund-level size and distribution metrics. Availability varies by fund type.
 ```
 
 
-## Notes
-- Fields that are not relevant for a given asset type are returned as *null*.
-- Field-level definitions and calculation rules are available in the [**Glossary**](https://finimpulse.com/glossary/).
+## Units and Formats
+
+Percent-like fields are returned as decimal values (e.g., 0.0095 represents 0.95%), including **ytd_return**, yield, expense ratios, holdings turnover, and sales loads.
+
+## Related APIs
+
+- [Summary Data API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/summary/)
+- [Lightweight Summary API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/summary-lite/)
+- [Search API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/search/)
+- [Market Price API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/market-price/)
+- [Company Insider Roster &amp; Activity API](https://developers.finimpulse.com/v1/holders/insiders/)
+- [Institutional &amp; Insider Ownership API for Stocks](https://developers.finimpulse.com/v1/holders/general/)
+- [ETF &amp; Mutual Fund Holdings Overview API](https://developers.finimpulse.com/v1/holdings/general/)
+- [ETF &amp; Mutual Fund Annual Returns API](https://developers.finimpulse.com/v1/statistics/annual-returns/)
+- [Financial News API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/news/)
+
+## Build with this API
+
+- [Build Rich Company Pages Using Company Profile API](https://finimpulse.com/rest-api-use-cases/company-profile-api/)
+
+## Related Resources
+
+- [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
+- [Glossary](https://finimpulse.com/glossary/)
+- [API Pricing](https://finimpulse.com/api/pricing/)

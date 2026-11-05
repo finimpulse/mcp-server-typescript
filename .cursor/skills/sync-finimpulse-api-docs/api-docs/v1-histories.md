@@ -1,45 +1,62 @@
 ---
-title: Histories
+title: Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices
 created: 2026-01-28
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/histories
 auth: Bearer Token
 ---
 
-# Histories
+# Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices
 
-Returns time-series data for an asset in a single unified stream.
+Returns historical price data for an asset, including dividends, splits, and capital gains, in a single stream. 
 
-This endpoint can return historical prices and, optionally, additional history “event” types such as dividends, splits, and capital gains (where available). It is a configurable endpoint that lets you control the date range, interval, included record types, sorting, and page size.
+**Available via:** [REST API ](https://developers.finimpulse.com/)· [MCP](https://developers.finimpulse.com/model-context-protocol/) · [n8n](https://n8n.io/integrations/finimpulse/) · [Make](https://www.make.com/en/integrations/finimpulse)
+
+This endpoint returns historical price data for stocks, ETFs, mutual funds, and indices, along with dividends, stock splits, and capital gains where available. It is a configurable endpoint that lets you control the date range, interval (from daily to yearly), and included record types, and optionally convert all values to USD.
+
+## Coverage
+
+Asset TypesStocks, ETFs, mutual funds, indicesMarket Regions~60Listings730,000+Historical Depth1970 to presentIntervalsDaily, weekly, monthly, quarterly, semiannual, yearly
+
+Coverage figures are approximate and may change over time.
+
+## Data Freshness 
+
+Historical data is updated once a day with records for the previous trading day.
 
 ## Asset Type Compatibility
-*/histories* works consistently across stocks, ETFs, and mutual funds.
+The Historical Price Data API works across stocks, ETFs, mutual funds, and indices. Available record types depend on the asset type:
 
-- ***historical_price***: The primary type and is generally available for all assets with price history.
-- ***dividends*** and ***splits***: Depend on the availability of corporate actions/distributions data for the asset.
-- ***capital_gains***: Typically present only for some funds (often older share classes/specific fund structures).
-
-If a requested type has no data for the asset, it will simply be absent from items.
+- **Stocks**: historical prices, dividends, and splits.
+- **ETFs**: historical prices, dividends, splits, and capital gains (only for some ETFs, depending on their distribution history).
+- **Mutual Funds**: historical prices, dividends, splits, and capital gains (only for some funds, depending on their distribution history).
+- **Indices**: historical prices only.
 
 ## USD Normalization
-By default, all currency-denominated fields are returned in the asset's native currency. For assets traded in non-USD currencies, **you can request automatic conversion to USD by passing the "*use_usd*" parameter**.
+By default, all currency-denominated fields are returned in the asset's native currency. For assets quoted in currencies other than USD, you can set **use_usd** to true to convert these values to USD.
 
-When **“use_usd”: true** is set, all currency-denominated fields across all record types are converted to USD at the applicable historical exchange rate for each date.
+When **“use_usd”: true** is set, each value is converted at the historical exchange rate for its date, so every price, dividend, and capital gain reflects the rate that applied on that day. This eliminates the need for client-side currency conversion and provides a consistent USD basis for comparing assets across markets.
 
-This removes the need for client-side currency conversion, providing a consistent USD baseline across all assets and record types.
 
+## Data Availability &amp; Limitations
+
+- Dividends, splits, and capital gains may not be available for all assets. If a requested record type has no data for the asset, it is not included in items.
+- If none of the requested record types have data for the asset, the response contains an empty items array, and all asset metadata fields are **null**.
+- Some fields may be **null** if a specific value is not available for a given asset. This does not indicate an error.
+- Intraday data is not available. The shortest supported interval is one day (1d).
 
 ## When to Use This Endpoint
-- Power the **Historical Data** tab (prices, with optional corporate actions overlays).
-- Build a **single list** of timeline records (including prices and events) for charts and tables.
-- Pull data for export (CSV/Sheets) with consistent sorting and pagination.
-- Show dividends/splits alongside prices without calling separate endpoints.
+- Build historical price charts for stocks, ETFs, mutual funds, and indices, with dividends and splits marked on the same timeline.
+- Display price history tables with open, high, low, close, adjusted close, and volume for any date range and interval.
+- Track index performance over time, such as the Dow Jones Industrial Average or the Nikkei 225.
+- Compare assets from different markets on a consistent USD basis.
+- Retrieve dividend, split, and capital gains history for income and corporate action analysis.
 
 ## Request Parameters
 **POST** `v1/histories` 
 
 - **symbol**   
-     `sring` *(required)* — Asset identifier (ticker symbol).
+     `string` *(required)* — Asset identifier (ticker symbol). Not required when `search_after_token` is provided.
 - **types**   
      `array` *(optional)* — Record types to include. **Supported values:**
     - `historical_price`
@@ -47,37 +64,41 @@ This removes the need for client-side currency conversion, providing a consisten
     - `splits`
     - `capital_gains`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported types are returned. **Example:** `"types": [ "historical_price", "dividends", "splits", "capital_gains" ]`
+     Each value is a **string**. You can pass any combination of the supported values. If no values are provided, all supported types are returned.
 - **interval**   
      `string` *(optional)* — Granularity for returned history records. **Available values:**
     - `1d` (1 day)
     - `1wk` (1 week)
     - `1mo` (1 month)
-    - `3mo` (3 month)
-    - `6mo` (6 month)
+    - `3mo` (3 months)
+    - `6mo` (6 months)
     - `1y` (1 year)
      
-     Supported intervals depend on the data source and asset coverage.
+     If no value is provided, daily records (1d) are returned.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD). Records returned fall within the requested period.
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD). If omitted, records are returned from the earliest available date.
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD). Records returned fall within the requested period.
-- **sort_by**   
-     `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
-    - `selector` - Metric used for sorting (e.g., date).
-    - `desc` - Sorting direction (*true* for descending, *false* for ascending).
-     
-     Sortings can be combined using `,`. **Example:** ` { "selector": "date", "desc": true }`
-- **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
-- **offset**   
-     `integer` *(optional)* — Pagination offset (0-based)
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD). If omitted, records are returned up to the most recent available date.
 - **use_usd**   
      `boolean` *(optional)* — Controls whether currency-denominated fields are returned in USD or in the asset's native currency. 
     - `true` - all currency-denominated fields are returned in USD
     - `false` - all currency-denominated fields are returned in the asset's native currency (default)
      
      Ignored for assets already denominated in USD.
+- **sort_by**   
+     `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as an object `{selector, desc}`: 
+    - `selector` - Field used for sorting (e.g., date).
+    - `desc` - Sorting direction (*true* for descending, *false* for ascending).
+     
+     Multiple sorting setups can be combined in the array.
+- **limit**   
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined). 
+    - Default: 100
+    - Maximum: 1000
+- **offset**   
+     `integer` *(optional)* — Pagination offset (0-based)
+- **search_after_token**   
+     `string` *(optional)* — Token for pagination. Use the value returned in the previous response to fetch the next page. Pass `limit` with each request, because the token does not store the page size. Other request parameters do not need to be repeated.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -90,10 +111,23 @@ curl --location "https://api.finimpulse.com/v1/histories" \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
-      "symbol": "NVDA",
+      "symbol": "NOKIA.HE",
+      "types": [
+          "historical_price",
+          "dividends",
+          "splits",
+          "capital_gains"
+      ],
       "interval": "1d",
       "start_date": "2025-12-01",
       "end_date": "2025-12-30",
+      "use_usd": true,
+      "sort_by": [
+          {
+              "selector": "date",
+              "desc": true
+          }
+      ],
       "limit": 5,
       "offset": 0,
       "tag": "just tag"
@@ -113,10 +147,23 @@ client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bear
 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
 var json = @"{
-    ""symbol"": ""NVDA"",
+    ""symbol"": ""NOKIA.HE"",
+    ""types"": [
+        ""historical_price"",
+        ""dividends"",
+        ""splits"",
+        ""capital_gains""
+    ],
     ""interval"": ""1d"",
     ""start_date"": ""2025-12-01"",
     ""end_date"": ""2025-12-30"",
+    ""use_usd"": true,
+    ""sort_by"": [
+        {
+            ""selector"": ""date"",
+            ""desc"": true
+        }
+    ],
     ""limit"": 5,
     ""offset"": 0,
     ""tag"": ""just tag""
@@ -143,10 +190,23 @@ curl_setopt_array($curl, [
   ],
   CURLOPT_POSTFIELDS => json_encode(
 [
-      "symbol" => "NVDA",
+      "symbol" => "NOKIA.HE",
+      "types" => [
+        "historical_price",
+        "dividends",
+        "splits",
+        "capital_gains"
+      ],
       "interval" => "1d",
       "start_date" => "2025-12-01",
       "end_date" => "2025-12-30",
+      "use_usd" => true,
+      "sort_by" => [
+        [
+          "selector" => "date",
+          "desc" => true
+        ]
+      ],
       "limit" => 5,
       "offset" => 0,
       "tag" => "just tag"
@@ -171,10 +231,23 @@ headers = {
     "Authorization": "Bearer <API_TOKEN>"
 }
 data = {
-    "symbol": "NVDA",
+    "symbol": "NOKIA.HE",
+    "types": [
+        "historical_price",
+        "dividends",
+        "splits",
+        "capital_gains"
+    ],
     "interval": "1d",
     "start_date": "2025-12-01",
     "end_date": "2025-12-30",
+    "use_usd": True,
+    "sort_by": [
+        {
+            "selector": "date",
+            "desc": True
+        }
+    ],
     "limit": 5,
     "offset": 0,
     "tag": "just tag"
@@ -195,10 +268,23 @@ with urllib.request.urlopen(req) as response:
 const https = require('https');
 
 const data = JSON.stringify({
-    "symbol": "NVDA",
+    "symbol": "NOKIA.HE",
+    "types": [
+        "historical_price",
+        "dividends",
+        "splits",
+        "capital_gains"
+    ],
     "interval": "1d",
     "start_date": "2025-12-01",
     "end_date": "2025-12-30",
+    "use_usd": true,
+    "sort_by": [
+        {
+            "selector": "date",
+            "desc": true
+        }
+    ],
     "limit": 5,
     "offset": 0,
     "tag": "just tag"
@@ -226,31 +312,38 @@ req.end();
 
 
 ## Response
-### Meta Fields
+The response contains asset metadata, pagination fields, and a list of history records. Each item represents a single record of the requested type for a given date.
+
+### Asset Metadata
 
 
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **quote_type**   
-     `string` — Asset type (e.g., equity, etf, mutualfund).
+     `string` — Asset class identifier (stock, etf, mutualfund, index, sector). **Note**: sector is returned for sector ETFs (XLK, XLF, XLV, XLY, XLP, XLC, XLI, XLE, XLB, XLRE, XLU).
 - **currency**   
      `string` — Trading currency.
 - **time_offset**   
      `integer` — Exchange time offset in seconds.
 - **exchange_timezone_name**   
-     `string` — Exchange time zone name (e.g., America/New_York).
+     `string` — Exchange time zone name.
 - **full_exchange_name**   
      `string` — Exchange name.
 - **display_name**   
-     `string` — Preferred asset name (if available).
+     `string` — Asset display name.
 - **market_region**   
      `string` — Market/country code.
+
+
+### Pagination Fields
+
+
 - **total_count**   
-     `integer` — Total number of items that match filters.
+     `integer` — Total number of matching history records.
 - **search_after_token**   
-     `string` — Token for pagination. Pass it in the next request to fetch the next page. **Format:** `"search_after_token": "token_here"`
+     `string` — Token for pagination. Pass it as the `search_after_token` request parameter, together with `limit`, to fetch the next page. Returns *null* if there are no more pages.
 - **items_count**   
-     `integer` — Number of items returned.
+     `integer` — Number of history records returned.
 - **items**   
      `array` — Array of history records.
 
@@ -259,30 +352,30 @@ req.end();
 
 
 - **type**   
-     `string` — Record type (historical_price expected).
+     `string` — Record type (historical_price).
 - **date**   
      `string` — Trading date (YYYY-MM-DD).
 - **open**   
-     `number` — Open price for the interval.
+     `number` — Market open price for the interval.
 - **high**   
-     `number` — High price for the interval.
+     `number` — Highest price for the interval.
 - **low**   
-     `number` — Low price for the interval.
+     `number` — Lowest price for the interval.
 - **close**   
      `number` — Close price for the interval.
 - **adj_close**   
-     `number` — Adjusted close price.
+     `number` — Adjusted close price for the interval.
 - **volume**   
-     `number` — Traded volume for the interval.
+     `number` — Trading volume for the interval.
 
 
 ### Dividends
 
 
 - **type**   
-     `string` — Record type (dividends expected).
+     `string` — Record type (dividends).
 - **date**   
-     `string` — Trading date (YYYY-MM-DD).
+     `string` — Event date (YYYY-MM-DD).
 - **amount**   
      `number` — Dividend amount.
 
@@ -291,9 +384,9 @@ req.end();
 
 
 - **type**   
-     `string` — Record type (splits expected).
+     `string` — Record type (splits).
 - **date**   
-     `string` — Trading date (YYYY-MM-DD).
+     `string` — Event date (YYYY-MM-DD).
 - **numerator**   
      `integer` — Number of shares after the split.
 - **denominator**   
@@ -304,11 +397,13 @@ req.end();
 
 
 - **type**   
-     `string` — Record type (capital_gains expected).
+     `string` — Record type (capital_gains).
 - **date**   
-     `string` — Trading date (YYYY-MM-DD).
+     `string` — Event date (YYYY-MM-DD).
 - **amount**   
-     `number` — Realized capital gain or loss amount (positive value = capital gain, negative value = capital loss).
+     `number` — Realized capital gain or loss amount 
+    - positive value = capital gain
+    - negative value = capital loss
 
 
 ### Example Response
@@ -316,95 +411,109 @@ req.end();
 
 ```json
 {
-    "task_id": "6a5e231c-27b7-436f-b5b8-54ebc30f62be",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0004,
-    "data": {
-        "symbol": "NVDA",
-        "interval": "1d",
-        "start_date": "2025-12-01",
-        "end_date": "2025-12-30",
-        "sort_by": [
-            {
-                "selector": "date",
-                "desc": true
-            }
-        ],
-        "limit": 5,
-        "offset": 0,
-        "tag": "just tag",
-        "types": [
-            "historical_price",
-            "dividends",
-            "splits",
-            "capital_gains"
-        ]
-    },
     "result": {
-        "symbol": "NVDA",
-        "quote_type": "equity",
+        "symbol": "NOKIA.HE",
+        "quote_type": "stock",
         "currency": "USD",
-        "time_offset": -14400,
-        "exchange_timezone_name": "America/New_York",
-        "full_exchange_name": "NasdaqGS",
-        "display_name": "NVIDIA",
-        "market_region": "US_OT",
-        "total_count": 21,
-        "search_after_token": "eyJSZXF1ZXN0RGF0YSI6eyJzeW1ib2wiOiJOVkRBIiwidXNlX3VzZCI6ZmFsc2UsInR5cGVzIjpbImhpc3RvcmljYWxfcHJpY2UiLCJkaXZpZGVuZHMiLCJzcGxpdHMiLCJjYXBpdGFsX2dhaW5zIl0sImludGVydmFsIjoiMWQiLCJzdGFydF9kYXRlIjoiMjAyNS0xMi0wMSIsImVuZF9kYXRlIjoiMjAyNS0xMi0zMCIsInF1ZXJ5IjpudWxsLCJvcmRlcl9ieSI6eyJvcmRlcl9maWVsZCI6ImRhdGUiLCJvcmRlcl90eXBlIjoiRGVzYyIsIm5leHQiOm51bGx9LCJsaW1pdCI6NSwib2Zmc2V0IjpudWxsLCJ1aWQiOm51bGx9LCJTZWFyY2hBZnRlckRhdGEiOnsiVmVyc2lvbiI6MSwiU2VhcmNoQWZ0ZXJWYWx1ZXMiOnsiZGF0ZSI6IjIwMjUtMTItMjIifSwiVG9rZW5SZWFsT2Zmc2V0Ijo1LCJUb3RhbENvdW50IjoyMX19",
+        "time_offset": 10800,
+        "exchange_timezone_name": "Europe/Helsinki",
+        "full_exchange_name": "Helsinki",
+        "display_name": null,
+        "market_region": "FI",
+        "total_count": 18,
+        "search_after_token": "eyJSZXF1ZXN0RGF0YSI6eyJzeW1ib2wiOiJOT0tJQS5IRSIsInVzZV91c2QiOnRydWUsInR5cGVzIjpbImhpc3RvcmljYWxfcHJpY2UiLCJkaXZpZGVuZHMiLCJzcGxpdHMiLCJjYXBpdGFsX2dhaW5zIl0sImludGVydmFsIjoiMWQiLCJzdGFydF9kYXRlIjoiMjAyNS0xMi0wMSIsImVuZF9kYXRlIjoiMjAyNS0xMi0zMCIsInF1ZXJ5IjpudWxsLCJvcmRlcl9ieSI6eyJvcmRlcl9maWVsZCI6ImRhdGUiLCJvcmRlcl90eXBlIjoiRGVzYyIsIm5leHQiOm51bGx9LCJsaW1pdCI6NSwib2Zmc2V0IjpudWxsLCJ1aWQiOm51bGx9LCJTZWFyY2hBZnRlckRhdGEiOnsiVmVyc2lvbiI6MSwiU2VhcmNoQWZ0ZXJWYWx1ZXMiOnsiZGF0ZSI6IjIwMjUtMTItMTgifSwiVG9rZW5SZWFsT2Zmc2V0Ijo1LCJUb3RhbENvdW50IjoxOH19",
         "items_count": 5,
         "items": [
             {
                 "type": "historical_price",
-                "open": 187.71000671,
-                "high": 188.75999451,
-                "low": 185.91000366,
-                "close": 188.22000122,
-                "adj_close": 188.22000122,
-                "volume": 120006100,
+                "open": 6.557415656036558,
+                "high": 6.571542483339749,
+                "low": 6.451460831145478,
+                "close": 6.566833729269171,
+                "adj_close": 6.566833729269171,
+                "volume": 7396059.44720707,
                 "date": "2025-12-29"
             },
             {
                 "type": "historical_price",
-                "open": 189.91999817,
-                "high": 192.69000244,
-                "low": 188,
-                "close": 190.52999878,
-                "adj_close": 190.52999878,
-                "volume": 139740300,
-                "date": "2025-12-26"
-            },
-            {
-                "type": "historical_price",
-                "open": 187.94000244,
-                "high": 188.91000366,
-                "low": 186.58999634,
-                "close": 188.61000061,
-                "adj_close": 188.61000061,
-                "volume": 65528500,
-                "date": "2025-12-24"
-            },
-            {
-                "type": "historical_price",
-                "open": 182.97000122,
-                "high": 189.33000183,
-                "low": 182.8999939,
-                "close": 189.21000671,
-                "adj_close": 189.21000671,
-                "volume": 174873600,
+                "open": 6.530102973053067,
+                "high": 6.541868629804295,
+                "low": 6.483039216516871,
+                "close": 6.492451859577361,
+                "adj_close": 6.492451859577361,
+                "volume": 6461769.63645807,
                 "date": "2025-12-23"
             },
             {
                 "type": "historical_price",
-                "open": 183.91999817,
-                "high": 184.16000366,
-                "low": 182.3500061,
-                "close": 183.69000244,
-                "adj_close": 183.69000244,
-                "volume": 129064400,
+                "open": 6.439451645,
+                "high": 6.516725041323812,
+                "low": 6.411352020602403,
+                "close": 6.441793099866685,
+                "adj_close": 6.441793099866685,
+                "volume": 8697302.52557367,
                 "date": "2025-12-22"
+            },
+            {
+                "type": "historical_price",
+                "open": 6.327169537869001,
+                "high": 6.449116575,
+                "low": 6.317789121925666,
+                "close": 6.399868986761997,
+                "adj_close": 6.399868986761997,
+                "volume": 22863284.96219175,
+                "date": "2025-12-19"
+            },
+            {
+                "type": "historical_price",
+                "open": 6.2187358496,
+                "high": 6.423052075411154,
+                "low": 6.192902932019542,
+                "close": 6.376082818380458,
+                "adj_close": 6.376082818380458,
+                "volume": 12163534.975946,
+                "date": "2025-12-18"
             }
         ]
     }
 }
 ```
+
+
+## Units and Formats 
+
+- Currency-denominated fields (**open**, **high**, **low**, **close**, **adj_close**, **amount**) are expressed in the currency indicated by the currency field.
+- For indices, **open**, **high**, **low**, **close**, and **adj_close** contain index values in points. The **currency** field shows the currency in which the index is calculated.
+
+## Pagination &amp; Limits 
+
+You can control how many records a response returns and page through large result sets using the **limit** and **offset** parameters or the **search_after_token** value.
+
+- Use **limit** to set the number of records per request, from 1 to 1000. If **limit** is not specified, up to 100 records are returned.
+- Use **offset** to skip records (0-based). For example, **limit**: 100 and **offset**: 100 return records 101–200.
+- To retrieve all matching records, increase **offset** by the **limit** value until **offset** + **items_count** reaches **total_count**.
+- Alternatively, pass the **search_after_token** value from the previous response in the next request to fetch the following page. Pass **limit** with each request, because the token does not store the page size. Other request parameters do not need to be repeated.
+- To keep the order consistent across pages, pass **sort_by**, for example, by **date**.
+
+## Related APIs 
+
+- [](https://developers.finimpulse.com/v1/search/)[Search API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/search/)
+- [Global Market Index Search API](https://developers.finimpulse.com/v1/market/index/)
+- [Market Price API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/market-price/)
+- [Summary Data API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/summary/)
+- [Statistics API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/statistics/general/)
+- [Stock Financial Metrics &amp; Dividends API](https://developers.finimpulse.com/v1/metrics/)
+- [ETF &amp; Mutual Fund Annual Returns API](https://developers.finimpulse.com/v1/statistics/annual-returns/)
+- [Corporate Earnings &amp; IPO Calendar API](https://developers.finimpulse.com/v1/events/tickers/)
+- [Macroeconomic Release Calendar API](https://developers.finimpulse.com/v1/market/calendars/)
+
+## Build with this API 
+
+- [Build Historical Price Charts Using Historical Prices API](https://finimpulse.com/rest-api-use-cases/historical-prices-api/)
+
+## Related Resources
+
+- [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
+- [Glossary](https://finimpulse.com/glossary/)
+- [API Pricing](https://finimpulse.com/api/pricing/)

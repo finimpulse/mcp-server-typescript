@@ -1,12 +1,12 @@
 ---
-title: Annual Returns
+title: ETF &amp; Mutual Fund Annual Returns API
 created: 2025-12-19
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/statistics/annual-returns
 auth: Bearer Token
 ---
 
-# Annual Returns
+# ETF &amp; Mutual Fund Annual Returns API
 
 Returns historical annual total returns for an asset by calendar year.
 
@@ -16,7 +16,7 @@ The returned dataset depends on the asset type and the availability of historica
 - **Mutual funds:** Annual returns may be available at the fund or category level, depending on data coverage and the fund's history.
 - **Stocks:** This endpoint returns an empty result. Annual total return history is not provided for individual stocks.
 
-An empty result indicates that annual return data does not exist for the requested asset; it is not a request error.
+An empty result indicates that annual return data does not exist for the requested asset; this is expected behavior.
 
 ## When to Use This Endpoint
 - Analyze long-term historical performance of ETFs and mutual funds.
@@ -157,9 +157,9 @@ The response is an array, with each item representing a single calendar year and
 - **year**   
      `integer` — Calendar year.
 - **annual_value**   
-     `number` — Total return of the asset for the given year.
+     `number` — Annual return.
 - **annual_category_value**   
-     `number` — Average return of the asset’s category for the same year, when available.
+     `number` — Category average annual return.
 - **q1**   
      `number` — First quarter return.
 - **q2**   
@@ -175,14 +175,6 @@ The response is an array, with each item representing a single calendar year and
 
 ```json
 {
-    "task_id": "a2b2c370-0844-467d-aa9c-efb4ce3e3539",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0008,
-    "data": {
-        "symbol": "FARMX",
-        "tag": "just_tag"
-    },
     "result": [
         {
             "year": 1970,
@@ -693,10 +685,7 @@ The response is an array, with each item representing a single calendar year and
 ```
 
 
-Quarterly values may be **null** when quarterly data is not available or not applicable.
-
 ## Notes
 - Returns are expressed as decimal values (e.g., 0.25 represents a 25% return).
 - **annual_value** and **annual_category_value** may be null depending on historical coverage and asset type.
-- Calendar-year availability varies by asset's inception date and data source.
 - Quarterly breakdowns are optional and may not be present for all assets or years.

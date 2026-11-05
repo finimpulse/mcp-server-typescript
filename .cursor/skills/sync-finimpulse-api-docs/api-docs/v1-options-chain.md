@@ -1,16 +1,18 @@
 ---
-title: Chain
+title: Stock &amp; ETF Options Chain API
 created: 2026-03-10
-updated: 2026-03-10
+updated: 2026-11-05
 endpoint: POST v1/options/chain
 auth: Bearer Token
 ---
 
-# Chain
+# Stock &amp; ETF Options Chain API
 
 Returns the option chain for a single underlying ticker and expiration date.
 
-This endpoint provides the core options data. It returns option contracts for a selected underlying and expiration date, including pricing, liquidity, implied volatility, and moneyness fields.
+This eindpoint covers option contracts for a selected underlying and expiration date, including pricing, liquidity, implied volatility, and moneyness fields.
+
+The endpoint returns contracts for one expiration date at a time. Use [**/v1/options/expirations/{symbol}**](https://developers.finimpulse.com/v1/options/expirations/) first to discover valid dates.
 
 ## Asset Type Compatibility
 
@@ -38,22 +40,27 @@ If a ticker is valid but has no options coverage, the response can return an emp
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **expiration_date**   
-     `string` *(required)* — Expiration date to retrieve (YYYY-MM-DD).
+     `string` *(required)* — Expiration date (YYYY-MM-DD).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
      `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires % as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
     - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
@@ -61,17 +68,17 @@ If a ticker is valid but has no options coverage, the response can return an emp
     - `endswith` - string ends with value
      
      *`%` usage examples:*
-    - %abc% - matches any string containing "abc"
-    - abc% - matches any string starting with "abc"
-    - %abc - matches any string ending with "abc"
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ [ "contract_size", "=", "REGULAR" ], "and", [ "bid", "<>", 0 ] ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., last_trade_date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "last_trade_date", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -88,6 +95,25 @@ curl --location "https://api.finimpulse.com/v1/options/chain" \
       "expiration_date": "2026-01-30",
       "limit": 5,
       "offset": 0,
+      "filters": [
+          [
+              "contract_size",
+              "=",
+              "REGULAR"
+          ],
+          "and",
+          [
+              "bid",
+              "<>",
+              0
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "last_trade_date",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -109,6 +135,25 @@ var json = @"{
     ""expiration_date"": ""2026-01-30"",
     ""limit"": 5,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""contract_size"",
+            ""="",
+            ""REGULAR""
+        ],
+        ""and"",
+        [
+            ""bid"",
+            ""<>"",
+            0
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""last_trade_date"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -137,6 +182,25 @@ curl_setopt_array($curl, [
       "expiration_date" => "2026-01-30",
       "limit" => 5,
       "offset" => 0,
+      "filters" => [
+        [
+          "contract_size",
+          "=",
+          "REGULAR"
+        ],
+        "and",
+        [
+          "bid",
+          "<>",
+          0
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "last_trade_date",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -163,6 +227,25 @@ data = {
     "expiration_date": "2026-01-30",
     "limit": 5,
     "offset": 0,
+    "filters": [
+        [
+            "contract_size",
+            "=",
+            "REGULAR"
+        ],
+        "and",
+        [
+            "bid",
+            "<>",
+            0
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "last_trade_date",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -185,6 +268,25 @@ const data = JSON.stringify({
     "expiration_date": "2026-01-30",
     "limit": 5,
     "offset": 0,
+    "filters": [
+        [
+            "contract_size",
+            "=",
+            "REGULAR"
+        ],
+        "and",
+        [
+            "bid",
+            "<>",
+            0
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "last_trade_date",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -217,15 +319,15 @@ req.end();
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **underlying_price**   
-     `number` — Current/reference price of the underlying asset used with the option chain snapshot.
+     `number` — Current price of the underlying asset.
 - **expiration_date**   
-     `string` — Expiration date for all returned contracts.
+     `string` — Expiration date (YYYY-MM-DD).
 - **total_count**   
-     `integer` — Total number of contracts available.
+     `integer` — Total number of matching contracts.
 - **items_count**   
-     `integer` — Number of contracts returned in this response.
+     `integer` — Number of contracts returned.
 - **items**   
-     `array` — Array of option contract entries.
+     `array` — Array of option contracts.
 
 
 ### Option Contract Item
@@ -236,33 +338,35 @@ Each item represents one option contract in the selected expiration chain.
 - **contract_name**   
      `string` — Full option contract identifier.
 - **option_type**   
-     `string` — Contract side. Expected values include `call` and `put`.
+     `string` — Contract side. **Possible values:**
+    - `call`
+    - `put`
 - **strike**   
-     `number` — Strike price of the contract.
+     `number` — Strike price.
 - **currency**   
-     `string` — Pricing currency.
+     `string` — Trading currency.
 - **last_price**   
-     `number` — Last traded contract price.
+     `number` — Last traded price.
 - **change**   
-     `number` — Absolute change in contract price versus prior reference.
+     `number` — Absolute price change.
 - **percent_change**   
-     `number` — Percentage change in contract price (returned as a fraction).
+     `number` — Percentage price change.
 - **volume**   
-     `integer` — Traded contract volume.
+     `integer` — Traded volume.
 - **open_interest**   
-     `integer` — Open interest for the contract.
+     `integer` — Open interest.
 - **bid**   
-     `number` — Current bid price.
+     `number` — Bid price.
 - **ask**   
-     `number` — Current ask price.
+     `number` — Ask price.
 - **contract_size**   
      `string` — Contract size classification (e.g. "REGULAR").
 - **last_trade_date**   
-     `string` — Timestamp of the last recorded trade for the contract.
+     `string` — Timestamp of the last recorded trade (ISO 8601).
 - **implied_volatility**   
-     `number` — Implied volatility (returned as a fraction).
+     `number` — Implied volatility.
 - **in_the_money**   
-     `boolean` — Indicates whether the contract is currently in the money based on the underlying/reference price.
+     `boolean` — Indicates whether the contract is currently in the money.
 
 
 ### Example Response
@@ -270,35 +374,6 @@ Each item represents one option contract in the selected expiration chain.
 
 ```json
 {
-    "task_id": "37acf6e5-654f-4d11-b424-746f3e5118cb",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0014,
-    "data": {
-        "symbol": "NVDA",
-        "limit": 5,
-        "offset": 0,
-        "filters": [
-            [
-                "contract_size",
-                "=",
-                "REGULAR"
-            ],
-            "and",
-            [
-                "bid",
-                "<>",
-                0
-            ]
-        ],
-        "expiration_date": "2026-01-30",
-        "sort_by": [
-            {
-                "selector": "last_trade_date",
-                "desc": true
-            }
-        ]
-    },
     "result": {
         "symbol": "NVDA",
         "underlying_price": 191.13,
@@ -399,6 +474,5 @@ Each item represents one option contract in the selected expiration chain.
 
 ## Notes
 
-- This endpoint returns contracts for one expiration date at a time. Use [**/v1/options/expirations/{symbol}**](https://developers.finimpulse.com/v1/options/expirations/) first to discover valid dates.
 - Some extreme or stale contracts can contain unusual values for implied volatility or price-related fields due to low liquidity or calculation artifacts.
 - The returned chain is a snapshot and can change throughout the trading session as quotes and trades update.

@@ -1,18 +1,19 @@
 ---
-title: Risks
+title: Risk &amp; Risk-Adjusted Performance Metrics API
 created: 2025-12-15
-updated: 2026-03-09
+updated: 2026-11-05
 endpoint: POST v1/statistics/risks
 auth: Bearer Token
 ---
 
-# Risks
+# Risk &amp; Risk-Adjusted Performance Metrics API
 
 Returns risk and risk-adjusted performance metrics for an asset across standardized time horizons.
 
 The returned dataset depends on the asset type and the availability of benchmark-based risk data.
 
-For **mutual funds**, all risk and risk-adjusted performance metrics are available. For **Stocks** and **ETFs**, the response may be empty if risk metrics are not available for the requested asset. In this case, the total count will be **zero**, and the list of items will be **empty**.
+- For **mutual funds**, all risk and risk-adjusted performance metrics are available.
+- For **Stocks** and **ETFs**, the response may be empty if risk metrics are not available for the requested asset. In this case, the total count will be **zero**, and the list of items will be **empty**.
 
 ## When to Use This Endpoint
 - Analyze the risk-adjusted performance of mutual funds.
@@ -26,38 +27,43 @@ For **mutual funds**, all risk and risk-adjusted performance metrics are availab
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **limit**   
-     `integer` *(optional)* — Maximum number of items to return (user-defined).
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
 - **offset**   
-     `integer` *(optional)* — Offset for paginated results.
+     `integer` *(optional)* — Pagination offset (0-based).
 - **filters**   
-     `array` *(optional)* — Optional filter expressions applied to risk metrics. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:** *Numeric fields:*
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
     - `>` - greater than
     - `>=` - greater than or equal
     - `<` - less than
     - `<=` - less than or equal
-    - `=` - equals
-    - `<>` - not equal
      
-     *String fields:*
-    - `like` – pattern match (requires `%` as a wildcard)
-    - `not_like` - pattern does not match (requires `%` as a wildcard)
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
+    - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
     - `startswith` - string starts with value
     - `endswith` - string ends with value
      
-     `%` *usage examples:*
-    - `%abc%` - matches any string containing "abc"
-    - `abc%` - matches any string starting with "abc"
-    - `%abc` - matches any string ending with "abc"
+     *`%` usage examples:*
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
      
-     **Example:** `"filters": [ [ "alpha", ">", -0.09 ], "and", [ "type", "<>", 0 ] ]`
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
      `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
     - `selector` - Metric used for sorting (e.g., alpha).
     - `desc` - Sorting direction (*true* for descending, *false* for ascending).
      
-     Sortings can be combined using `,`. **Example:** `"sort_by": [ { "selector": "alpha", "desc": true } ]`
+     Sortings can be combined using `,`.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -73,6 +79,25 @@ curl --location "https://api.finimpulse.com/v1/statistics/risks" \
       "symbol": "FARMX",
       "limit": 10,
       "offset": 0,
+      "filters": [
+          [
+              "alpha",
+              ">",
+              -0.09
+          ],
+          "and",
+          [
+              "type",
+              "<>",
+              0
+          ]
+      ],
+      "sort_by": [
+          {
+              "selector": "alpha",
+              "desc": true
+          }
+      ],
       "tag": "just tag"
   }'
 ```
@@ -93,6 +118,25 @@ var json = @"{
     ""symbol"": ""FARMX"",
     ""limit"": 10,
     ""offset"": 0,
+    ""filters"": [
+        [
+            ""alpha"",
+            "">"",
+            -0.09
+        ],
+        ""and"",
+        [
+            ""type"",
+            ""<>"",
+            0
+        ]
+    ],
+    ""sort_by"": [
+        {
+            ""selector"": ""alpha"",
+            ""desc"": true
+        }
+    ],
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -120,6 +164,25 @@ curl_setopt_array($curl, [
       "symbol" => "FARMX",
       "limit" => 10,
       "offset" => 0,
+      "filters" => [
+        [
+          "alpha",
+          ">",
+          -0.09
+        ],
+        "and",
+        [
+          "type",
+          "<>",
+          0
+        ]
+      ],
+      "sort_by" => [
+        [
+          "selector" => "alpha",
+          "desc" => true
+        ]
+      ],
       "tag" => "just tag"
     ]
   )
@@ -145,6 +208,25 @@ data = {
     "symbol": "FARMX",
     "limit": 10,
     "offset": 0,
+    "filters": [
+        [
+            "alpha",
+            ">",
+            -0.09
+        ],
+        "and",
+        [
+            "type",
+            "<>",
+            0
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "alpha",
+            "desc": True
+        }
+    ],
     "tag": "just tag"
 }
 
@@ -166,6 +248,25 @@ const data = JSON.stringify({
     "symbol": "FARMX",
     "limit": 10,
     "offset": 0,
+    "filters": [
+        [
+            "alpha",
+            ">",
+            -0.09
+        ],
+        "and",
+        [
+            "type",
+            "<>",
+            0
+        ]
+    ],
+    "sort_by": [
+        {
+            "selector": "alpha",
+            "desc": true
+        }
+    ],
     "tag": "just tag"
 });
 
@@ -197,9 +298,9 @@ req.end();
 - **total_count**   
      `integer` — Total number of matching items.
 - **items_count**   
-     `integer` — Number of items returned in the current response.
+     `integer` — Number of items returned.
 - **items**   
-     `array` — Array of risk metric records (funds).
+     `array` — Array of risk metric records.
 
 
 ### Risk Item Fields
@@ -218,7 +319,7 @@ Each item represents a standardized time horizon and its corresponding risk metr
 - **mean_annual_return**   
      `number` — Mean annual return.
 - **r_squared**   
-     `number` — R-squared (0–1).
+     `number` — R-squared (R²).
 - **std_dev**   
      `number` — Standard deviation.
 - **sharpe_ratio**   
@@ -232,35 +333,6 @@ Each item represents a standardized time horizon and its corresponding risk metr
 
 ```json
 {
-    "task_id": "18d7e4bb-7165-4b2d-aa88-0c28eaa7593e",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0015,
-    "data": {
-        "symbol": "FARMX",
-        "limit": 10,
-        "offset": 0,
-        "filters": [
-            [
-                "alpha",
-                ">",
-                -0.09
-            ],
-            "and",
-            [
-                "type",
-                "<>",
-                0
-            ]
-        ],
-        "tag": "just tag",
-        "sort_by": [
-            {
-                "selector": "alpha",
-                "desc": true
-            }
-        ]
-    },
     "result": {
         "total_count": 3,
         "items_count": 3,

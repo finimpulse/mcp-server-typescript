@@ -1,10 +1,10 @@
 ---
-title: Authentication
+title: Financial Data API Authentication
 created: 2026-01-28
-updated: 2026-04-16
+updated: 2026-10-09
 ---
 
-# Authentication
+# Financial Data API Authentication
 
 Learn how to authenticate with the FinImpulse API using Bearer authentication.
 
@@ -14,9 +14,11 @@ Note that all requests must include a valid token. Otherwise, they will be rejec
 
 ## Obtaining the Token
 
-To get your token, you need to [create an account with FinImpulse](https://app.finimpulse.com/auth/register). After logging in, you can view or create a personal token in the **API settings**. Make sure to copy and securely store your token immediately.
+To get your token, you need to [create an account with FinImpulse](https://app.finimpulse.com/auth/register). After logging in, you can view or create a personal token in the **API Settings**. Make sure to copy and securely store your token immediately.
 
 Each token is unique and should be kept **confidential**, as anyone with access to it can make requests on your behalf.
+
+For step-by-step instructions on finding, creating, and managing tokens, see the [API Tokens Management &amp; Security guide](https://finimpulse.com/help/api-tokens/).
 
 ## Using the Token
 

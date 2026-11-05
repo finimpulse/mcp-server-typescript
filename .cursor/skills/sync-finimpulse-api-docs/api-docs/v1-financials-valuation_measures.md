@@ -1,20 +1,23 @@
 ---
-title: Valuation Measures
+title: Historical Stock Valuation Metrics API
 created: 2026-01-23
-updated: 2026-02-06
+updated: 2026-11-03
 endpoint: POST v1/financials/valuation_measures
 auth: Bearer Token
 ---
 
-# Valuation Measures
+# Historical Stock Valuation Metrics API
 
 Provides key Valuation Measures for stocks and some funds, including P/E, EV/EBITDA, P/B, etc.
 
-This endpoint helps assess a company’s market value relative to its fundamentals and is essential for comparative analysis.
+This endpoint returns company valuation multiples derived from market price and financial statement data.
+
+Financial statements data covers over 85,000 tickers. Coverage starts from **September 30, 2021**, subject to availability per company. The full list of covered symbols is available for download [here](https://developers.finimpulse.com/wp-content/uploads/2026/06/tickers_with_financials.csv).
 
 ## When to Use This Endpoint
-- Populate the "Valuation Measures" section of the Financials views.
-- Pull valuation metrics aligned to the same date grid as financial statements for apples-to-apples analysis.
+- Populate the “Valuation Measures” section of the Financials views.
+- Pull valuation metrics aligned to the same date grid as financial statements.
+- Compare valuation multiples across reporting periods (trailing, quarterly, annual).
 
 ## Request Parameters
 **POST** `v1/financials/valuation_measures` 
@@ -22,16 +25,16 @@ This endpoint helps assess a company’s market value relative to its fundamenta
 - **symbol**   
      `string` *(required)* — Asset identifier (ticker symbol).
 - **intervals**   
-     `array` *(optional)* — Reporting frequencies to return. **Supported values:**
+     `array` *(required)* — Reporting frequencies to return. **Supported values:**
     - `annual`
     - `quarterly`
     - `trailing`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported intervals are returned. Note that interval availability depends on coverage. If data is missing for a period, values may be **null**. **Example:** `"intervals": [ "trailing", "quarterly", "annual" ]`
+     Note that interval availability depends on coverage. If data is missing for a period, values may be **null**.
 - **start_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
 - **end_date**   
-     `string` *(optional)* — Date range filter (YYYY-MM-DD).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -45,7 +48,12 @@ curl --location "https://api.finimpulse.com/v1/financials/valuation_measures" \
   --header "Authorization: Bearer <API_TOKEN>" \
   -d '{
       "symbol": "NVDA",
-      "start_date": "2020-08-11",
+      "intervals": [
+          "trailing",
+          "quarterly",
+          "annual"
+      ],
+      "start_date": "2021-10-01",
       "end_date": "2026-08-11",
       "tag": "just_tag"
   }'
@@ -65,7 +73,12 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 
 var json = @"{
     ""symbol"": ""NVDA"",
-    ""start_date"": ""2020-08-11"",
+    ""intervals"": [
+        ""trailing"",
+        ""quarterly"",
+        ""annual""
+    ],
+    ""start_date"": ""2021-10-01"",
     ""end_date"": ""2026-08-11"",
     ""tag"": ""just_tag""
 }";
@@ -92,7 +105,12 @@ curl_setopt_array($curl, [
   CURLOPT_POSTFIELDS => json_encode(
 [
       "symbol" => "NVDA",
-      "start_date" => "2020-08-11",
+      "intervals" => [
+        "trailing",
+        "quarterly",
+        "annual"
+      ],
+      "start_date" => "2021-10-01",
       "end_date" => "2026-08-11",
       "tag" => "just_tag"
     ]
@@ -117,7 +135,12 @@ headers = {
 }
 data = {
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "trailing",
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 }
@@ -138,7 +161,12 @@ const https = require('https');
 
 const data = JSON.stringify({
     "symbol": "NVDA",
-    "start_date": "2020-08-11",
+    "intervals": [
+        "trailing",
+        "quarterly",
+        "annual"
+    ],
+    "start_date": "2021-10-01",
     "end_date": "2026-08-11",
     "tag": "just_tag"
 });
@@ -164,10 +192,8 @@ req.end();
 ```
 
 
-The system covers data from **September 30, 2021**, subject to data availability per company.
-
 ## Response
-The response is a single object containing metadata and an ***items*** array of records.
+The response is a single object containing metadata and an ***items*** array of statement snapshots for a given interval and date.
 
 ### Metadata Fields
 
@@ -175,15 +201,15 @@ The response is a single object containing metadata and an ***items*** array of 
 - **symbol**   
      `string` — Asset identifier (ticker symbol).
 - **display_name**   
-     `string` — Preferred display name (if available).
+     `string` — Asset display name.
 - **short_name**   
      `string` — Short descriptive name.
 - **long_name**   
-     `string` — Full legal or formal name (company/fund).
+     `string` — Full legal or formal name.
 - **quote_type**   
-     `string` — Asset type.
+     `string` — Asset class identifier (stock, etf, mutualfund).
 - **quote_source_name**   
-     `string` — Data source label for the quote (e.g., real-time vs delayed).
+     `string` — Data source label for the quote.
 - **currency**   
      `string` — Trading currency.
 - **full_exchange_name**   
@@ -199,11 +225,28 @@ The response is a single object containing metadata and an ***items*** array of 
 - **market_region**   
      `string` — Market/country code.
 - **total_count**   
-     `integer` — Total number of items that match filters.
+     `integer` — Total number of matching items.
 - **items_count**   
-     `integer` — Number of items in the response.
+     `integer` — Number of items returned.
+- **reports_count**   
+     `integer` — Total number of unique reports in the response.
+- **report_keys**   
+     `array` — Array of unique report identifiers returned in the response. Each key follows the format `interval|date`. All items sharing the same key belong to the same report.
 - **items**   
-     `array` — Array of valuation records. It is a unified list where each element represents one measure snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or source limitations.
+     `array` — Array of valuation records. It is a unified list where each element represents one measure snapshot for a requested `interval` and `date`. Note that many fields can be *null* depending on the reporting format, company structure, or data limitations.
+
+
+### Snapshot Info
+
+
+- **type**   
+     `string` — Snapshot type (valuation_measures expected).
+- **report_key**   
+     `string` — Unique identifier of the report this item belongs to. Format: `interval|date`.
+- **interval**   
+     `string` — Reporting frequency (trailing/quarterly/annual).
+- **date**   
+     `string` — End date of the reporting period.
 
 
 ### Market Cap
@@ -212,42 +255,31 @@ The response is a single object containing metadata and an ***items*** array of 
 - **market_cap**   
      `number` — Market Capitalization.
 - **enterprise_value**   
-     `number` — Enterprise Value.
+     `number` — Enterprise value (EV).
 - **enterprises_value_ebitda_ratio**   
-     `number` — Enterprise Value to EBITDA.
+     `number` — Enterprise value-to-EBITDA (EV/EBITDA) ratio.
 - **enterprises_value_revenue_ratio**   
-     `number` — Enterprise Value to Revenue.
+     `number` — Enterprise value-to-revenue (EV/Revenue) ratio.
 
 
-### P/E Ratio
+### Price-to-Earnings (P/E)
 
 
 - **pe_ratio**   
-     `number` — Price-to-Earnings ratio.
+     `number` — Price-to-Earnings (P/E) ratio.
 - **forward_pe_ratio**   
-     `number` — Forward Price-to-Earnings ratio.
+     `number` — Forward Price-to-Earnings (P/E) ratio.
 - **peg_ratio**   
-     `number` — PEG ratio.
+     `number` — Price/earnings-to-growth (PEG) ratio.
 
 
 ### Other
 
 
 - **pb_ratio**   
-     `number` — Price-to-Book ratio.
+     `number` — Price-to-book (P/B) ratio
 - **ps_ratio**   
-     `number` — Price-to-Sales ratio.
-
-
-### Snapshot Info
-
-
-- **type**   
-     `string` — Report/snapshot type (valuation_measures expected).
-- **interval**   
-     `string` — Reporting frequencies (trailing/quarterly/annual).
-- **date**   
-     `string` — Reporting period end date.
+     `number` — Price-to-sales (P/S) ratio
 
 
 ### Example Response
@@ -255,24 +287,6 @@ The response is a single object containing metadata and an ***items*** array of 
 
 ```json
 {
-    "task_id": "581bcfaa-ef8c-4cc0-ae0d-553d43d70c84",
-    "status_code": 20000,
-    "status_message": "OK",
-    "cost": 0.0032,
-    "data": {
-        "symbol": "NVDA",
-        "start_date": "2020-08-11",
-        "end_date": "2026-08-11",
-        "tag": "just_tag",
-        "intervals": [
-            "trailing",
-            "quarterly",
-            "annual"
-        ],
-        "types": [
-            "valuation_measures"
-        ]
-    },
     "result": {
         "symbol": "NVDA",
         "quote_type": "stock",
@@ -281,30 +295,34 @@ The response is a single object containing metadata and an ***items*** array of 
         "display_name": "NVIDIA",
         "market_region": "US_OT",
         "exchange_timezone_name": "America/New_York",
-        "exchange_timezone_short_name": "EST",
+        "exchange_timezone_short_name": "EDT",
         "exchange": "NMS",
         "short_name": "NVIDIA Corporation",
         "long_name": "NVIDIA Corporation",
-        "quote_source_name": "Nasdaq Real Time Price",
+        "quote_source_name": "BOATS Real Time Price",
         "time_offset": -14400,
-        "total_count": 12,
-        "items_count": 12,
+        "total_count": 14,
+        "items_count": 14,
+        "reports_count": 14,
+        "report_keys": [
+            "annual|2022-01-31",
+            "annual|2023-01-31",
+            "annual|2024-01-31",
+            "annual|2025-01-31",
+            "annual|2026-01-31",
+            "quarterly|2024-07-31",
+            "quarterly|2024-10-31",
+            "quarterly|2025-01-31",
+            "quarterly|2025-04-30",
+            "quarterly|2025-07-31",
+            "quarterly|2025-10-31",
+            "quarterly|2026-01-31",
+            "quarterly|2026-04-30",
+            "trailing|2026-06-19"
+        ],
         "items": [
             {
-                "type": "valuation_measures",
-                "enterprise_value": null,
-                "enterprises_value_ebitda_ratio": null,
-                "enterprises_value_revenue_ratio": null,
-                "forward_pe_ratio": null,
-                "market_cap": null,
-                "pb_ratio": null,
-                "pe_ratio": null,
-                "peg_ratio": null,
-                "ps_ratio": null,
-                "interval": "annual",
-                "date": "2021-01-31"
-            },
-            {
+                "report_key": "annual|2022-01-31",
                 "type": "valuation_measures",
                 "enterprise_value": 606148160000,
                 "enterprises_value_ebitda_ratio": 61.0606,
@@ -319,6 +337,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2022-01-31"
             },
             {
+                "report_key": "annual|2023-01-31",
                 "type": "valuation_measures",
                 "enterprise_value": 480387420000,
                 "enterprises_value_ebitda_ratio": 64.5335,
@@ -333,6 +352,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2023-01-31"
             },
             {
+                "report_key": "annual|2024-01-31",
                 "type": "valuation_measures",
                 "enterprise_value": 1508771280000,
                 "enterprises_value_ebitda_ratio": 66.1626,
@@ -347,6 +367,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-01-31"
             },
             {
+                "report_key": "annual|2025-01-31",
                 "type": "valuation_measures",
                 "enterprise_value": 2910691390000,
                 "enterprises_value_ebitda_ratio": 38.8756,
@@ -361,6 +382,22 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "annual|2026-01-31",
+                "type": "valuation_measures",
+                "enterprise_value": 4595096520000,
+                "enterprises_value_ebitda_ratio": 38.5851,
+                "enterprises_value_revenue_ratio": 24.5541,
+                "forward_pe_ratio": 24.9377,
+                "market_cap": 4645223520000,
+                "pb_ratio": 39.069308,
+                "pe_ratio": 47.309406,
+                "peg_ratio": 0.7215,
+                "ps_ratio": 25.106609,
+                "interval": "annual",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2024-07-31",
                 "type": "valuation_measures",
                 "enterprise_value": null,
                 "enterprises_value_ebitda_ratio": null,
@@ -375,6 +412,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-07-31"
             },
             {
+                "report_key": "quarterly|2024-10-31",
                 "type": "valuation_measures",
                 "enterprise_value": 3228897080000,
                 "enterprises_value_ebitda_ratio": 51.2735,
@@ -389,6 +427,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2024-10-31"
             },
             {
+                "report_key": "quarterly|2025-01-31",
                 "type": "valuation_measures",
                 "enterprise_value": 2910691390000,
                 "enterprises_value_ebitda_ratio": 38.8756,
@@ -403,6 +442,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-01-31"
             },
             {
+                "report_key": "quarterly|2025-04-30",
                 "type": "valuation_measures",
                 "enterprise_value": 2623352715519,
                 "enterprises_value_ebitda_ratio": 30.4556,
@@ -417,6 +457,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-04-30"
             },
             {
+                "report_key": "quarterly|2025-07-31",
                 "type": "valuation_measures",
                 "enterprise_value": 4288194890000,
                 "enterprises_value_ebitda_ratio": 47.1396,
@@ -431,6 +472,7 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-07-31"
             },
             {
+                "report_key": "quarterly|2025-10-31",
                 "type": "valuation_measures",
                 "enterprise_value": 4878126450000,
                 "enterprises_value_ebitda_ratio": 47.27,
@@ -445,18 +487,49 @@ The response is a single object containing metadata and an ***items*** array of 
                 "date": "2025-10-31"
             },
             {
+                "report_key": "quarterly|2026-01-31",
                 "type": "valuation_measures",
-                "enterprise_value": 4595287650000,
-                "enterprises_value_ebitda_ratio": 38.5867,
-                "enterprises_value_revenue_ratio": 24.5551,
+                "enterprise_value": 4595096520000,
+                "enterprises_value_ebitda_ratio": 38.5851,
+                "enterprises_value_revenue_ratio": 24.5541,
                 "forward_pe_ratio": 24.9377,
-                "market_cap": 4645414650000,
-                "pb_ratio": 39.070916,
+                "market_cap": 4645223520000,
+                "pb_ratio": 39.069308,
                 "pe_ratio": 47.309406,
                 "peg_ratio": 0.7215,
                 "ps_ratio": 25.106609,
+                "interval": "quarterly",
+                "date": "2026-01-31"
+            },
+            {
+                "report_key": "quarterly|2026-04-30",
+                "type": "valuation_measures",
+                "enterprise_value": 4782174219153,
+                "enterprises_value_ebitda_ratio": 33.0827,
+                "enterprises_value_revenue_ratio": 22.1461,
+                "forward_pe_ratio": 24.57,
+                "market_cap": 4833690219153,
+                "pb_ratio": 30.730485,
+                "pe_ratio": 40.728571,
+                "peg_ratio": 0.6334,
+                "ps_ratio": 22.65585,
+                "interval": "quarterly",
+                "date": "2026-04-30"
+            },
+            {
+                "report_key": "trailing|2026-06-19",
+                "type": "valuation_measures",
+                "enterprise_value": 5034898490000,
+                "enterprises_value_ebitda_ratio": 26.0916,
+                "enterprises_value_revenue_ratio": 19.8622,
+                "forward_pe_ratio": 24.0385,
+                "market_cap": 5103122490000,
+                "pb_ratio": 26.1064,
+                "pe_ratio": 32.264931,
+                "peg_ratio": 0.6484,
+                "ps_ratio": 20.32919,
                 "interval": "trailing",
-                "date": "2026-01-30"
+                "date": "2026-06-19"
             }
         ]
     }
