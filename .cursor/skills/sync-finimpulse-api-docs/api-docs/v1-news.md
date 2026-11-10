@@ -1,55 +1,74 @@
 ---
-title: Financial News API for Stocks, ETFs &amp; Mutual Funds
+title: Financial News API for Stocks, ETFs, Mutual Funds &amp; Indices
 created: 2026-02-09
-updated: 2026-11-03
+updated: 2026-11-06
 endpoint: POST v1/news
 auth: Bearer Token
 ---
 
-# Financial News API for Stocks, ETFs &amp; Mutual Funds
+# Financial News API for Stocks, ETFs, Mutual Funds &amp; Indices
 
-Returns the latest news and press releases for financial assets.
+Returns news articles and press releases for one asset symbol. 
 
-This endpoint aggregates news and press releases for stocks, ETFs, and mutual funds. Each item includes:
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/) · [n8n](https://n8n.io/integrations/finimpulse/) · [Make](https://www.make.com/en/integrations/finimpulse)
 
-- Headline
-- Brief description
-- Publication date
-- List of related tickers
-- Provider information
+This endpoint retrieves news articles and press releases related to a single stock, ETF, mutual fund, or index, with headlines, short descriptions, publication dates, and links to the original sources.
 
-**/news** works consistently across all asset types.
+## Coverage
+
+Asset TypesStocks, ETFs, mutual funds, indicesMarket Regions~58Listings115,000+News Items 15 million+ Historical Depth2025 to present
+
+Coverage figures are approximate and may change over time.
+
+## Data Freshness
+
+News is added as it is published and may appear with a delay of up to 3 days.
+
+## Data Availability &amp; Limitations
+
+- Some fields may be **null** if a specific value is not available for a given news item. This does not indicate an error.
+- If no news matches the request, the API returns status code 40400 (Not Found). This is expected behavior and does not indicate an error.
 
 ## When to Use This Endpoint
 
-- Power News sections for individual assets or aggregated portfolios.
-- Track news that impacts multiple related tickers, such as sector-level or market-wide events.
-- Support historical views, real-time dashboards, and alerting systems.
-- Enable event-driven analysis by linking news data with price, volume, or performance metrics.
+- Add news feeds to stock, ETF, fund, and index pages in financial data and research apps.
+- Build portfolio news digests that combine headlines for every holding.
+- Display official company announcements separately from media coverage using press releases.
+- Link news to price movements in event-driven analysis and backtesting tools.
+- Provide AI assistants and research copilots with recent headlines for a specific asset.
 
 ## Request Parameters
 
 **POST** `v1/news` 
 
 - **symbol**   
-     `string` *(required)* — Asset identifier (ticker symbol).
+     `string` *(required)* — Asset identifier (ticker symbol). Not required when `search_after_token` is provided.
 - **types**   
      `array` *(optional)* — News types to include. **Supported values:**
     - `news`
     - `press_release`
      
-     All parameters are of type **string** and are **optional**. If none are provided, all supported types are returned.
+     If no values are provided, all supported types are returned.
 - **start_date**   
-     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD).
+     `string` *(optional)* — Start of the date range filter (YYYY-MM-DD). If omitted, news from the earliest available date is returned.
 - **end_date**   
-     `string` *(optional)* — End of the date range filter (YYYY-MM-DD).
-- **limit**   
-     `integer` *(optional)* — Maximum number of matched items returned (user-defined).
-- **offset**   
-     `integer` *(optional)* — Pagination offset (0-based).
+     `string` *(optional)* — End of the date range filter (YYYY-MM-DD). If omitted, news up to the most recent available date is returned.
 - **filters**   
-     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as: `[field, operator, value]`. Conditions can be combined using logical operators `and`/`or`. **Supported operators:**
-    - `like` – pattern match (requires % as a wildcard)
+     `array` *(optional)* — Optional filter expressions. Each filter condition is defined as `[field, operator, value]`. Conditions can be combined using the logical operators `and`, `or`, and `not`. **Supported operators:** *Any field type (numbers, strings, booleans, dates):*
+    - `=` - equals
+    - `<>` - not equal
+     
+     *Numbers and dates:*
+    - `>` - greater than
+    - `>=` - greater than or equal
+    - `<` - less than
+    - `<=` - less than or equal
+     
+     *List of values:*
+    - `in` - matches any value in the list (e.g., \["field", "in", \["value_1", "value_2"\]\])
+     
+     *Strings:*
+    - `like` - pattern match (requires % as a wildcard)
     - `not_like` - pattern does not match (requires % as a wildcard)
     - `contains` - value exists in string
     - `not_contains` - value does not exist in string
@@ -57,15 +76,25 @@ This endpoint aggregates news and press releases for stocks, ETFs, and mutual fu
     - `endswith` - string ends with value
      
      *`%` usage examples:*
-    - %abc% - matches any string containing "abc"
-    - abc% - matches any string starting with "abc"
-    - %abc - matches any string ending with "abc"
+    - `%abc%` - matches any string containing “abc”
+    - `abc%` - matches any string starting with “abc”
+    - `%abc` - matches any string ending with “abc”
+     
+     String operators are case-sensitive. Dates are compared as text, so pass date values in the same format as the field returns them. Fields that contain arrays cannot be filtered.
 - **sort_by**   
-     `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as `[selector, desc]`: 
-    - `selector` - Metric used for sorting (e.g., pub_date).
+     `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as an object `{selector, desc}`: 
+    - `selector` - Field used for sorting (e.g., pub_date).
     - `desc` - Sorting direction (true for descending, false for ascending).
      
-     Sortings can be combined using `,`.
+     Multiple sorting setups can be combined in the array.
+- **limit**   
+     `integer` *(optional)* — Maximum number of matched items returned (user-defined). 
+    - Default: 100
+    - Maximum: 1000
+- **offset**   
+     `integer` *(optional)* — Pagination offset (0-based).
+- **search_after_token**   
+     `string` *(optional)* — Token for pagination. Use the value returned in the previous response to fetch the next page. Pass `limit` with each request, because the token does not store the page size. Other request parameters do not need to be repeated.
 - **tag**   
      `string` *(optional)* — User-defined identifier for the task (max 255 characters). It is returned in the response data object, allowing you to match results with the corresponding request. It does not affect API processing or filtering logic.
 
@@ -80,24 +109,15 @@ curl --location "https://api.finimpulse.com/v1/news" \
   -d '{
       "symbol": "NVDA",
       "types": [
-          "news"
+          "news",
+          "press_release"
       ],
-      "start_date": "2025-02-03",
-      "end_date": "2026-02-03",
-      "limit": 3,
-      "offset": 0,
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-30",
       "filters": [
-          [
-              "title",
-              "<>",
-              null
-          ],
-          "and",
-          [
-              "content_type",
-              "<>",
-              null
-          ]
+          "title",
+          "contains",
+          "Buyback"
       ],
       "sort_by": [
           {
@@ -105,6 +125,8 @@ curl --location "https://api.finimpulse.com/v1/news" \
               "desc": true
           }
       ],
+      "limit": 2,
+      "offset": 0,
       "tag": "just tag"
   }'
 ```
@@ -124,24 +146,15 @@ client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("app
 var json = @"{
     ""symbol"": ""NVDA"",
     ""types"": [
-        ""news""
+        ""news"",
+        ""press_release""
     ],
-    ""start_date"": ""2025-02-03"",
-    ""end_date"": ""2026-02-03"",
-    ""limit"": 3,
-    ""offset"": 0,
+    ""start_date"": ""2026-09-01"",
+    ""end_date"": ""2026-09-30"",
     ""filters"": [
-        [
-            ""title"",
-            ""<>"",
-            null
-        ],
-        ""and"",
-        [
-            ""content_type"",
-            ""<>"",
-            null
-        ]
+        ""title"",
+        ""contains"",
+        ""Buyback""
     ],
     ""sort_by"": [
         {
@@ -149,6 +162,8 @@ var json = @"{
             ""desc"": true
         }
     ],
+    ""limit"": 2,
+    ""offset"": 0,
     ""tag"": ""just tag""
 }";
 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -175,24 +190,15 @@ curl_setopt_array($curl, [
 [
       "symbol" => "NVDA",
       "types" => [
-        "news"
+        "news",
+        "press_release"
       ],
-      "start_date" => "2025-02-03",
-      "end_date" => "2026-02-03",
-      "limit" => 3,
-      "offset" => 0,
+      "start_date" => "2026-09-01",
+      "end_date" => "2026-09-30",
       "filters" => [
-        [
-          "title",
-          "<>",
-          null
-        ],
-        "and",
-        [
-          "content_type",
-          "<>",
-          null
-        ]
+        "title",
+        "contains",
+        "Buyback"
       ],
       "sort_by" => [
         [
@@ -200,6 +206,8 @@ curl_setopt_array($curl, [
           "desc" => true
         ]
       ],
+      "limit" => 2,
+      "offset" => 0,
       "tag" => "just tag"
     ]
   )
@@ -224,24 +232,15 @@ headers = {
 data = {
     "symbol": "NVDA",
     "types": [
-        "news"
+        "news",
+        "press_release"
     ],
-    "start_date": "2025-02-03",
-    "end_date": "2026-02-03",
-    "limit": 3,
-    "offset": 0,
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-30",
     "filters": [
-        [
-            "title",
-            "<>",
-            None
-        ],
-        "and",
-        [
-            "content_type",
-            "<>",
-            None
-        ]
+        "title",
+        "contains",
+        "Buyback"
     ],
     "sort_by": [
         {
@@ -249,6 +248,8 @@ data = {
             "desc": True
         }
     ],
+    "limit": 2,
+    "offset": 0,
     "tag": "just tag"
 }
 
@@ -269,24 +270,15 @@ const https = require('https');
 const data = JSON.stringify({
     "symbol": "NVDA",
     "types": [
-        "news"
+        "news",
+        "press_release"
     ],
-    "start_date": "2025-02-03",
-    "end_date": "2026-02-03",
-    "limit": 3,
-    "offset": 0,
+    "start_date": "2026-09-01",
+    "end_date": "2026-09-30",
     "filters": [
-        [
-            "title",
-            "<>",
-            null
-        ],
-        "and",
-        [
-            "content_type",
-            "<>",
-            null
-        ]
+        "title",
+        "contains",
+        "Buyback"
     ],
     "sort_by": [
         {
@@ -294,6 +286,8 @@ const data = JSON.stringify({
             "desc": true
         }
     ],
+    "limit": 2,
+    "offset": 0,
     "tag": "just tag"
 });
 
@@ -320,7 +314,9 @@ req.end();
 
 ## Response
 
-### Meta Fields
+The response contains pagination fields and a list of news items.
+
+### Pagination Fields
 
 
 - **total_count**   
@@ -328,7 +324,7 @@ req.end();
 - **items_count**   
      `integer` — Number of items returned.
 - **search_after_token**   
-     `string` — Token for pagination. Pass it in the next request to fetch the next page. **Format:** `"search_after_token": "token_here"`
+     `string` — Token for pagination. Pass it as the `search_after_token` request parameter, together with `limit`, to fetch the next page. Returns *null* if there are no more pages.
 - **items**   
      `array` — Array of news items.
 
@@ -343,17 +339,17 @@ req.end();
 - **title**   
      `string` — Headline of the news.
 - **description**   
-     `string` — Brief description of the news content.
+     `string` — Brief description of the news content. May contain HTML markup and may be truncated.
 - **pub_date**   
-     `string` — Original publication date/time.
+     `string` — Publication date and time in UTC (YYYY-MM-DD HH:MM:SS).
 - **display_time**   
-     `string` — Display-friendly publication date/time.
+     `string` — Display date and time in UTC (YYYY-MM-DD HH:MM:SS).
 - **canonical_url**   
      `string` — Direct link to the source.
 - **content_type**   
-     `string` — Content type categorization (e.g., STORY).
+     `string` — Content type (e.g., STORY, VIDEO).
 - **related_tickers**   
-     `array` — Array of related ticker symbols.
+     `array` — Array of related ticker symbols (up to 20). The requested symbol is listed first, and the other symbols may differ between identical requests.
 - **provider_display_name**   
      `string` — Display-friendly name of the news provider.
 - **provider_url**   
@@ -370,199 +366,40 @@ req.end();
 ```json
 {
     "result": {
-        "total_count": 1157,
-        "items_count": 3,
-        "search_after_token": "eyJSZXF1ZXN0RGF0YSI6eyJzeW1ib2wiOiJOVkRBIiwidHlwZXMiOlsibmV3cyJdLCJzdGFydF9kYXRlIjoiMjAyNS0wMi0wM1QwMDowMDowMCIsImVuZF9kYXRlIjoiMjAyNi0wMi0wM1QwMDowMDowMCIsInF1ZXJ5Ijp7InR5cGUiOiJhbmQiLCJsZWZ0Ijp7InR5cGUiOiJub3QiLCJzdWJxdWVyeSI6eyJmaWVsZCI6InRpdGxlIiwidHlwZSI6ImVxIiwidmFsdWUiOm51bGx9fSwicmlnaHQiOnsidHlwZSI6Im5vdCIsInN1YnF1ZXJ5Ijp7ImZpZWxkIjoiY29udGVudF90eXBlIiwidHlwZSI6ImVxIiwidmFsdWUiOm51bGx9fX0sIm9yZGVyX2J5Ijp7Im9yZGVyX2ZpZWxkIjoicHViX2RhdGUiLCJvcmRlcl90eXBlIjoiRGVzYyIsIm5leHQiOm51bGx9LCJsaW1pdCI6Mywib2Zmc2V0IjowLCJ1aWQiOm51bGx9LCJTZWFyY2hBZnRlckRhdGEiOnsiVmVyc2lvbiI6MSwiU2VhcmNoQWZ0ZXJWYWx1ZXMiOnsicHViX2RhdGUiOiIyMDI2LTAyLTAyVDIzOjAxOjExKzAwOjAwIn0sIlRva2VuUmVhbE9mZnNldCI6MywiVG90YWxDb3VudCI6MTE1N319",
+        "total_count": 3,
+        "items_count": 2,
+        "search_after_token": "eyJSZXF1ZXN0RGF0YSI6eyJzeW1ib2wiOiJOVkRBIiwidHlwZXMiOlsibmV3cyIsInByZXNzX3JlbGVhc2UiXSwic3RhcnRfZGF0ZSI6IjIwMjYtMDktMDFUMDA6MDA6MDAiLCJlbmRfZGF0ZSI6IjIwMjYtMDktMzBUMDA6MDA6MDAiLCJxdWVyeSI6eyJmaWVsZCI6InRpdGxlIiwidHlwZSI6Imxpa2UiLCJ2YWx1ZSI6IiVCdXliYWNrJSJ9LCJvcmRlcl9ieSI6eyJvcmRlcl9maWVsZCI6InB1Yl9kYXRlIiwib3JkZXJfdHlwZSI6IkRlc2MiLCJuZXh0IjpudWxsfSwibGltaXQiOjIsIm9mZnNldCI6MCwidWlkIjpudWxsfSwiU2VhcmNoQWZ0ZXJEYXRhIjp7IlZlcnNpb24iOjEsIlNlYXJjaEFmdGVyVmFsdWVzIjp7InB1Yl9kYXRlIjoiMjAyNi0wOS0xNlQwMjowNzowMSswMDowMCJ9LCJUb2tlblJlYWxPZmZzZXQiOjIsIlRvdGFsQ291bnQiOjN9fQ==",
         "items": [
             {
-                "id": "25c9a5aa-205e-36c3-8f91-99cc1d7e7676",
+                "id": "b27bf070-bf49-3ee6-b8d7-c3481625ef72",
                 "type": "news",
-                "title": "Oracle said it was ‘highly confident in OpenAI’s ability to raise funds and meet its commitments.’ Cue the stock fall",
-                "description": "Oracle’s plan to raise $50 billion had shares rising. Then a tweet about its confidence in OpenAI triggered a selloff that spoke volumes.",
-                "pub_date": "2026-02-02 23:39:13",
-                "display_time": "2026-02-02 23:39:13",
-                "canonical_url": "https://finance.yahoo.com/news/oracle-said-highly-confident-openai-233913053.html",
+                "title": "Sandisk Unveiled an $14 Billion Buyback and Warren Buffett Has Something to Say About It",
+                "description": "Sandisk announced a $14 billion share buyback during its fiscal fourth-quarter earnings.",
+                "pub_date": "2026-09-18 04:20:00",
+                "display_time": "2026-09-18 04:20:00",
+                "canonical_url": "https://www.fool.com/investing/2026/09/18/sandisk-unveiled-an-14-billion-buyback-and-warren/",
                 "content_type": "STORY",
                 "related_tickers": [
-                    "ORCLC.BA",
-                    "ORC.DU",
-                    "NVDAC.BA",
-                    "ORCL.MX",
-                    "NVDA80.BK",
-                    "NVD.DU",
-                    "NVDG.F",
-                    "NVDA-USD.SW",
-                    "NVDG.HM",
-                    "ORC.F",
-                    "NVDA.BA",
-                    "NVDA.MX",
-                    "NVD.MU",
-                    "ORCLCL.SN",
-                    "ORCL06.BK",
-                    "NVDAD.BA",
-                    "ORC1.F",
-                    "ORC.MU",
-                    "ORC.DE",
-                    "NVDD.XC",
-                    "NVDA03.BK",
-                    "ORC.HA",
-                    "NVDA.WA",
-                    "ORCL",
-                    "NVDC34.SA",
-                    "0R1I.IL",
-                    "NVD.HA",
-                    "NVDA.VI",
-                    "ORCD.XC",
-                    "ZNVD.NE",
-                    "ORCL.BA",
-                    "NVDA19.BK",
-                    "NVD.F",
-                    "0R1Z.L",
-                    "NVDA06.BK",
-                    "NVD.DE",
-                    "NVDA01.BK",
-                    "NVDA.SW",
-                    "NVDA.SN",
-                    "1NVDA.MI",
-                    "ORCL34.SA",
-                    "NVD0.F",
-                    "NVD.SG",
-                    "ORAC.TO",
-                    "ORCL19.BK",
                     "NVDA",
-                    "NVD.HM",
-                    "ORC.HM",
-                    "ORCL.VI",
-                    "ORCD.XD",
-                    "NVDACL.SN",
-                    "NVDD.XD",
-                    "NVDG.SG",
-                    "ORCLD.BA",
-                    "NVDG.DU"
-                ],
-                "provider_display_name": "Fortune",
-                "provider_url": "http://fortune.com/",
-                "is_hosted": true,
-                "is_premium_news": false
-            },
-            {
-                "id": "008b6e97-a6c5-355b-8769-d79419e464ee",
-                "type": "news",
-                "title": "Stock Market Today, Feb. 2: Stocks Recover and Micron Technology Soars Again",
-                "description": "Today, Feb. 2, 2026, volatility continues in commodities while manufacturing data boosts markets.",
-                "pub_date": "2026-02-02 23:12:08",
-                "display_time": "2026-02-02 23:12:08",
-                "canonical_url": "https://www.fool.com/coverage/stock-market-today/2026/02/02/stock-market-today-feb-2-stocks-recover-and-micron-technology-soars-again/",
-                "content_type": "STORY",
-                "related_tickers": [
-                    "WDP0.MU",
-                    "ZDIS.NE",
-                    "1T.MI",
-                    "NVDAC.BA",
-                    "SOBA.SG",
-                    "NVDA80.BK",
-                    "CYTH.DU",
-                    "ZMIC.NE",
+                    "WDC",
+                    "WDC.HA",
+                    "SNDK80.BK",
                     "NVD.DU",
-                    "MUC.BA",
-                    "WDP.DU",
+                    "BW90.F",
+                    "BW9.DU",
+                    "BW9.F",
+                    "NVDA80.BK",
+                    "1WDCM.XD",
+                    "SNDK.BA",
                     "NVDG.F",
-                    "US5502411037.SG",
-                    "SOBA.DE",
-                    "NVDA-USD.SW",
-                    "DIS.TO",
-                    "0QZO.L",
-                    "DISCL.SN",
-                    "0QZ1.L",
-                    "MU",
-                    "WDPD.XD",
-                    "NVDG.HM",
-                    "MU.MX",
-                    "NVDA.BA",
-                    "CYTH.HM",
-                    "CYTH.F",
-                    "LUMN",
-                    "1CYTH.MI",
-                    "DIS",
-                    "NVDA.MX",
-                    "ATTB34.SA",
-                    "MTE0.F",
-                    "DIS.MX",
-                    "DIS.VI",
-                    "NVD.MU",
-                    "NVDAD.BA",
-                    "TC.BA",
-                    "WDP0.DU",
-                    "1MU.MI",
-                    "SOBA.F",
-                    "DISNEY19.BK",
-                    "MTE.HA",
-                    "NVDA.WA",
-                    "NVDD.XC",
-                    "WDP.HM",
-                    "NVDA03.BK",
-                    "MTE.DU",
-                    "DISND.BA",
-                    "MTE.HM",
-                    "MTE.DE",
                     "NVD.HA",
-                    "MU.BA",
-                    "NVDC34.SA",
-                    "MU.SW",
-                    "WDP0.F",
-                    "0R1I.IL",
-                    "WDPD.XC",
-                    "WDP.HA",
-                    "1DIS.MI",
-                    "WDP3.F",
-                    "MTE.MU",
-                    "T-PA",
-                    "NVDA.VI",
-                    "ZNVD.NE",
-                    "NVDA19.BK",
-                    "NVD.DE",
-                    "NVD.F",
-                    "DISNC.BA",
-                    "MUTC34.SA",
-                    "NVDA06.BK",
-                    "MU.TO",
-                    "WDP.F",
-                    "NVDA01.BK",
-                    "T.BA",
-                    "MUD.BA",
-                    "NVDA.SW",
-                    "ATT.VI",
-                    "LUMN.MX",
-                    "CYTH.MU",
+                    "SNDK.VI",
+                    "0QZF.L",
+                    "SNDK.NE",
+                    "NVDA03.BK",
                     "NVDA.SN",
-                    "1NVDA.MI",
-                    "SOBA.HA",
-                    "SOBA.DU",
-                    "0R2T.IL",
-                    "WDP.MU",
-                    "MU.VI",
-                    "TD.BA",
-                    "MTED.XD",
-                    "L1MN34.SA",
-                    "MTE1.F",
-                    "NVD0.F",
-                    "NVD.SG",
-                    "MTED.XC",
-                    "WDP.SG",
-                    "WDP.DE",
-                    "NVDA",
-                    "T-PC",
-                    "NVD.HM",
-                    "MTE.F",
-                    "SOBA.HM",
-                    "NVDACL.SN",
-                    "DISB34.SA",
-                    "NVDD.XD",
-                    "NVDG.SG",
-                    "MTE.SG",
-                    "SOBAD.XD",
-                    "DISN.BA",
-                    "NVDG.DU"
+                    "NVDD.XC",
+                    "BW9.HM"
                 ],
                 "provider_display_name": "Motley Fool",
                 "provider_url": "http://www.fool.com/",
@@ -570,122 +407,38 @@ req.end();
                 "is_premium_news": false
             },
             {
-                "id": "f423d0be-a5c1-379a-afc7-582e1799ffaf",
+                "id": "dfec23a0-3c8a-3955-867a-d784a1686c99",
                 "type": "news",
-                "title": "Ford, Xiaomi Deny JV Talks Even As Jim Farley Expressed Admiration For Chinese EVs While Flagging Them As Competitive Threat",
-                "description": "Ford Motor Co. (NYSE:F) and Chinese tech giant Xiaomi (OTC:XIACF) have both denied reports of a potential collaboration to produce electric vehicles in the United States. Ford Reportedly Held Preliminary Talks With Xiaomi The Financial Times reported that Ford had preliminary discussions with Xiaomi about a joint venture, aiming to facilitate Chinese carmakers’ entry into the U.S. market. However, both companies have refuted these claims. A Ford spokesperson stated, "This story is completely fal",
-                "pub_date": "2026-02-02 23:01:11",
-                "display_time": "2026-02-02 23:01:11",
-                "canonical_url": "https://finance.yahoo.com/news/ford-xiaomi-deny-jv-talks-230111582.html",
+                "title": "Nvidia Spent $26 Billion on Buybacks and Dividends in a Single Quarter. Its Board Is Betting Today's Profits Last 3 More Years.",
+                "description": "Buybacks and dividends this big only pay off if today's profits hold. The board is betting they will.",
+                "pub_date": "2026-09-16 02:07:01",
+                "display_time": "2026-09-16 02:07:01",
+                "canonical_url": "https://www.fool.com/investing/2026/09/15/nvidia-spent-usd26-billion-on-buybacks-and-dividends-in-a-single-quarter-its-board-is-betting-today-s-profits-last-3-more-years/",
                 "content_type": "STORY",
                 "related_tickers": [
-                    "FMC1.HA",
-                    "TSLA",
-                    "3CP.HM",
-                    "NVDAC.BA",
-                    "XIAOMI01.BK",
-                    "NVDA80.BK",
-                    "TSLA01.BK",
-                    "NVD.DU",
-                    "FMC1.SG",
-                    "HXXD.SI",
-                    "TSLA.VI",
-                    "NVDG.F",
-                    "TL00.F",
-                    "NVDA-USD.SW",
-                    "TSLAD.BA",
-                    "TL01.DU",
-                    "NVDG.HM",
-                    "NVDA.BA",
-                    "FMC1.F",
-                    "3CP.MU",
-                    "F.BA",
-                    "1TSLA.MI",
-                    "TSLACO.CL",
-                    "F",
-                    "FMC1.DE",
-                    "TL0.SG",
-                    "NVDA.MX",
-                    "3CP2.F",
-                    "XIAOMI23.BK",
-                    "F.MX",
-                    "NVD.MU",
-                    "TSLA34.SA",
-                    "NVDAD.BA",
-                    "3CPA.SG",
-                    "FDMO34.SA",
-                    "FMC1.HM",
-                    "FMC1D.XD",
-                    "TL0.HA",
-                    "81810.HK",
-                    "TSLAC.BA",
-                    "3CPA.HM",
-                    "F.TO",
-                    "NVDD.XC",
-                    "TL0.F",
-                    "NVDA03.BK",
-                    "0P4F.L",
-                    "NVDA.WA",
-                    "1F.MI",
-                    "TSLA.BA",
-                    "3CP.HA",
-                    "TL0.MU",
-                    "XIAOMI13.BK",
-                    "NVD.HA",
-                    "FORD.VI",
-                    "NVDC34.SA",
-                    "0R1I.IL",
-                    "3CPA.F",
-                    "FMC1.DU",
-                    "3CP.F",
-                    "TL0.DE",
-                    "TL01.F",
-                    "NVDA.VI",
-                    "3CPA.DU",
-                    "ZNVD.NE",
-                    "NVDA19.BK",
-                    "NVD.DE",
-                    "NVD.F",
-                    "TSLA03.BK",
-                    "FMC1.MU",
-                    "NVDA06.BK",
-                    "3CPA.MU",
-                    "NVDA01.BK",
-                    "TSLA.MX",
-                    "NVDA.SW",
-                    "1810.HK",
-                    "TL0D.XC",
-                    "NVDA.SN",
-                    "1NVDA.MI",
-                    "FD.BA",
-                    "TSLA.WA",
-                    "TL0.DU",
-                    "TL0.HM",
-                    "NVD0.F",
-                    "NVD.SG",
-                    "TL01.MU",
-                    "XIAOMI19.BK",
                     "NVDA",
-                    "NVD.HM",
-                    "3CP.SG",
-                    "3CP.DU",
-                    "TL0D.XD",
-                    "NVDACL.SN",
-                    "TSLA80.BK",
-                    "XIACY",
-                    "1810N.MX",
-                    "NVDD.XD",
-                    "NVDG.SG",
-                    "XIACF",
-                    "0R0X.L",
-                    "TSLACL.SN",
-                    "FMC.F",
-                    "NVDG.DU",
-                    "XIAOMI80.BK",
-                    "ZTSL.NE"
+                    "NVD.DU",
+                    "1NVDAM.XD",
+                    "NVDA80.BK",
+                    "NVDG.F",
+                    "NVDG.HM",
+                    "NVDA.MX",
+                    "NVDA.SN",
+                    "NVDD.XC",
+                    "NVDC34.SA",
+                    "NVDG.MU",
+                    "ZNVD.NE",
+                    "NVD.DE",
+                    "NVDACO.CL",
+                    "NVDAC.BA",
+                    "NVDA.BA",
+                    "NVDA.TO",
+                    "NVDA.SW",
+                    "NVDA-USD.SW",
+                    "NVDA06.BK"
                 ],
-                "provider_display_name": "Benzinga",
-                "provider_url": "http://www.benzinga.com/",
+                "provider_display_name": "Motley Fool",
+                "provider_url": "http://www.fool.com/",
                 "is_hosted": true,
                 "is_premium_news": false
             }
@@ -693,3 +446,36 @@ req.end();
     }
 }
 ```
+
+
+## Pagination &amp; Limits 
+
+You can control how many news items a response returns and page through large result sets using the **limit** and **offset** parameters or the **search_after_token** value.
+
+- Use **limit** to set the number of news items per request, from 1 to 1000. If **limit** is not specified, up to 100 news items are returned.
+- Use **offset** to skip news items (0-based). For example, **limit**: 100 and **offset**: 100 return news items 101–200.
+- To retrieve all matching news items, increase **offset** by the **limit** value until **offset** + **items_count** reaches **total_count**.
+- Alternatively, pass the **search_after_token** value from the previous response in the next request to fetch the following page. Pass **limit** with each request, because the token does not store the page size. Other request parameters do not need to be repeated.
+- To keep the order consistent across pages, pass **sort_by**, for example, by **pub_date**.
+
+## Related APIs
+
+- [Search API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/search/)
+- [Summary Data API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/summary/)
+- [Company, ETF &amp; Mutual Fund Profile API](https://developers.finimpulse.com/v1/profile/)
+- [Market Price API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/market-price/)
+- [Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/histories/)
+- [SEC Filing Events API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/sec-filings/events/)
+- [Corporate Earnings &amp; IPO Calendar API](https://developers.finimpulse.com/v1/events/tickers/)
+- [Analyst Upgrades, Downgrades &amp; Price Target Changes API](https://developers.finimpulse.com/v1/analysis/upgrades-downgrades/)
+
+## Build with this API
+
+- [Build Financial News Feeds Using Market News API](https://finimpulse.com/rest-api-use-cases/market-news-api/)
+
+## Related Resources
+
+- [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
+- [Glossary](https://finimpulse.com/glossary/)
+- [API Pricing](https://finimpulse.com/api/pricing/)

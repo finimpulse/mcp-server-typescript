@@ -1,7 +1,7 @@
 ---
 title: Summary Data API for Stocks, ETFs &amp; Mutual Funds
 created: 2026-01-15
-updated: 2026-11-04
+updated: 2026-11-09
 endpoint: POST v1/summary
 auth: Bearer Token
 ---
@@ -458,7 +458,7 @@ The response returns a single summary object for the requested symbol.
 - **net_info_shares**   
      `integer` — Net insider shares (buys - sells) during `period`.
 - **net_percent_insider_shares**   
-     `number` — Net insider shares during `period`, as a fraction of total insider shares.
+     `number` — Net insider shares during `period`, as a fraction of insider holdings.
 - **total_insider_shares**   
      `integer` — Total insider shares held.
 
@@ -1044,7 +1044,7 @@ The response returns a single summary object for the requested symbol.
 - [Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices](https://developers.finimpulse.com/v1/histories/)
 - [Financial News API for Stocks, ETFs &amp; Mutual Funds](https://developers.finimpulse.com/v1/news/)
 - [Stock Financial Statements &amp; Valuation APIs](https://developers.finimpulse.com/financial-statements/)
-- [Institutional &amp; Insider Ownership API](https://developers.finimpulse.com/v1/holders/general/)
+- [Institutional &amp; Insider Ownership API for Stocks](https://developers.finimpulse.com/v1/holders/general/)
 - [Analyst Coverage, Ratings &amp; Price Targets API](https://developers.finimpulse.com/v1/analysis/analysts/)
 - [ETF &amp; Mutual Fund Holdings Overview API](https://developers.finimpulse.com/v1/holdings/general/)
 

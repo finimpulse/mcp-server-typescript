@@ -1,41 +1,12 @@
 {
   "counts": {
     "doc_endpoints": 39,
-    "implemented": 30,
-    "missing": 7,
+    "implemented": 37,
+    "missing": 0,
     "skipped": 2,
     "orphaned_tools": 1
   },
-  "missing": [
-    {
-      "slug": "v1-events-tickers",
-      "endpoint": "POST v1/events/tickers"
-    },
-    {
-      "slug": "v1-holdings-history-dates",
-      "endpoint": "POST v1/holdings/history/dates/{symbol}"
-    },
-    {
-      "slug": "v1-holdings-history",
-      "endpoint": "POST v1/holdings/history"
-    },
-    {
-      "slug": "v1-macro-economics",
-      "endpoint": "POST v1/macro-economics"
-    },
-    {
-      "slug": "v1-market-calendars",
-      "endpoint": "POST v1/market/calendars"
-    },
-    {
-      "slug": "v1-market-index",
-      "endpoint": "POST v1/market/index"
-    },
-    {
-      "slug": "v1-sec-filings-events",
-      "endpoint": "POST v1/sec-filings/events"
-    }
-  ],
+  "missing": [],
   "orphaned_tools": [
     {
       "path": "financials/general",
@@ -59,6 +30,7 @@
     "analysis/earnings",
     "analysis/recommendations",
     "analysis/upgrades-downgrades",
+    "events/tickers",
     "financials/balance_sheet",
     "financials/cash_flow",
     "financials/income_statement",
@@ -70,8 +42,13 @@
     "holders/institutional",
     "holders/mutual-funds",
     "holdings/general",
+    "holdings/history",
+    "holdings/history/dates",
     "holdings/top-holdings",
+    "macro-economics",
     "market-price",
+    "market/calendars",
+    "market/index",
     "metrics",
     "news",
     "options/chain",
@@ -80,6 +57,7 @@
     "profile",
     "search",
     "search-lite",
+    "sec-filings/events",
     "statistics/annual-returns",
     "statistics/general",
     "statistics/risks",

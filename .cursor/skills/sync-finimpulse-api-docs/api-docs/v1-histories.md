@@ -1,7 +1,7 @@
 ---
 title: Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices
 created: 2026-01-28
-updated: 2026-11-05
+updated: 2026-11-06
 endpoint: POST v1/histories
 auth: Bearer Token
 ---
@@ -312,7 +312,7 @@ req.end();
 
 
 ## Response
-The response contains asset metadata, pagination fields, and a list of history records. Each item represents a single record of the requested type for a given date.
+The response contains asset metadata, pagination fields, and a list of history records. Each item represents a price record for one interval or a single dividend, split, or capital gain event.
 
 ### Asset Metadata
 
@@ -354,7 +354,7 @@ The response contains asset metadata, pagination fields, and a list of history r
 - **type**   
      `string` — Record type (historical_price).
 - **date**   
-     `string` — Trading date (YYYY-MM-DD).
+     `string` — Record date (YYYY-MM-DD).
 - **open**   
      `number` — Market open price for the interval.
 - **high**   

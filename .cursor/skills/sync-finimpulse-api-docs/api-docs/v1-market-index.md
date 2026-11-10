@@ -1,7 +1,7 @@
 ---
 title: Global Market Index Search API
 created: 2026-09-29
-updated: 2026-11-05
+updated: 2026-11-06
 endpoint: POST v1/market/index
 auth: Bearer Token
 ---
@@ -30,7 +30,7 @@ Index data is updated once every 24 hours. Note that each index is updated at it
 
 - This endpoint returns the latest price data for each index, such as the close price, daily change, and 52-week range. Historical index prices are available through the [Historical Price Data API](https://developers.finimpulse.com/v1/histories/).
 - Intraday, pre-market, and post-market prices are not available for indices.
-- Some fields may be **null** if a specific value is not available for a given index. It does not indicate an error.
+- Some fields may be **null** if a specific value is not available for a given index. This does not indicate an error.
 - Values are provided based on upstream source data. Index methodologies are defined by index providers and may vary across indices.
 
 ## When to Use This Endpoint

@@ -51,7 +51,7 @@ interface SearchItem {
 
 export interface SearchResponse {
 	total_count: number;
-	search_after_token: string;
+	search_after_token: string | null;
 	items_count: number;
 	items: SearchItem[];
 }

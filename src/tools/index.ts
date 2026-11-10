@@ -31,6 +31,13 @@ import {registerHoldingsTopHoldingsTool} from './holdings/top-holdings/index.js'
 import {registerOptionsChainTool} from './options/chain/index.js';
 import {registerOptionsContractsTool} from './options/contracts/index.js';
 import {registerOptionsExpirationsTool} from './options/expirations/index.js';
+import {registerHoldingsHistoryTool} from './holdings/history/index.js';
+import {registerHoldingsHistoryDatesTool} from './holdings/history-dates/index.js';
+import {registerEventsTickersTool} from './events/tickers/index.js';
+import {registerMacroEconomicsTool} from './macro-economics/index.js';
+import {registerMarketCalendarsTool} from './market/calendars/index.js';
+import {registerMarketIndexTool} from './market/index/index.js';
+import {registerSecFilingsEventsTool} from './sec-filings/events/index.js';
 
 export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerSearchTool(server, client);
@@ -61,7 +68,14 @@ export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerStatisticsAnnualReturnsTool(server, client);
 	registerHoldingsGeneralTool(server, client);
 	registerHoldingsTopHoldingsTool(server, client);
+	registerHoldingsHistoryDatesTool(server, client);
+	registerHoldingsHistoryTool(server, client);
 	registerOptionsChainTool(server, client);
 	registerOptionsContractsTool(server, client);
 	registerOptionsExpirationsTool(server, client);
+	registerEventsTickersTool(server, client);
+	registerMacroEconomicsTool(server, client);
+	registerMarketCalendarsTool(server, client);
+	registerMarketIndexTool(server, client);
+	registerSecFilingsEventsTool(server, client);
 }

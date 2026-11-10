@@ -10,7 +10,7 @@ auth: Bearer Token
 
 Returns the option chain for a single underlying ticker and expiration date.
 
-This eindpoint covers option contracts for a selected underlying and expiration date, including pricing, liquidity, implied volatility, and moneyness fields.
+This endpoint covers option contracts for a selected underlying and expiration date, including pricing, liquidity, implied volatility, and moneyness fields.
 
 The endpoint returns contracts for one expiration date at a time. Use [**/v1/options/expirations/{symbol}**](https://developers.finimpulse.com/v1/options/expirations/) first to discover valid dates.
 

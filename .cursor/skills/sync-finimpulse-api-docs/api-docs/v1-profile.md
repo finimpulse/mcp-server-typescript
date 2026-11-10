@@ -1,7 +1,7 @@
 ---
 title: Company, ETF &amp; Mutual Fund Profile API
 created: 2026-01-13
-updated: 2026-11-05
+updated: 2026-11-06
 endpoint: POST v1/profile
 auth: Bearer Token
 ---
@@ -38,9 +38,9 @@ Some fields may return **null**, an **empty string**, or an **empty array** if a
 
 ## When to Use This Endpoint
 
-- Build company profile pages for investment research platforms and brokerage apps.
+- Build company profile pages for financial data platforms and research apps.
 - Add leadership and executive overviews to equity research tools.
-- Power fund research and fund comparison tools for investors and financial advisors.
+- Power fund research and fund comparison tools.
 - Enrich portfolio trackers and watchlists with company and fund background information.
 - Provide context for AI assistants and research copilots answering questions about specific assets.
 

@@ -43,7 +43,10 @@ SANDBOX_API_TOKEN=your-token npm run test:watch
 | `holders.test.ts` | `get_holders_general`, `get_holders_institutional`, `get_holders_mutual_funds`, `get_holders_insiders`, `get_holders_insiders_transactions` |
 | `financials.test.ts` | `get_financials_general`, `get_financials_income_statement`, `get_financials_balance_sheet`, `get_financials_cash_flow`, `get_financials_valuation_measures` |
 | `statistics.test.ts` | `get_statistics_general`, `get_statistics_risks`, `get_statistics_annual_returns` |
-| `holdings.test.ts` | `get_holdings_general`, `get_holdings_top_holdings` |
+| `holdings.test.ts` | `get_holdings_general`, `get_holdings_top_holdings`, `get_holdings_history_dates`, `get_holdings_history` |
 | `options.test.ts` | `get_options_expirations`, `get_options_chain`, `get_options_contracts` |
+| `events.test.ts` | `get_events_tickers` |
+| `market.test.ts` | `get_market_index`, `get_market_calendars`, `get_macro_economics` |
+| `sec-filings.test.ts` | `get_sec_filings_events` |
 
-> `get_holdings_*` use ticker `SPY` (ETF) — holdings data is only available for ETFs and mutual funds.
+> `get_holdings_*` (including the history tools) use ticker `SPY` (ETF) — holdings data is only available for ETFs and mutual funds.

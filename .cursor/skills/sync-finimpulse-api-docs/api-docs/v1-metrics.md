@@ -1,7 +1,7 @@
 ---
 title: Stock Financial Metrics &amp; Dividends API
 created: 2026-06-18
-updated: 2026-11-03
+updated: 2026-11-06
 endpoint: POST v1/metrics
 auth: Bearer Token
 ---
@@ -35,7 +35,7 @@ Primarily designed for stocks. Other asset types (ETFs, mutual funds, and indice
 
 ## When to Use This Endpoint
 
-- Add a key metrics panel to stock detail pages in investment research or portfolio apps.
+- Add a key metrics panel to stock detail pages in financial data or portfolio apps.
 - Build a dividend tracker that shows forward and trailing payouts for each holding in a portfolio.
 - Calculate portfolio dividend income for holdings from different markets using USD-normalized dividend rates.
 - Feed profitability, growth, and leverage metrics into stock comparison or scoring models.

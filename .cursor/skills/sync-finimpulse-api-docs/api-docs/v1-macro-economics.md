@@ -22,6 +22,12 @@ Countries50+, including all OECD and G20 countries, plus Bulgaria, Croatia, Peru
 
 Macroeconomic indicators are updated quarterly.
 
+## Data Source
+
+Macroeconomic data is sourced from the OECD Data Explorer.
+
+Use and redistribution of the data are subject to the OECD Terms and Conditions, including applicable source attribution requirements.
+
 ## Data Availability &amp; Limitations
 
 - Data is annual. Quarterly and monthly values are not provided.
