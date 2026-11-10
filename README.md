@@ -265,6 +265,8 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 | `get_histories` | Historical time-series: prices, dividends, splits, and capital gains with configurable date range and interval. |
 | `get_profile` | Asset profile and descriptive metadata: identity, classification, governance, and fund-specific attributes. |
 | `get_news` | Latest news and press releases with headlines, descriptions, related tickers, and provider info. |
+| `get_market_index` | Search ~39,000 global market indices with latest close, daily change, 52-week range, and one-year return. |
+| `get_sec_filings_events` | SEC filing events: filing dates, form types (10-K, 8-K, ...), document metadata, and source URLs. |
 
 ### Statistics & Performance
 
@@ -300,6 +302,8 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 |------|-------------|
 | `get_holdings_general` | Portfolio composition and holdings-level aggregates: asset allocation, sector exposure. |
 | `get_holdings_top_holdings` | Top holdings list with ticker, name, and weight as % of total net assets. |
+| `get_holdings_history_dates` | Available historical holdings reporting dates for an ETF. Use before `get_holdings_history`. |
+| `get_holdings_history` | Full ETF holdings composition (shares, weight, market value) on a historical reporting date. |
 
 ### Analyst Coverage & Ratings
 
@@ -317,6 +321,14 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 | `get_options_expirations` | Available option expiration dates for an underlying symbol. |
 | `get_options_chain` | Full option chain for a given expiration: calls and puts with pricing, bid/ask, volume, open interest, and implied volatility. |
 | `get_options_contracts` | Single option contract snapshot: pricing, bid/ask, volume, open interest, implied volatility, moneyness, and Greeks. |
+
+### Events & Macroeconomics
+
+| Tool | Description |
+|------|-------------|
+| `get_events_tickers` | Past and upcoming corporate events: earnings (EPS estimate/actual/surprise) and IPOs. |
+| `get_market_calendars` | Macroeconomic release calendar: indicator releases by country with actual, prior, and originally reported values. |
+| `get_macro_economics` | Annual country-level macroeconomic indicators (GDP, inflation, rates, trade, government finances). Source: OECD. |
 
 ## Configuration
 
