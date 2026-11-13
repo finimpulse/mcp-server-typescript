@@ -79,15 +79,14 @@ Open `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-level) and add
 
 #### VS Code (Copilot)
 
-Open your VS Code `settings.json` and add:
+Open the `mcp.json` configuration file: run **MCP: Open User Configuration** from the **Command Palette** to make the server available in all workspaces, or create `.vscode/mcp.json` in the workspace folder to use it only in the current project. Add the following configuration to the file:
 
 ```json
 {
-  "mcp": {
-    "servers": {
-      "finimpulse": {
-        "url": "https://mcp.finimpulse.com/mcp"
-      }
+  "servers": {
+    "finimpulse": {
+      "type": "http",
+      "url": "https://mcp.finimpulse.com/mcp"
     }
   }
 }
@@ -110,12 +109,13 @@ Claude Desktop does not yet speak Streamable HTTP natively. Bridge through `mcp-
 
 #### ChatGPT
 
-In the ChatGPT desktop app go to **Settings → Connectors → Add custom connector** and enter:
+In the ChatGPT web app go to **Plugins → Add → Add custom MCP server** and enter the following:
 
-- URL: `https://mcp.finimpulse.com/mcp`
+- Name: `FinImpulse`
+- Connection: Server URL, `https://mcp.finimpulse.com/mcp`
 - Authentication: OAuth
 
-#### Windsurf / Cline / other Streamable-HTTP clients
+#### Devin Desktop (Windsurf) / Cline / other Streamable-HTTP clients
 
 Any MCP client that supports the Streamable HTTP transport can use the URL directly:
 
@@ -158,10 +158,14 @@ Add the server configuration:
 #### Claude Code
 
 ```bash
-claude mcp add finimpulse -- npx -y finimpulse-mcp-server
+claude mcp add finimpulse -e API_TOKEN=your-api-token -- npx -y finimpulse-mcp-server
 ```
 
-Then set the `API_TOKEN` environment variable or pass it inline.
+To verify the connection, run:
+
+```bash
+claude mcp list
+```
 
 #### Cursor
 
@@ -181,9 +185,15 @@ Open `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-level) and add
 }
 ```
 
-#### Windsurf
+#### Devin Desktop (Windsurf)
 
-Open `~/.codeium/windsurf/mcp_config.json` and add:
+Open `mcp_config.json`:
+
+- macOS: `~/.config/devin/mcp_config.json`
+- Windows: `%APPDATA%\devin\mcp_config.json`
+- Linux: `~/.config/devin/mcp_config.json`
+
+Add the server configuration:
 
 ```json
 {
@@ -201,33 +211,32 @@ Open `~/.codeium/windsurf/mcp_config.json` and add:
 
 #### VS Code (Copilot)
 
-Open your VS Code `settings.json` and add:
+Open the `mcp.json` configuration file: run **MCP: Open User Configuration** from the **Command Palette** to make the server available in all workspaces, or create `.vscode/mcp.json` in the workspace folder to use it only in the current project. Add the following configuration to the file:
 
 ```json
 {
-  "mcp": {
-    "servers": {
-      "finimpulse": {
-        "command": "npx",
-        "args": ["-y", "finimpulse-mcp-server"],
-        "env": {
-          "API_TOKEN": "your-api-token"
-        }
+  "servers": {
+    "finimpulse": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "finimpulse-mcp-server"],
+      "env": {
+        "API_TOKEN": "your-api-token"
       }
     }
   }
 }
 ```
 
-#### Gemini CLI
+#### Antigravity CLI
 
 ```bash
-gemini mcp add finimpulse -- npx -y finimpulse-mcp-server
+agy mcp add -e API_TOKEN=your-api-token finimpulse -- npx -y finimpulse-mcp-server
 ```
 
 #### Cline
 
-Open Cline settings, go to **MCP Servers**, and add a new server with this config:
+Open the Cline panel, click the **MCP Servers** icon, go to the **Configure** tab, and select **Configure MCP Servers** to open the configuration file. Add the following configuration:
 
 ```json
 {
@@ -245,48 +254,58 @@ Open Cline settings, go to **MCP Servers**, and add a new server with this confi
 
 #### Any MCP-Compatible Client (stdio)
 
-```bash
-API_TOKEN=your-api-token npx finimpulse-mcp-server
-```
+For clients that support stdio only, configure the client to launch the server with the following parameters, replacing `your-api-token` with your FinImpulse API token:
+
+- Command: `npx`
+- Arguments: `-y finimpulse-mcp-server`
+- Environment variable: `API_TOKEN=your-api-token`
 
 ## Available Tools
+
+The server exposes 38 tools across 11 functional groups.
 
 ### Search & Discovery
 
 | Tool | Description |
 |------|-------------|
 | `get_search` | Cross-asset search for stocks, ETFs, and mutual funds. Powers ticker autocomplete and discovery flows. |
+| `get_search_lite` | Lightweight cross-asset search with a focused field set: core identification, current pricing, and key performance metrics. |
+| `get_market_index` | Search ~39,000 global market indices with latest close, daily change, 52-week range, and one-year return. |
 
-### Market Data
+### Price Data
+
+| Tool | Description |
+|------|-------------|
+| `get_market_price` | Current market price snapshot: pre-market, regular, and post-market session prices for US-listed assets, plus the latest traded price. |
+| `get_histories` | Historical time-series: prices, dividends, splits, and capital gains with configurable date range and interval. |
+
+### Asset Summary & Profile
 
 | Tool | Description |
 |------|-------------|
 | `get_summary` | Comprehensive single-call snapshot: identity, market data, fundamentals, ownership, analyst coverage, and fund metrics. |
-| `get_histories` | Historical time-series: prices, dividends, splits, and capital gains with configurable date range and interval. |
+| `get_summary_lite` | Focused snapshot of key identification, market, and fundamental data with a configurable field selection. |
 | `get_profile` | Asset profile and descriptive metadata: identity, classification, governance, and fund-specific attributes. |
+
+### News, Events & Calendars
+
+| Tool | Description |
+|------|-------------|
 | `get_news` | Latest news and press releases with headlines, descriptions, related tickers, and provider info. |
-| `get_market_index` | Search ~39,000 global market indices with latest close, daily change, 52-week range, and one-year return. |
 | `get_sec_filings_events` | SEC filing events: filing dates, form types (10-K, 8-K, ...), document metadata, and source URLs. |
+| `get_events_tickers` | Past and upcoming corporate events: earnings (EPS estimate/actual/surprise) and IPOs. |
+| `get_market_calendars` | Macroeconomic release calendar: indicator releases by country with actual, prior, and originally reported values. |
 
-### Statistics & Performance
-
-| Tool | Description |
-|------|-------------|
-| `get_statistics_general` | Key statistics and performance indicators: valuation, dividends, risk, trailing returns. |
-| `get_statistics_risks` | Risk-adjusted performance metrics (Alpha, Beta, Sharpe, Treynor, R-squared) across 3y/5y/10y horizons. |
-| `get_statistics_annual_returns` | Historical annual total returns by calendar year with quarterly breakdowns. |
-
-### Financial Statements
+### Analyst & Earnings Data
 
 | Tool | Description |
 |------|-------------|
-| `get_financials_general` | Unified financial statements and valuation measures across reporting intervals. |
-| `get_financials_income_statement` | Detailed Income Statement: revenue, expenses, net income (annual/quarterly/trailing). |
-| `get_financials_balance_sheet` | Balance Sheet: financial position and capital structure snapshot. |
-| `get_financials_cash_flow` | Cash Flow Statement: operating, investing, and financing cash flows. |
-| `get_financials_valuation_measures` | Valuation Measures: P/E, EV/EBITDA, P/B, and related metrics. |
+| `get_analysis_analysts` | Analyst coverage records per analyst: scores, ratings, sentiment, price targets, and announcement dates. |
+| `get_analysis_earnings` | Earnings and estimate data: EPS actuals, earnings vs. revenue, EPS trends, revisions, and growth metrics. |
+| `get_analysis_recommendations` | Analyst recommendation breakdown over time: Strong Buy, Buy, Hold, Sell, and Strong Sell counts per period. |
+| `get_analysis_upgrades_downgrades` | Analyst rating action feed: upgrades, downgrades, reiterations, and price target changes with from/to grades. |
 
-### Holders & Ownership
+### Ownership & Insider Data
 
 | Tool | Description |
 |------|-------------|
@@ -296,7 +315,34 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 | `get_holders_insiders` | Insider transaction records: actions, roles, and reported positions. |
 | `get_holders_insiders_transactions` | Detailed insider transactions with share counts, values, and filer identity. |
 
-### Fund Holdings
+### Financial Statements & Valuation
+
+| Tool | Description |
+|------|-------------|
+| `get_financials_general` | Unified financial statements and valuation measures across reporting intervals. |
+| `get_financials_income_statement` | Detailed Income Statement: revenue, expenses, net income (annual/quarterly/trailing). |
+| `get_financials_balance_sheet` | Balance Sheet: financial position and capital structure snapshot. |
+| `get_financials_cash_flow` | Cash Flow Statement: operating, investing, and financing cash flows. |
+| `get_financials_valuation_measures` | Valuation Measures: P/E, EV/EBITDA, P/B, and related metrics. |
+| `get_metrics` | Dividend data, returns, profitability, growth, leverage, and business quality metrics. Primarily applicable to stocks. |
+
+### Statistics, Performance & Risk
+
+| Tool | Description |
+|------|-------------|
+| `get_statistics_general` | Key statistics and performance indicators: valuation, dividends, risk, trailing returns. |
+| `get_statistics_risks` | Risk-adjusted performance metrics (Alpha, Beta, Sharpe, Treynor, R-squared) across 3y/5y/10y horizons. |
+| `get_statistics_annual_returns` | Historical annual total returns by calendar year with quarterly breakdowns. |
+
+### Options Data
+
+| Tool | Description |
+|------|-------------|
+| `get_options_expirations` | Available option expiration dates for an underlying symbol. |
+| `get_options_chain` | Full option chain for a given expiration: calls and puts with pricing, bid/ask, volume, open interest, and implied volatility. |
+| `get_options_contracts` | Single option contract snapshot: pricing, bid/ask, volume, open interest, implied volatility, moneyness, and Greeks. |
+
+### ETF & Fund Holdings
 
 | Tool | Description |
 |------|-------------|
@@ -305,29 +351,10 @@ API_TOKEN=your-api-token npx finimpulse-mcp-server
 | `get_holdings_history_dates` | Available historical holdings reporting dates for an ETF. Use before `get_holdings_history`. |
 | `get_holdings_history` | Full ETF holdings composition (shares, weight, market value) on a historical reporting date. |
 
-### Analyst Coverage & Ratings
+### Macroeconomic Data
 
 | Tool | Description |
 |------|-------------|
-| `get_analysis_analysts` | Analyst coverage records per analyst: scores, ratings, sentiment, price targets, and announcement dates. |
-| `get_analysis_earnings` | Earnings and estimate data: EPS actuals, earnings vs. revenue, EPS trends, revisions, and growth metrics. |
-| `get_analysis_recommendations` | Analyst recommendation breakdown over time: Strong Buy, Buy, Hold, Sell, and Strong Sell counts per period. |
-| `get_analysis_upgrades_downgrades` | Analyst rating action feed: upgrades, downgrades, reiterations, and price target changes with from/to grades. |
-
-### Options
-
-| Tool | Description |
-|------|-------------|
-| `get_options_expirations` | Available option expiration dates for an underlying symbol. |
-| `get_options_chain` | Full option chain for a given expiration: calls and puts with pricing, bid/ask, volume, open interest, and implied volatility. |
-| `get_options_contracts` | Single option contract snapshot: pricing, bid/ask, volume, open interest, implied volatility, moneyness, and Greeks. |
-
-### Events & Macroeconomics
-
-| Tool | Description |
-|------|-------------|
-| `get_events_tickers` | Past and upcoming corporate events: earnings (EPS estimate/actual/surprise) and IPOs. |
-| `get_market_calendars` | Macroeconomic release calendar: indicator releases by country with actual, prior, and originally reported values. |
 | `get_macro_economics` | Annual country-level macroeconomic indicators (GDP, inflation, rates, trade, government finances). Source: OECD. |
 
 ## Configuration
