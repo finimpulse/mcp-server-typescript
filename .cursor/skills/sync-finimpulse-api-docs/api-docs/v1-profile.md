@@ -1,12 +1,12 @@
 ---
-title: Company, ETF &amp; Mutual Fund Profile API
+title: Profiles API for Companies, ETFs &amp; Mutual Funds
 created: 2026-01-13
-updated: 2026-11-06
+updated: 2026-11-17
 endpoint: POST v1/profile
 auth: Bearer Token
 ---
 
-# Company, ETF &amp; Mutual Fund Profile API
+# Profiles API for Companies, ETFs &amp; Mutual Funds
 
 Returns company or fund profile data for one asset symbol, including description, classification, key officers, and fund fees. 
 

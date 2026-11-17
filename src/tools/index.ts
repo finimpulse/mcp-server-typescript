@@ -3,6 +3,7 @@ import {ApiClient} from '../http/client.js';
 import {registerSearchTool} from './search/index.js';
 import {registerSearchLiteTool} from './search-lite/index.js';
 import {registerHistoriesTool} from './historical/index.js';
+import {registerHistoriesCurrenciesTool} from './historical/currencies/index.js';
 import {registerSummaryTool} from './summary/index.js';
 import {registerSummaryLiteTool} from './summary-lite/index.js';
 import {registerProfileTool} from './profile/index.js';
@@ -38,11 +39,13 @@ import {registerMacroEconomicsTool} from './macro-economics/index.js';
 import {registerMarketCalendarsTool} from './market/calendars/index.js';
 import {registerMarketIndexTool} from './market/index/index.js';
 import {registerSecFilingsEventsTool} from './sec-filings/events/index.js';
+import {registerSecFilingsInsiderTransactionsTool} from './sec-filings/insider-transactions/index.js';
 
 export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerSearchTool(server, client);
 	registerSearchLiteTool(server, client);
 	registerHistoriesTool(server, client);
+	registerHistoriesCurrenciesTool(server, client);
 	registerSummaryTool(server, client);
 	registerSummaryLiteTool(server, client);
 	registerProfileTool(server, client);
@@ -78,4 +81,5 @@ export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerMarketCalendarsTool(server, client);
 	registerMarketIndexTool(server, client);
 	registerSecFilingsEventsTool(server, client);
+	registerSecFilingsInsiderTransactionsTool(server, client);
 }

@@ -1,12 +1,12 @@
 ---
-title: Historical Stock Valuation Metrics API
+title: Historical Valuation Metrics API
 created: 2026-01-23
-updated: 2026-11-03
+updated: 2026-11-17
 endpoint: POST v1/financials/valuation_measures
 auth: Bearer Token
 ---
 
-# Historical Stock Valuation Metrics API
+# Historical Valuation Metrics API
 
 Provides key Valuation Measures for stocks and some funds, including P/E, EV/EBITDA, P/B, etc.
 

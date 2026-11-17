@@ -4,5 +4,5 @@ import {SecFilingsEventsResponse} from './types.js';
 import {SecFilingsEventsInput} from './schema.js';
 
 export async function secFilingsEventsHandler(input: SecFilingsEventsInput, client: ApiClient): Promise<CallToolResult> {
-	return client.request<SecFilingsEventsResponse>('/v1/events', 'POST', input);
+	return client.request<SecFilingsEventsResponse>('/v1/sec-filings/events', 'POST', input);
 }

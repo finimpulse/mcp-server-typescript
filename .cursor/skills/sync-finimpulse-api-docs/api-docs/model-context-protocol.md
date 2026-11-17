@@ -1,7 +1,7 @@
 ---
 title: MCP Server for Financial Data
 created: 2026-04-21
-updated: 2026-10-23
+updated: 2026-11-13
 ---
 
 # MCP Server for Financial Data
@@ -18,9 +18,9 @@ The MCP server is intended for developers and teams building AI-powered applicat
 - [Claude Code](https://developers.finimpulse.com/mcp-clients/#claude-code)
 - [ChatGPT](https://developers.finimpulse.com/mcp-clients/#chatgpt)
 - [Cursor](https://developers.finimpulse.com/mcp-clients/#cursor)
-- [Windsurf](https://developers.finimpulse.com/mcp-clients/#windsurf)
+- [Devin Desktop (Windsurf)](https://developers.finimpulse.com/mcp-clients/#devin-desktop-windsurf)
 - [VS Code (Copilot)](https://developers.finimpulse.com/mcp-clients/#vs-code-copilot)
-- [Gemini CLI](https://developers.finimpulse.com/mcp-clients/#gemini-cli)
+- [Antigravity CLI](https://developers.finimpulse.com/mcp-clients/#antigravity-cli)
 - [Cline](https://developers.finimpulse.com/mcp-clients/#cline)
 
 For per-client setup instructions, refer to the [Supported MCP Clients](https://developers.finimpulse.com/mcp-clients/).
@@ -33,9 +33,11 @@ The server sits between an AI client and the FinImpulse API:
 
 **AI Client → MCP Server → FinImpulse API → Financial Data**
 
-![Diagram illustrating the FinImpulse MCP flow: an AI tool sends a natural language request to the FinImpulse MCP Server, which maps it to API endpoints and forwards a structured API call to the FinImpulse API. The API returns financial data, which is passed back to the AI tool as a structured response.](https://developers.finimpulse.com/wp-content/uploads/2026/04/mcp-flow-1024x523.webp)When an AI client issues a tool call, the MCP server processes the request, queries the appropriate FinImpulse API endpoint, and returns a structured response.
+![Diagram illustrating the FinImpulse MCP flow: an AI tool sends a natural language request to the FinImpulse MCP Server, which maps it to API endpoints and forwards a structured API call to the FinImpulse API. The API returns financial data, which is passed back to the AI tool as a structured response.](https://developers.finimpulse.com/wp-content/uploads/2026/04/mcp-flow-1024x523.webp)
 
-This allows AI agents and development environments to retrieve financial data — including quotes, fundamentals, financial statements, ownership data, and fund holdings — through a standardized interface.
+When an AI client issues a tool call, the MCP server processes the request, queries the appropriate FinImpulse API endpoint, and returns a structured response.
+
+This allows AI agents and development environments to retrieve market prices, financial statements, analyst coverage, ownership and fund holdings data, options, news, corporate events, and macroeconomic indicators through a standardized interface.
 
 ## Requirements
 
@@ -48,9 +50,11 @@ FinImpulse MCP supports two connection methods:
 
 ## Available Tools
 
-The server exposes 27 tools across 8 functional groups.
+The server exposes 38 tools across 11 functional groups.
 
-**Tool group****Description**Search &amp; DiscoveryAsset search across stocks, ETFs, and mutual fundsMarket DataSnapshot data, historical time series, asset profiles, newsStatistics &amp; PerformanceKey statistics, risk-adjusted metrics, annual returnsFinancial StatementsIncome statement, balance sheet, cash flow, valuation measuresHolders &amp; OwnershipInstitutional holders, insider transactions, mutual fund holdersFund HoldingsPortfolio composition, top holdingsAnalyst Coverage &amp; RatingsAnalyst records, earnings estimates, recommendation breakdowns, upgrades and downgrades OptionsExpiration dates, full option chains, single contract snapshots with Greeks ## Disclaimer
+**Tool group****Description**Search &amp; DiscoveryAsset search across stocks, ETFs, mutual funds, and indicesPrice DataCurrent market prices, historical prices with dividends, splits, and capital gainsAsset Summary &amp; ProfileConsolidated asset snapshots, company and fund profilesNews, Events &amp; CalendarsFinancial news, SEC filings, earnings and IPO calendars, macroeconomic release calendarAnalyst &amp; Earnings DataEarnings and estimates, recommendation breakdowns, rating changes and price targets, analyst coverageOwnership &amp; Insider DataOwnership snapshots, institutional holders, fund holders, insider rosters and transactionsFinancial Statements &amp; ValuationIncome statement, balance sheet, cash flow, valuation measures, financial metrics and dividendsStatistics, Performance &amp; RiskKey statistics, risk-adjusted metrics, annual returnsOptions DataExpiration dates, full option chains, single contract snapshots with GreeksETF &amp; Fund HoldingsPortfolio composition, top holdings, historical ETF holdings and reporting datesMacroeconomic DataAnnual country-level macroeconomic indicators
+
+## Disclaimer
 
 FinImpulse MCP Server provides access to financial data and analytics via a standardized interface. It does not generate investment recommendations and does not provide financial, investment, or trading advice.
 

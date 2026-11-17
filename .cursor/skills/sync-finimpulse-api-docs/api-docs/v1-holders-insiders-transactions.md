@@ -1,12 +1,12 @@
 ---
-title: Stock Insider Transactions API
+title: Insider Transactions API for Stocks
 created: 2026-01-13
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/holders/insiders-transactions
 auth: Bearer Token
 ---
 
-# Stock Insider Transactions API
+# Insider Transactions API for Stocks
 
 Provides transaction-level data and is more granular than /holders/insiders.
 

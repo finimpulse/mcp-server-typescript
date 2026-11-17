@@ -1,12 +1,12 @@
 ---
-title: Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices
+title: Historical Prices API for Stocks, ETFs, Mutual Funds &amp; Indices
 created: 2026-01-28
-updated: 2026-11-06
+updated: 2026-11-17
 endpoint: POST v1/histories
 auth: Bearer Token
 ---
 
-# Historical Price Data API for Stocks, ETFs, Mutual Funds &amp; Indices
+# Historical Prices API for Stocks, ETFs, Mutual Funds &amp; Indices
 
 Returns historical price data for an asset, including dividends, splits, and capital gains, in a single stream. 
 
@@ -86,11 +86,11 @@ When **“use_usd”: true** is set, each value is converted at the historical e
      
      Ignored for assets already denominated in USD.
 - **sort_by**   
-     `array` *(optional)* — Optional sorting configuration for result items. Each sorting setup is defined as an object `{selector, desc}`: 
-    - `selector` - Field used for sorting (e.g., date).
+     `array` *(optional)* — Optional sorting configuration for result items. Records can be sorted by `date` only. The sorting setup is defined as an object {selector, desc}: 
+    - `selector` - Field used for sorting. The only supported value is `date`.
     - `desc` - Sorting direction (*true* for descending, *false* for ascending).
      
-     Multiple sorting setups can be combined in the array.
+     By default, records are sorted by `date` in descending order.
 - **limit**   
      `integer` *(optional)* — Maximum number of matched items returned (user-defined). 
     - Default: 100
@@ -125,7 +125,7 @@ curl --location "https://api.finimpulse.com/v1/histories" \
       "sort_by": [
           {
               "selector": "date",
-              "desc": true
+              "desc": false
           }
       ],
       "limit": 5,
@@ -161,7 +161,7 @@ var json = @"{
     ""sort_by"": [
         {
             ""selector"": ""date"",
-            ""desc"": true
+            ""desc"": false
         }
     ],
     ""limit"": 5,
@@ -204,7 +204,7 @@ curl_setopt_array($curl, [
       "sort_by" => [
         [
           "selector" => "date",
-          "desc" => true
+          "desc" => false
         ]
       ],
       "limit" => 5,
@@ -245,7 +245,7 @@ data = {
     "sort_by": [
         {
             "selector": "date",
-            "desc": True
+            "desc": False
         }
     ],
     "limit": 5,
@@ -282,7 +282,7 @@ const data = JSON.stringify({
     "sort_by": [
         {
             "selector": "date",
-            "desc": true
+            "desc": false
         }
     ],
     "limit": 5,
@@ -493,7 +493,6 @@ You can control how many records a response returns and page through large resul
 - Use **offset** to skip records (0-based). For example, **limit**: 100 and **offset**: 100 return records 101–200.
 - To retrieve all matching records, increase **offset** by the **limit** value until **offset** + **items_count** reaches **total_count**.
 - Alternatively, pass the **search_after_token** value from the previous response in the next request to fetch the following page. Pass **limit** with each request, because the token does not store the page size. Other request parameters do not need to be repeated.
-- To keep the order consistent across pages, pass **sort_by**, for example, by **date**.
 
 ## Related APIs 
 

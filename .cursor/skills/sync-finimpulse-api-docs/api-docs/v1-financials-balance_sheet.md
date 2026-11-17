@@ -1,12 +1,12 @@
 ---
-title: Stock Balance Sheet API
+title: Balance Sheets API
 created: 2026-01-23
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/financials/balance_sheet
 auth: Bearer Token
 ---
 
-# Stock Balance Sheet API
+# Balance Sheets API
 
 Returns detailed Balance Sheet data for stocks and some funds, including assets, liabilities, and equity for the selected period. 
 

@@ -1,12 +1,12 @@
 ---
-title: Stock Cash Flow Statement API
+title: Cash Flow Statements API
 created: 2026-01-23
-updated: 2026-11-03
+updated: 2026-11-17
 endpoint: POST v1/financials/cash_flow
 auth: Bearer Token
 ---
 
-# Stock Cash Flow Statement API
+# Cash Flow Statements API
 
 Returns detailed Cash Flow Statement data, including operating, investing, and financing cash flows.
 

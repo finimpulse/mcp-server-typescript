@@ -1,7 +1,7 @@
 ---
 title: Global Market Index Search API
 created: 2026-09-29
-updated: 2026-11-06
+updated: 2026-11-17
 endpoint: POST v1/market/index
 auth: Bearer Token
 ---
@@ -10,7 +10,7 @@ auth: Bearer Token
 
 Returns a search result for global market indices, such as the S&P 500, Dow Jones, and Nasdaq Composite, with closing prices and key performance metrics. 
 
-**Available via:** [REST API](https://developers.finimpulse.com/)
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/)
 
 This endpoint allows searching across ~39,000 global market indices, including equity, volatility, currency, and U.S. Treasury yield indices, and returns core identification, closing price, and performance data.
 
@@ -594,5 +594,6 @@ You can control how many records a response returns and page through large resul
 ## Related Resources
 
 - [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
 - [Glossary](https://finimpulse.com/glossary/)
 - [API Pricing](https://finimpulse.com/api/pricing/)

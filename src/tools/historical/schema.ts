@@ -21,24 +21,11 @@ export const historiesInputSchema = z.object({
 	),
 	sort_by: z.array(
 		z.object({
-			selector: z.string().describe("Metric used for sorting (e.g., amount_usd)"),
-			desc: z.boolean().describe("Sorting direction (true for descending, false for ascending)."),
+			selector: z.enum(['date']).describe('Field used for sorting. The only supported value is date.'),
+			desc: z.boolean().describe('Sorting direction (true for descending, false for ascending).'),
 		}),
 	).optional().describe(
-		`Optional sorting configuration for result items. Each sorting setup is defined as [selector, desc]:
-
-			selector - Metric used for sorting (e.g., date).
-			desc - Sorting direction (true for descending, false for ascending).
-			Sortings can be combined using ,.
-			
-			Example:
-			
-			    {
-			        "selector": "date",
-			        "desc": true
-			    }
-			
-			`
+		'Optional sorting configuration. Records can be sorted by date only: [{"selector": "date", "desc": false}]. By default, records are sorted by date in descending order.'
 	),
 	limit: z.number().min(1).max(5000).default(10).optional().describe("Maximum number of matched items returned."),
 	offset: z.number().min(0).optional().describe(

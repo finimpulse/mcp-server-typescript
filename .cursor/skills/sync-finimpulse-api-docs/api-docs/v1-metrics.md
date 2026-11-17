@@ -1,12 +1,12 @@
 ---
-title: Stock Financial Metrics &amp; Dividends API
+title: Financial Metrics &amp; Dividends API
 created: 2026-06-18
-updated: 2026-11-06
+updated: 2026-11-17
 endpoint: POST v1/metrics
 auth: Bearer Token
 ---
 
-# Stock Financial Metrics &amp; Dividends API
+# Financial Metrics &amp; Dividends API
 
 Returns dividend, performance, technical, profitability, growth, and risk metrics for a single asset symbol. 
 

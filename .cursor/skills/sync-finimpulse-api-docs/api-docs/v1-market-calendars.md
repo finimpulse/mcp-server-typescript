@@ -1,7 +1,7 @@
 ---
 title: Macroeconomic Release Calendar API
 created: 2026-09-29
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/market/calendars
 auth: Bearer Token
 ---
@@ -10,7 +10,7 @@ auth: Bearer Token
 
 Returns scheduled macroeconomic events, indicators, and data releases for countries globally (e.g., Unemployment Rate, CPI, Retail Sales).
 
-**Available via:** [REST API](https://developers.finimpulse.com/)
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/)
 
 This endpoint provides scheduled macroeconomic data releases for 71 countries and the euro area, covering recent releases and upcoming events for approximately the next 30 days. Each record covers one indicator release for one country and contains the release date and time, the reference period, and the actual, prior, and originally reported values.
 
@@ -485,5 +485,6 @@ You can control how many records a response returns and page through large resul
 ## Related Resources
 
 - [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
 - [Glossary](https://finimpulse.com/glossary/)
 - [API Pricing](https://finimpulse.com/api/pricing/)

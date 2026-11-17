@@ -1,7 +1,7 @@
 ---
 title: Corporate Earnings &amp; IPO Calendar API
 created: 2026-09-29
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/events/tickers
 auth: Bearer Token
 ---
@@ -10,7 +10,7 @@ auth: Bearer Token
 
 Returns upcoming and historical corporate events associated with specific ticker symbols, including earnings announcements and Initial Public Offerings (IPOs).
 
-**Available via:** [REST API](https://developers.finimpulse.com/)
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/)
 
 This endpoint provides past and upcoming corporate earnings and IPO events. Each record contains the event type, ticker symbol, company name, and event date and time, along with type-specific details such as EPS estimates and actual results for earnings, or deal status and listing exchange for IPOs.
 
@@ -433,5 +433,6 @@ You can control how many records a response returns and page through large resul
 ## Related Resources
 
 - [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
 - [Glossary](https://finimpulse.com/glossary/)
 - [API Pricing](https://finimpulse.com/api/pricing/)

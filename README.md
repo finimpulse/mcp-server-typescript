@@ -278,6 +278,7 @@ The server exposes 38 tools across 11 functional groups.
 |------|-------------|
 | `get_market_price` | Current market price snapshot: pre-market, regular, and post-market session prices for US-listed assets, plus the latest traded price. |
 | `get_histories` | Historical time-series: prices, dividends, splits, and capital gains with configurable date range and interval. |
+| `get_histories_currencies` | Historical forex exchange rates (OHLC) for currency pairs with configurable date range and interval. |
 
 ### Asset Summary & Profile
 
@@ -293,6 +294,7 @@ The server exposes 38 tools across 11 functional groups.
 |------|-------------|
 | `get_news` | Latest news and press releases with headlines, descriptions, related tickers, and provider info. |
 | `get_sec_filings_events` | SEC filing events: filing dates, form types (10-K, 8-K, ...), document metadata, and source URLs. |
+| `get_sec_filings_insider_transactions` | Record-level SEC Form 4 / 4/A data for one filing: insider transactions and holdings, transaction codes, ownership after the transaction, footnotes. |
 | `get_events_tickers` | Past and upcoming corporate events: earnings (EPS estimate/actual/surprise) and IPOs. |
 | `get_market_calendars` | Macroeconomic release calendar: indicator releases by country with actual, prior, and originally reported values. |
 

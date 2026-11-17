@@ -1,16 +1,16 @@
 ---
-title: Country Macroeconomic Indicators API
+title: Macroeconomic Indicators API by Country
 created: 2026-09-29
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/macro-economics
 auth: Bearer Token
 ---
 
-# Country Macroeconomic Indicators API
+# Macroeconomic Indicators API by Country
 
 Returns annual macroeconomic indicators by country, including GDP, inflation, employment, interest rates, trade, and government finances.
 
-**Available via:** [REST API](https://developers.finimpulse.com/)
+**Available via:** [REST API](https://developers.finimpulse.com/) · [MCP](https://developers.finimpulse.com/model-context-protocol/)
 
 This endpoint provides country-level macroeconomic data from 1970 to the current year. Each record covers one country for one calendar year and contains 38 indicators grouped by category.
 
@@ -523,5 +523,6 @@ You can control how many records a response returns and page through large resul
 ## Related Resources
 
 - [API Sandbox](https://developers.finimpulse.com/sandbox/)
+- [MCP Server](https://developers.finimpulse.com/model-context-protocol/)
 - [Glossary](https://finimpulse.com/glossary/)
 - [API Pricing](https://finimpulse.com/api/pricing/)

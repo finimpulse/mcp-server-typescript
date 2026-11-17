@@ -1,7 +1,7 @@
 {
   "counts": {
-    "doc_endpoints": 39,
-    "implemented": 37,
+    "doc_endpoints": 41,
+    "implemented": 39,
     "missing": 0,
     "skipped": 2,
     "orphaned_tools": 1
@@ -36,6 +36,7 @@
     "financials/income_statement",
     "financials/valuation_measures",
     "histories",
+    "histories/currencies",
     "holders/general",
     "holders/insiders",
     "holders/insiders-transactions",
@@ -58,6 +59,7 @@
     "search",
     "search-lite",
     "sec-filings/events",
+    "sec-filings/insider-transactions",
     "statistics/annual-returns",
     "statistics/general",
     "statistics/risks",

@@ -1,12 +1,12 @@
 ---
-title: Lightweight Search API for Stocks, ETFs, Mutual Funds &amp; Indices
+title: Lightweight Asset Search API for Stocks, ETFs, Mutual Funds &amp; Indices
 created: 2026-06-18
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/search-lite
 auth: Bearer Token
 ---
 
-# Lightweight Search API for Stocks, ETFs, Mutual Funds &amp; Indices
+# Lightweight Asset Search API for Stocks, ETFs, Mutual Funds &amp; Indices
 
 Returns a lightweight, cross-asset search result for stocks, ETFs, mutual funds, and indices. 
 

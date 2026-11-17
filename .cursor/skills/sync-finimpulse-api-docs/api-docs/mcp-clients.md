@@ -1,7 +1,7 @@
 ---
 title: Supported MCP Clients &amp; Setup
 created: 2026-04-22
-updated: 2026-10-23
+updated: 2026-11-13
 ---
 
 # Supported MCP Clients &amp; Setup
@@ -16,20 +16,20 @@ The [FinImpulse MCP Server](https://developers.finimpulse.com/model-context-prot
 - [Claude Code](https://developers.finimpulse.com/mcp-clients/#claude-code)
 - [ChatGPT](https://developers.finimpulse.com/mcp-clients/#chatgpt)
 - [Cursor](https://developers.finimpulse.com/mcp-clients/#cursor)
-- [Windsurf](https://developers.finimpulse.com/mcp-clients/#windsurf)
+- [Devin Desktop (Windsurf)](https://developers.finimpulse.com/mcp-clients/#devin-desktop-windsurf)
 - [VS Code (Copilot)](https://developers.finimpulse.com/mcp-clients/#vs-code-copilot)
-- [Gemini CLI](https://developers.finimpulse.com/mcp-clients/#gemini-cli)
+- [Antigravity CLI](https://developers.finimpulse.com/mcp-clients/#antigravity-cli)
 - [Cline](https://developers.finimpulse.com/mcp-clients/#cline)
 
 Configuration instructions for all listed MCP clients are provided below, covering both the hosted endpoint (OAuth) and local server (stdio) connection methods.
 
 > **Note:** Support for custom MCP servers is defined by each client. Depending on the client, adding a custom MCP server may require a specific subscription plan, account type, or permissions granted by a workspace administrator. MCP clients are updated regularly, and menu names or setup steps may change between versions. If an option appears under a different name, refer to the client’s official documentation for the current steps.
 
-## Connection Methods 
+## Connection Methods 
 
 Two connection methods are available. Select the option that best fits your environment.
 
-### Option 1 — Hosted Server 
+### Option 1 — Hosted Server 
 
 The FinImpulse-hosted MCP endpoint is available at **https://mcp.finimpulse.com/mcp.**
 
@@ -47,7 +47,7 @@ The full source code and additional setup references are available on [GitHub](h
 
 ## Claude Desktop
 
-Claude Desktop supports two connection methods: a hosted server via the mcp-remote bridge and a local server via stdio.
+Claude Desktop supports two connection methods: the hosted endpoint through the mcp-remote bridge, and the local server directly over stdio.
 
 For both options, open Claude Desktop and navigate to **Settings → Developer**, then select **Edit Config** to open the configuration file. Alternatively, locate the file manually at the following path, depending on the operating system:
 
@@ -55,7 +55,7 @@ For both options, open Claude Desktop and navigate to **Settings → Developer**
 - **Windows**: %APPDATA%\\Claude\\claude_desktop_config.json
 - **Linux**: ~/.config/Claude/claude_desktop_config.json
 
-As Claude Desktop does not support Streamable HTTP natively, to connect via the hosted endpoint, use the mcp-remote bridge. Add the following configuration to the file:
+Since the configuration file supports only local (stdio) servers, use the mcp-remote bridge to connect via the hosted endpoint. Add the following configuration to the file:
 
 ```
 {
@@ -84,11 +84,11 @@ To run the server locally, add the following configuration, replacing *your-api-
 }
 ```
 
+After saving the configuration file, quit and restart Claude Desktop for the changes to take effect.
+
 ## Claude Code
 
-Claude Code supports two connection methods.
-
-Install and configure Claude Code before proceeding. Refer to the [Anthropic documentation](https://docs.anthropic.com/en/docs/claude-code) for setup instructions.
+Claude Code supports two connection methods. Install and configure Claude Code before proceeding. Refer to the [Anthropic documentation](https://code.claude.com/docs/en/overview) for setup instructions.
 
 To connect via the hosted endpoint, run:
 
@@ -96,16 +96,12 @@ To connect via the hosted endpoint, run:
 claude mcp add --transport http finimpulse https://mcp.finimpulse.com/mcp
 ```
 
-To run the server locally:
+To complete the authorization, run /mcp within Claude Code and follow the steps in the browser.
+
+To run the server locally, use the following command, replacing *your-api-token* with your FinImpulse API token:
 
 ```
-claude mcp add finimpulse -- npx -y finimpulse-mcp-server
-```
-
-Then set the *API_TOKEN* environment variable:
-
-```
-export API_TOKEN=your-api-token
+claude mcp add finimpulse -e API_TOKEN=your-api-token -- npx -y finimpulse-mcp-server 
 ```
 
 To verify the connection, run:
@@ -118,9 +114,7 @@ The FinImpulse server should appear in the list of configured MCP servers.
 
 ## ChatGPT
 
-ChatGPT supports only the hosted endpoint connection method, available both on the web and in the desktop application.
-
-To set it up, go to **Plugins → Add → Add custom MCP server** and enter the following:
+ChatGPT supports only the hosted endpoint connection method. To set it up in the ChatGPT web app, go to **Plugins → Add → Add custom MCP server** and enter the following:
 
 - Name: FinImpulse
 - Connection: Server URL, https://mcp.finimpulse.com/mcp
@@ -144,7 +138,7 @@ To connect via the hosted endpoint, open the configuration file at *~/.cursor/mc
 }
 ```
 
- To run the server locally, add the following configuration to the same file, replacing *your-api-token* with your FinImpulse API token:
+To run the server locally, add the following configuration instead, replacing *your-api-token* with your FinImpulse API token:
 
 ```
 {
@@ -160,23 +154,27 @@ To connect via the hosted endpoint, open the configuration file at *~/.cursor/mc
 }
 ```
 
-## Windsurf
+## Devin Desktop (Windsurf)
 
-Windsurf supports two connection methods.
+Windsurf has been renamed to Devin Desktop. Devin Desktop supports two connection methods. For both options, open the configuration file at the following path, depending on the operating system:
 
-To connect via the hosted endpoint, open *~/.codeium/mcp_config.json* and add the following:
+- **macOS**: ~/.config/devin/mcp_config.json
+- **Windows**: %APPDATA%\\devin\\mcp_config.json
+- **Linux**: ~/.config/devin/mcp_config.json
+
+To connect via the hosted endpoint, add the following configuration to the file:
 
 ```
 {
   "mcpServers": {
     "finimpulse": {
-      "serverUrl": "https://mcp.finimpulse.com/mcp"
+      "url": "https://mcp.finimpulse.com/mcp"
     }
   }
 }
 ```
 
-To run the server locally, open *~/.codeium/windsurf/mcp_config.json* and add the following, replacing *your-api-token* with your FinImpulse API token:
+To run the server locally, use the following configuration instead, replacing *your-api-token* with your FinImpulse API token:
 
 ```
 {
@@ -194,86 +192,80 @@ To run the server locally, open *~/.codeium/windsurf/mcp_config.json* and add th
 
 ## VS Code (Copilot)
 
-VS Code supports two connection methods.
+VS Code supports two connection methods. For both options, open the *mcp.json* configuration file: run **MCP: Open User Configuration** from the **Command Palette** to make the server available in all workspaces, or create *.vscode/mcp.json* in the workspace folder to use it only in the current project.
 
-To connect via the hosted endpoint, open *settings.json* and add the following:
-
-```
-{
-  "mcp": {
-    "servers": {
-      "finimpulse": {
-          "type": "http",
-          "url": "https://mcp.finimpulse.com/mcp"
-       } 
-    }
-  }
-}
-```
-
-To run the server locally, add the following configuration to the same file, replacing *your-api-token* with your FinImpulse API token:
+To connect via the hosted endpoint, add the following configuration to the file:
 
 ```
 {
-  "mcp": {
-    "servers": {
-      "finimpulse": {
-        "command": "npx",
-        "args": ["-y", "finimpulse-mcp-server"],
-        "env": {
-          "API_TOKEN": "your-api-token"
-        }
-      }
-    }
-  }
-}
-```
-
-## Gemini CLI
-
-Gemini CLI supports only the local server (stdio) connection method.
-
-Install and configure Gemini CLI before proceeding. Refer to the [Google documentation](https://cloud.google.com/gemini/docs/codeassist/gemini-cli) for setup instructions.
-
-Run the following command to add the FinImpulse MCP server:
-
-```
-gemini mcp add finimpulse -- npx -y finimpulse-mcp-server
-```
-
-Then set the API_TOKEN environment variable, replacing *your-api-token* with your FinImpulse API token:
-
-```
-export API_TOKEN=your-api-token
-```
-
-To verify the connection, run:
-
-```
-/mcp list
-```
-
-The FinImpulse server should appear in the list of configured MCP servers.
-
-## Cline
-
-Cline supports two connection methods.
-
-Firstly, open Cline settings and navigate to **MCP Servers**.
-
-To connect via the hosted endpoint, add a new server with the following configuration:
-
-```
-{
-  "mcpServers": {
+  "servers": {
     "finimpulse": {
+      "type": "http",
       "url": "https://mcp.finimpulse.com/mcp"
     }
   }
 }
 ```
 
-To run the server locally, add a new server with the following configuration, replacing *your-api-token* with your FinImpulse API token:
+To run the server locally, use the following configuration instead, replacing *your-api-token* with your FinImpulse API token:
+
+```
+{
+  "servers": {
+    "finimpulse": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "finimpulse-mcp-server"],
+      "env": {
+        "API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+## Antigravity CLI
+
+Antigravity CLI replaces Gemini CLI for individual Google accounts. Antigravity CLI supports two connection methods. Install and configure Antigravity CLI before proceeding. Refer to the [Antigravity documentation](https://antigravity.google/docs/getting-started?tab=cli) for setup instructions.
+
+To connect via the hosted endpoint, run:
+
+```
+agy mcp add finimpulse https://mcp.finimpulse.com/mcp
+```
+
+To run the server locally, use the following command, replacing *your-api-token* with your FinImpulse API token:
+
+```
+agy mcp add -e API_TOKEN=your-api-token finimpulse -- npx -y finimpulse-mcp-server 
+```
+
+To verify the connection, run:
+
+```
+agy mcp list 
+```
+
+The FinImpulse server should appear in the list of configured MCP servers.
+
+## Cline
+
+Cline supports two connection methods. For both options, open the Cline panel, click the **MCP Servers** icon, go to the **Configure** tab, and select **Configure MCP Servers** to open the configuration file.
+
+To connect via the hosted endpoint, add the following configuration to the file:
+
+```
+{
+  "mcpServers": {
+    "finimpulse": {
+      "type": "streamableHttp",
+      "url": "https://mcp.finimpulse.com/mcp"
+    }
+  }
+}
+```
+
+To run the server locally, use the following configuration instead, replacing *your-api-token* with your FinImpulse API token:
 
 ```
 {
@@ -291,17 +283,17 @@ To run the server locally, add a new server with the following configuration, re
 
 ## Other MCP-Compatible Clients
 
-Any client that supports the Streamable HTTP transport can connect via the hosted endpoint using the following URL:
+Any client that supports the Streamable HTTP transport and OAuth 2.0 can connect via the hosted endpoint using the following URL:
 
 ```
 https://mcp.finimpulse.com/mcp 
 ```
 
-For clients that support stdio only, pass the API token as an environment variable and run:
+For clients that support stdio only, configure the client to launch the server with the following parameters, replacing *your-api-token* with your FinImpulse API token:
 
-```
-API_TOKEN=your-api-token npx finimpulse-mcp-server
-```
+- Command: npx
+- Arguments: -y finimpulse-mcp-server
+- Environment variable: API_TOKEN=your-api-token
 
 ## Disclaimer
 

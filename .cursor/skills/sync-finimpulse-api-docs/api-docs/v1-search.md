@@ -1,12 +1,12 @@
 ---
-title: Search API for Stocks, ETFs, Mutual Funds &amp; Indices
+title: Asset Search API for Stocks, ETFs, Mutual Funds &amp; Indices
 created: 2026-01-23
-updated: 2026-11-05
+updated: 2026-11-17
 endpoint: POST v1/search
 auth: Bearer Token
 ---
 
-# Search API for Stocks, ETFs, Mutual Funds &amp; Indices
+# Asset Search API for Stocks, ETFs, Mutual Funds &amp; Indices
 
 Returns a unified, cross-asset search result for stocks, ETFs, mutual funds, and indices. 
 

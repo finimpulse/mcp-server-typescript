@@ -1,12 +1,12 @@
 ---
-title: Stock Income Statement API
+title: Income Statements API
 created: 2026-01-23
-updated: 2026-11-03
+updated: 2026-11-17
 endpoint: POST v1/financials/income_statement
 auth: Bearer Token
 ---
 
-# Stock Income Statement API
+# Income Statements API
 
 Returns detailed Income Statement data for stocks and some funds, including revenue, expenses, and net income for the selected period. 
 
