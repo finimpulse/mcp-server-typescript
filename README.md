@@ -262,7 +262,7 @@ For clients that support stdio only, configure the client to launch the server w
 
 ## Available Tools
 
-The server exposes 38 tools across 11 functional groups.
+The server exposes 40 tools across 11 functional groups.
 
 ### Search & Discovery
 
@@ -272,7 +272,7 @@ The server exposes 38 tools across 11 functional groups.
 | `get_search_lite` | Lightweight cross-asset search with a focused field set: core identification, current pricing, and key performance metrics. |
 | `get_market_index` | Search ~39,000 global market indices with latest close, daily change, 52-week range, and one-year return. |
 
-### Price Data
+### Price Data & Exchange Rates
 
 | Tool | Description |
 |------|-------------|
@@ -294,7 +294,6 @@ The server exposes 38 tools across 11 functional groups.
 |------|-------------|
 | `get_news` | Latest news and press releases with headlines, descriptions, related tickers, and provider info. |
 | `get_sec_filings_events` | SEC filing events: filing dates, form types (10-K, 8-K, ...), document metadata, and source URLs. |
-| `get_sec_filings_insider_transactions` | Record-level SEC Form 4 / 4/A data for one filing: insider transactions and holdings, transaction codes, ownership after the transaction, footnotes. |
 | `get_events_tickers` | Past and upcoming corporate events: earnings (EPS estimate/actual/surprise) and IPOs. |
 | `get_market_calendars` | Macroeconomic release calendar: indicator releases by country with actual, prior, and originally reported values. |
 
@@ -316,6 +315,7 @@ The server exposes 38 tools across 11 functional groups.
 | `get_holders_mutual_funds` | Mutual funds and ETFs that hold a given stock. |
 | `get_holders_insiders` | Insider transaction records: actions, roles, and reported positions. |
 | `get_holders_insiders_transactions` | Detailed insider transactions with share counts, values, and filer identity. |
+| `get_sec_filings_insider_transactions` | Record-level SEC Form 4 / 4/A data for one filing: insider transactions and holdings, transaction codes, ownership after the transaction, footnotes. |
 
 ### Financial Statements & Valuation
 
