@@ -39,6 +39,7 @@ async function resolveApiToken(req: Request): Promise<string | null> {
 export async function bearerAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
 	const apiToken = await resolveApiToken(req);
 	if (!apiToken) {
+		res.set('WWW-Authenticate', `Bearer resource_metadata="${req.protocol}://${req.get('host')}/.well-known/oauth-protected-resource"`);
 		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
