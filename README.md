@@ -262,7 +262,7 @@ For clients that support stdio only, configure the client to launch the server w
 
 ## Available Tools
 
-The server exposes 40 tools across 11 functional groups.
+The server exposes 39 tools across 11 functional groups.
 
 ### Search & Discovery
 
@@ -321,7 +321,6 @@ The server exposes 40 tools across 11 functional groups.
 
 | Tool | Description |
 |------|-------------|
-| `get_financials_general` | Unified financial statements and valuation measures across reporting intervals. |
 | `get_financials_income_statement` | Detailed Income Statement: revenue, expenses, net income (annual/quarterly/trailing). |
 | `get_financials_balance_sheet` | Balance Sheet: financial position and capital structure snapshot. |
 | `get_financials_cash_flow` | Cash Flow Statement: operating, investing, and financing cash flows. |
