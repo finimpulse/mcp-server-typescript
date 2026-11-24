@@ -41,7 +41,7 @@ SANDBOX_API_TOKEN=your-token npm run test:watch
 | `historical.test.ts` | `get_histories`, `get_histories_currencies` |
 | `analysis.test.ts` | `get_analysis_analysts`, `get_analysis_earnings`, `get_analysis_recommendations`, `get_analysis_upgrades_downgrades` |
 | `holders.test.ts` | `get_holders_general`, `get_holders_institutional`, `get_holders_mutual_funds`, `get_holders_insiders`, `get_holders_insiders_transactions` |
-| `financials.test.ts` | `get_financials_general`, `get_financials_income_statement`, `get_financials_balance_sheet`, `get_financials_cash_flow`, `get_financials_valuation_measures` |
+| `financials.test.ts` | `get_financials_income_statement`, `get_financials_balance_sheet`, `get_financials_cash_flow`, `get_financials_valuation_measures` |
 | `statistics.test.ts` | `get_statistics_general`, `get_statistics_risks`, `get_statistics_annual_returns` |
 | `holdings.test.ts` | `get_holdings_general`, `get_holdings_top_holdings`, `get_holdings_history_dates`, `get_holdings_history` |
 | `options.test.ts` | `get_options_expirations`, `get_options_chain`, `get_options_contracts` |

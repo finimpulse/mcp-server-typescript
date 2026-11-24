@@ -1,5 +1,5 @@
-import {CashFlowItem, FinancialsGeneralResponse} from '../general/types.js';
+import {CashFlowItem, FinancialsResponse} from '../types.js';
 
-export interface FinancialsCashFlowResponse extends Omit<FinancialsGeneralResponse, 'items'> {
+export interface FinancialsCashFlowResponse extends Omit<FinancialsResponse, 'items'> {
 	items: CashFlowItem[];
 }

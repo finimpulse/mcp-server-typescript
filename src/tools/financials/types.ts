@@ -396,7 +396,7 @@ export interface ValuationMeasuresItem {
 
 type FinancialsItem = IncomeStatementItem | BalanceSheetItem | CashFlowItem | ValuationMeasuresItem;
 
-export interface FinancialsGeneralResponse {
+export interface FinancialsResponse {
 	symbol: string;
 	display_name: string | null;
 	short_name: string | null;

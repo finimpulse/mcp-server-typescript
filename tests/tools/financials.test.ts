@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { ApiClient } from '../../src/http/client.js';
-import { financialsGeneralHandler } from '../../src/tools/financials/general/handler.js';
 import { financialsIncomeStatementHandler } from '../../src/tools/financials/income_statement/handler.js';
 import { financialsBalanceSheetHandler } from '../../src/tools/financials/balance_sheet/handler.js';
 import { financialsCashFlowHandler } from '../../src/tools/financials/cash_flow/handler.js';
@@ -15,19 +14,6 @@ function assertSuccess(text: string) {
 	expect(parsed.data).toBeDefined();
 	return parsed;
 }
-
-describe('get_financials_general', () => {
-	let client: ApiClient;
-	beforeAll(() => {
-		if (!TOKEN) throw new Error('SANDBOX_API_TOKEN or API_TOKEN env var is required');
-		client = new ApiClient(TOKEN);
-	});
-
-	it('returns general financials for AAPL', async () => {
-		const result = await financialsGeneralHandler({ symbol: 'AAPL' }, client);
-		assertSuccess(result.content[0].text as string);
-	});
-});
 
 describe('get_financials_income_statement', () => {
 	let client: ApiClient;

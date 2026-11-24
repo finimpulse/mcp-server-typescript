@@ -19,7 +19,6 @@ import {registerHoldersInstitutionalTool} from './holders/institutional/index.js
 import {registerHoldersMutualFundsTool} from './holders/mutual-funds/index.js';
 import {registerHoldersInsidersTool} from './holders/insiders/index.js';
 import {registerHoldersInsidersTransactionsTool} from './holders/insiders-transactions/index.js';
-import {registerFinancialsGeneralTool} from './financials/general/index.js';
 import {registerFinancialsIncomeStatementTool} from './financials/income_statement/index.js';
 import {registerFinancialsBalanceSheetTool} from './financials/balance_sheet/index.js';
 import {registerFinancialsCashFlowTool} from './financials/cash_flow/index.js';
@@ -61,7 +60,6 @@ export function registerAllTools(server: McpServer, client: ApiClient): void {
 	registerHoldersMutualFundsTool(server, client);
 	registerHoldersInsidersTool(server, client);
 	registerHoldersInsidersTransactionsTool(server, client);
-	registerFinancialsGeneralTool(server, client);
 	registerFinancialsIncomeStatementTool(server, client);
 	registerFinancialsBalanceSheetTool(server, client);
 	registerFinancialsCashFlowTool(server, client);

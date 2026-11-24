@@ -4,15 +4,10 @@
     "implemented": 39,
     "missing": 0,
     "skipped": 2,
-    "orphaned_tools": 1
+    "orphaned_tools": 0
   },
   "missing": [],
-  "orphaned_tools": [
-    {
-      "path": "financials/general",
-      "handler": "src/tools/financials/general/handler.ts"
-    }
-  ],
+  "orphaned_tools": [],
   "skipped": [
     "GET v1/errors",
     "GET v1/appendix/user_data"
