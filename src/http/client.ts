@@ -8,6 +8,7 @@ export class ApiClient {
 	private API_BASE = 'https://api.finimpulse.com';
 	
 	private USER_AGENT = `FinImpulse-MCP-TypeScript-SDK/${version}`;
+	private TOKEN_SETTINGS_URL = 'https://app.finimpulse.com/developer/settings';
 	constructor(private readonly token: string) {}
 	
 	async request<T>(url: string, method: string = 'POST', body?: any, forceFull: boolean = false): Promise<CallToolResult> {
@@ -27,6 +28,9 @@ export class ApiClient {
 				headers,
 				body: bodyStr
 			});
+			if (response.status === 401) {
+				return this.formatUnauthorizedResponse();
+			}
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
@@ -81,6 +85,21 @@ export class ApiClient {
 				{
 					type: "text",
 					text: `Error: ${this.formatError(error)}`,
+				},
+			],
+		};
+	}
+	
+	private formatUnauthorizedResponse(): CallToolResult {
+		const message = this.token
+			? 'FinImpulse API rejected the API token (401 Unauthorized). The token is invalid or revoked.'
+			: 'FinImpulse API token is missing (401 Unauthorized).';
+		return {
+			isError: true,
+			content: [
+				{
+					type: "text",
+					text: `Error: ${message} For a local server, set a valid API_TOKEN environment variable in the MCP client config and restart the server. Get a token at ${this.TOKEN_SETTINGS_URL}. For the hosted server (https://mcp.finimpulse.com/mcp), reconnect it to sign in again.`,
 				},
 			],
 		};
