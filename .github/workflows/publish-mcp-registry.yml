@@ -1,6 +1,9 @@
 name: Publish to MCP Registry
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -12,6 +15,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check versions
+        run: |
+          VERSION=$(jq -r .version server.json)
+          for v in "$(jq -r .version package.json)" $(jq -r '.packages[].version' server.json); do
+            if [ "$v" != "$VERSION" ]; then
+              echo "::error::Version mismatch: server.json is $VERSION, found $v in package.json or server.json packages"
+              exit 1
+            fi
+          done
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "PACKAGE=$(jq -r .name package.json)" >> "$GITHUB_ENV"
+
+      # The registry rejects versions that are not on npm yet, and npm can take a few minutes after publish.
+      - name: Wait for the package on npm
+        run: |
+          for i in $(seq 1 30); do
+            if [ "$(npm view "$PACKAGE@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "::error::$PACKAGE@$VERSION is not on npm. Run npm publish first."
+          exit 1
 
       - name: Install mcp-publisher
         run: |
