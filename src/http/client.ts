@@ -32,7 +32,7 @@ export class ApiClient {
 				return this.formatUnauthorizedResponse();
 			}
 			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
+				return this.formatHttpErrorResponse(response.status, await this.readErrorBody(response));
 			}
 			return this.validateAndFormatResponse<T>(await response.json() as FinImpulseFullResponse<T>)
 		} catch (error) {
@@ -79,8 +79,31 @@ export class ApiClient {
 		};
 	}
 	
+	private async readErrorBody(response: Response): Promise<Partial<FinImpulseFullResponse<unknown>> | null> {
+		try {
+			return await response.json() as Partial<FinImpulseFullResponse<unknown>>;
+		} catch {
+			return null;
+		}
+	}
+
+	private formatHttpErrorResponse(httpStatus: number, body: Partial<FinImpulseFullResponse<unknown>> | null): CallToolResult {
+		const code = body?.status_code ? ` (Code: ${body.status_code})` : '';
+		const message = body?.status_message ? `: ${body.status_message}` : '.';
+		return {
+			isError: true,
+			content: [
+				{
+					type: "text",
+					text: `Error: FinImpulse API returned HTTP ${httpStatus}${code}${message}`,
+				},
+			],
+		};
+	}
+
 	private formatErrorResponse(error: unknown): CallToolResult {
 		return {
+			isError: true,
 			content: [
 				{
 					type: "text",

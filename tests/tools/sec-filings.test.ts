@@ -45,4 +45,10 @@ describe('get_sec_filings_insider_transactions', () => {
 		);
 		assertSuccess(result.content[0].text as string);
 	});
+
+	it('returns the API validation message when both symbol and cik are missing', async () => {
+		const result = await secFilingsInsiderTransactionsHandler({ accession_number: '0001185185-26-005515' }, client);
+		expect(result.isError).toBe(true);
+		expect(result.content[0].text).toMatch(/^Error: FinImpulse API returned HTTP 422 \(Code: 40000\): .*symbol field is required when cik is not present/);
+	});
 });

@@ -37,4 +37,10 @@ describe('get_histories_currencies', () => {
 		const result = await historiesCurrenciesHandler({ currency_from: 'EUR', currency_to: 'USD', interval: '1mo', sort_by: [{ selector: 'date', desc: false }], limit: 3 }, client);
 		assertSuccess(result.content[0].text as string);
 	});
+
+	it('returns the API validation message when currencies and search_after_token are missing', async () => {
+		const result = await historiesCurrenciesHandler({ limit: 3 }, client);
+		expect(result.isError).toBe(true);
+		expect(result.content[0].text).toMatch(/^Error: FinImpulse API returned HTTP 422 \(Code: 40000\): .*currency from field is required/);
+	});
 });
