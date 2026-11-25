@@ -4,6 +4,8 @@ import { createServer } from '../server.js';
 
 const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL ?? 'https://data.finimpulse.com';
 const STATIC_API_TOKEN = process.env.API_TOKEN ?? '';
+const MCPRUSH_CLAIM_TOKEN = 'mcprush.com-62b1b2937f289323db941261';
+const GLAMA_CLAIM_TOKEN = 'glama_claim_vSgIXc_mWqED_N43mNFyPnfiAvk0OI5X';
 const apiTokenCache = new Map<string, string>();
 
 async function exchangeOAuthToken(oauthToken: string): Promise<string | null> {
@@ -59,6 +61,14 @@ export async function runHttp(): Promise<void> {
 	const app = express();
 	app.set('trust proxy', true);
 	app.use(express.json());
+
+	// Domain ownership proofs for MCPRush and Glama: keep them public and served, Glama re-checks daily.
+	app.get('/.well-known/mcprush.com-claim.txt', (_req, res) => {
+		res.type('text/plain').send(`${MCPRUSH_CLAIM_TOKEN}\n`);
+	});
+	app.get('/.well-known/glama.json', (_req, res) => {
+		res.json({ $schema: 'https://glama.ai/mcp/schemas/connector.json', claim: GLAMA_CLAIM_TOKEN });
+	});
 
 	if (!STATIC_API_TOKEN) {
 		app.get('/.well-known/oauth-protected-resource', (req, res) => {
