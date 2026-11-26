@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from '../server.js';
+import { version } from '../utils/version.js';
 
 const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL ?? 'https://data.finimpulse.com';
 const STATIC_API_TOKEN = process.env.API_TOKEN ?? '';
@@ -61,6 +62,10 @@ export async function runHttp(): Promise<void> {
 	const app = express();
 	app.set('trust proxy', true);
 	app.use(express.json());
+
+	app.get('/health', (_req, res) => {
+		res.json({ status: 'ok', version });
+	});
 
 	// Domain ownership proofs for MCPRush and Glama: keep them public and served, Glama re-checks daily.
 	app.get('/.well-known/mcprush.com-claim.txt', (_req, res) => {
