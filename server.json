@@ -8,7 +8,7 @@
     "url": "https://github.com/finimpulse/mcp-server-typescript",
     "source": "github"
   },
-  "version": "1.3.4",
+  "version": "1.3.5",
   "remotes": [
     {
       "type": "streamable-http",
@@ -19,7 +19,7 @@
     {
       "registryType": "npm",
       "identifier": "finimpulse-mcp-server",
-      "version": "1.3.4",
+      "version": "1.3.5",
       "transport": {
         "type": "stdio"
       },
