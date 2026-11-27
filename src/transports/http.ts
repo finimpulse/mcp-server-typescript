@@ -7,21 +7,44 @@ const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL ?? 'https://data.finimpulse.
 const STATIC_API_TOKEN = process.env.API_TOKEN ?? '';
 const MCPRUSH_CLAIM_TOKEN = 'mcprush.com-62b1b2937f289323db941261';
 const GLAMA_CLAIM_TOKEN = 'glama_claim_vSgIXc_mWqED_N43mNFyPnfiAvk0OI5X';
-const apiTokenCache = new Map<string, string>();
+// Bounded TTL so a revoked OAuth token stops working within minutes and memory does not grow unbounded.
+const API_TOKEN_CACHE_TTL_MS = 10 * 60 * 1000;
+const API_TOKEN_CACHE_MAX_SIZE = 1000;
+const TOKEN_EXCHANGE_TIMEOUT_MS = 10_000;
+const apiTokenCache = new Map<string, { apiToken: string; expiresAt: number }>();
+
+function getCachedApiToken(oauthToken: string): string | null {
+	const entry = apiTokenCache.get(oauthToken);
+	if (!entry) return null;
+	if (entry.expiresAt <= Date.now()) {
+		apiTokenCache.delete(oauthToken);
+		return null;
+	}
+	return entry.apiToken;
+}
+
+function cacheApiToken(oauthToken: string, apiToken: string): void {
+	if (apiTokenCache.size >= API_TOKEN_CACHE_MAX_SIZE) {
+		const oldestKey = apiTokenCache.keys().next().value;
+		if (oldestKey !== undefined) apiTokenCache.delete(oldestKey);
+	}
+	apiTokenCache.set(oauthToken, { apiToken, expiresAt: Date.now() + API_TOKEN_CACHE_TTL_MS });
+}
 
 async function exchangeOAuthToken(oauthToken: string): Promise<string | null> {
-	const cached = apiTokenCache.get(oauthToken);
+	const cached = getCachedApiToken(oauthToken);
 	if (cached) return cached;
 
 	try {
 		const res = await fetch(`${AUTH_SERVER_URL}/api/mcp/token`, {
 			method: 'POST',
 			headers: { Authorization: `Bearer ${oauthToken}` },
+			signal: AbortSignal.timeout(TOKEN_EXCHANGE_TIMEOUT_MS),
 		});
 		if (!res.ok) return null;
 		const data = await res.json() as { token?: string; api_token?: string };
 		const apiToken = data.token ?? data.api_token;
-		if (apiToken) apiTokenCache.set(oauthToken, apiToken);
+		if (apiToken) cacheApiToken(oauthToken, apiToken);
 		return apiToken ?? null;
 	} catch {
 		return null;
@@ -77,7 +100,7 @@ export async function runHttp(): Promise<void> {
 
 	if (!STATIC_API_TOKEN) {
 		app.get('/.well-known/oauth-protected-resource', (req, res) => {
-			const resource = `${req.protocol}://${req.get('host')}`;
+			const resource = `${req.protocol}://${req.get('host')}/mcp`;
 			res.json({ resource, authorization_servers: [AUTH_SERVER_URL] });
 		});
 	}
