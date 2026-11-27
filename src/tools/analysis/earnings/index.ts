@@ -9,7 +9,7 @@ export function registerAnalysisEarningsTool(server: McpServer, client: ApiClien
 		'get_analysis_earnings',
 		{
 			title: 'Earnings & analyst estimates',
-			description: 'Returns earnings and estimate records for an asset, including EPS actuals, earnings vs. revenue, EPS trends, revisions, and growth metrics. Supports filtering by type and accounting methodology (GAAP/normalized). Primarily intended for stocks — ETFs and mutual funds may return empty results. Use for populating Earnings & Estimates dashboards or feeding earnings analytics pipelines.',
+			description: 'Returns earnings and estimate records for an asset, including EPS actuals, earnings vs. revenue, EPS trends, revisions, and growth metrics. Supports filtering by type and accounting methodology (GAAP/normalized). Primarily intended for stocks — ETFs and mutual funds may return empty results. Use to compare reported and estimated earnings or to track estimate revisions.',
 			inputSchema: analysisEarningsInputSchema,
 			annotations: readOnlyToolAnnotations,
 		},

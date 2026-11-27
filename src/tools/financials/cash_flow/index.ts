@@ -5,5 +5,5 @@ import {ApiClient} from '../../../http/client.js';
 import {readOnlyToolAnnotations} from '../../../config/tool-annotations.js';
 
 export function registerFinancialsCashFlowTool(server: McpServer, client: ApiClient): void {
-	server.registerTool('get_financials_cash_flow', { title: 'Cash flow statements', description: 'Returns detailed Cash Flow Statement data, including operating, investing, and financing cash flows for the selected period. Supports filtering by interval (annual, quarterly, trailing). Use to populate the Cash Flow section or extract multi-period series for liquidity analysis, forecasting, or visualization.', inputSchema: financialsCashFlowInputSchema, annotations: readOnlyToolAnnotations }, (input) => financialsCashFlowHandler(input, client));
+	server.registerTool('get_financials_cash_flow', { title: 'Cash flow statements', description: 'Returns detailed Cash Flow Statement data, including operating, investing, and financing cash flows for the selected period. Supports filtering by interval (annual, quarterly, trailing). Use for multi-period cash flow series in liquidity analysis, forecasting, or charts.', inputSchema: financialsCashFlowInputSchema, annotations: readOnlyToolAnnotations }, (input) => financialsCashFlowHandler(input, client));
 }

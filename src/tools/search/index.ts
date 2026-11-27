@@ -5,5 +5,5 @@ import {ApiClient} from '../../http/client.js';
 import {readOnlyToolAnnotations} from '../../config/tool-annotations.js';
 
 export function registerSearchTool(server: McpServer, client: ApiClient): void {
-	server.registerTool('get_search', { title: 'Asset search', description: 'Returns a unified, cross-asset search result for financial instruments, including stocks, ETFs, and mutual funds. This endpoint powers global asset search, ticker autocomplete, discovery flows, and AI-assisted search scenarios. It returns a normalized set of price, liquidity, performance, and classification fields, allowing different asset types to be ranked and compared in a single response.', inputSchema: searchInputSchema, annotations: readOnlyToolAnnotations }, (input) => searchHandler(input, client));
+	server.registerTool('get_search', { title: 'Asset search', description: 'Returns a unified, cross-asset search result for financial instruments, including stocks, ETFs, and mutual funds. Use it to find instruments by name or ticker, or to screen assets with filters and sorting. It returns a normalized set of price, liquidity, performance, and classification fields, allowing different asset types to be ranked and compared in a single response.', inputSchema: searchInputSchema, annotations: readOnlyToolAnnotations }, (input) => searchHandler(input, client));
 }

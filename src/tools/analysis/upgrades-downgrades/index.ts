@@ -9,7 +9,7 @@ export function registerAnalysisUpgradesDowngradesTool(server: McpServer, client
 		'get_analysis_upgrades_downgrades',
 		{
 			title: 'Analyst upgrades, downgrades & price target changes',
-			description: 'Returns a feed of analyst rating actions for a ticker, including upgrades, downgrades, reiterations, and price target changes (from/to grade, action type, current and prior price targets). Primarily intended for stocks — ETFs and mutual funds rarely have analyst rating coverage. Use for populating an Upgrades & Downgrades table or tracking rating action feeds.',
+			description: 'Returns a feed of analyst rating actions for a ticker, including upgrades, downgrades, reiterations, and price target changes (from/to grade, action type, current and prior price targets). Primarily intended for stocks — ETFs and mutual funds rarely have analyst rating coverage. Use to track recent rating changes and price target revisions for a stock.',
 			inputSchema: analysisUpgradesDowngradesInputSchema,
 			annotations: readOnlyToolAnnotations,
 		},

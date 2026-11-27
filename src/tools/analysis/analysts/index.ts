@@ -9,7 +9,7 @@ export function registerAnalysisAnalystsTool(server: McpServer, client: ApiClien
 		'get_analysis_analysts',
 		{
 			title: 'Analyst coverage, ratings & price targets',
-			description: 'Returns a paginated list of analyst-level coverage records for an asset, including per-analyst scores, current rating, sentiment, price target, and latest announcement date. Primarily intended for stocks — ETFs and mutual funds may return empty results. Use for populating an Analysts table in the Analysis module, filtering by sentiment, or sorting by announcement date.',
+			description: 'Returns a paginated list of analyst-level coverage records for an asset, including per-analyst scores, current rating, sentiment, price target, and latest announcement date. Primarily intended for stocks — ETFs and mutual funds may return empty results. Use to list individual analysts covering a stock, filter them by sentiment, or sort them by announcement date.',
 			inputSchema: analysisAnalystsInputSchema,
 			annotations: readOnlyToolAnnotations,
 		},
