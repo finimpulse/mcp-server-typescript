@@ -39,6 +39,7 @@ Copy the closest existing tool as a starting point: `src/tools/analysis/analysts
 - Fixed allowed values → `z.enum([...])` (arrays → `z.array(z.enum([...]))`), never `z.string()`.
 - Dates → `.regex(/^\d{4}-\d{2}-\d{2}$/)`.
 - List endpoints include `limit` / `offset`; add `filters` (`getFilterExpression()` from `utils/filters.js`), `sort_by`, `tag` only if the spec lists them.
+- `limit` gets the maximum the API validates: `.int().min(1).max(1000)` (the API answers `40000 The limit field must be between 1 and 1000.` above it). Many spec pages omit the maximum — check with a live token (`limit: 1001`), not the sandbox: sandbox ignores `limit` and returns a fixed dummy list. Put the default and maximum in `.describe()` only when the spec or a live check confirms them.
 
 **`types.ts`** — response interfaces from the spec's Response section. `| null` when the docs mark a field nullable or it does not apply to every asset type. Group fields with comments matching the doc sections (`// Identity`, `// Performance`). No `any`; unknown shapes → `Record<string, unknown>`.
 
@@ -52,7 +53,31 @@ export async function analysisAnalystsHandler(input: AnalysisAnalystsInput, clie
 
 Path params (`{symbol}`) go into the URL with `encodeURIComponent`; for POST send the remaining fields as the body (`const {symbol, ...body} = input;`). Keep the literal `/v1/...` prefix in the call — the sync script detects coverage from it.
 
-**`index.ts`** — `server.registerTool('<tool_name>', { description, inputSchema }, (input) => handler(input, client))`. The description says: what data is returned; asset-type coverage only if it differs by type (e.g. "for ETFs and mutual funds returns an empty result"); when to use it, including related tools to call first (e.g. "Use get_options_expirations to discover valid dates").
+**`index.ts`** — registration with `title` and annotations (Claude and ChatGPT directories reject tools without them):
+
+```typescript
+server.registerTool(
+	'get_analysis_analysts',
+	{
+		title: 'Analyst coverage, ratings & price targets',
+		description: '…',
+		inputSchema: analysisAnalystsInputSchema,
+		annotations: readOnlyToolAnnotations, // from config/tool-annotations.js
+	},
+	(input) => analysisAnalystsHandler(input, client),
+);
+```
+
+- `title` — short human name shown in Claude / ChatGPT instead of the tool name. Take the endpoint `label` from `GET /api/playground/settings` (the Playground catalog), without a "— FinImpulse" suffix.
+- `annotations` — `readOnlyToolAnnotations` (all three hints set explicitly: `readOnlyHint: true`, `destructiveHint: false`, `openWorldHint: false`). Every current endpoint only reads data.
+
+The description is read by a model in a chat, not by a visitor of the docs site. It says: what data is returned; asset-type coverage only if it differs by type (e.g. "for ETFs and mutual funds returns an empty result"); when to use it, including related tools to call first (e.g. "Use get_options_expirations to discover valid dates"). The spec text is written for the docs site, so rewrite these parts instead of copying them:
+
+| Spec wording | Why it does not fit | Write instead |
+|---|---|---|
+| "For a comprehensive field set use the /v1/summary endpoint" | the model sees tool names, not REST paths | "use get_summary" |
+| "Use to populate the Balance Sheet section", "Upgrades & Downgrades table" | refers to FinImpulse UI blocks that do not exist in a chat | the question the tool answers: "Use for historical balance sheet data in solvency analysis" |
+| "the most comprehensive single-call snapshot in FinImpulse", "powers … AI-assisted search scenarios" | superlatives and site-marketing context; OpenAI plugin guidelines 6.1: "Avoid misleading, overly promotional, or comparative language" | what it combines and when to pick it: "Use it for a general overview of a ticker instead of calling several tools" |
 
 Register in `src/tools/index.ts`: add the import and the `register...Tool(server, client)` call next to its group.
 
