@@ -9,6 +9,7 @@ export class ApiClient {
 	
 	private USER_AGENT = `FinImpulse-MCP-TypeScript-SDK/${version}`;
 	private TOKEN_SETTINGS_URL = 'https://app.finimpulse.com/developer/settings';
+	private REQUEST_TIMEOUT_MS = 30_000;
 	constructor(private readonly token: string) {}
 	
 	async request<T>(url: string, method: string = 'POST', body?: any, forceFull: boolean = false): Promise<CallToolResult> {
@@ -26,7 +27,8 @@ export class ApiClient {
 			const response = await fetch(this.API_BASE + url, {
 				method,
 				headers,
-				body: bodyStr
+				body: bodyStr,
+				signal: AbortSignal.timeout(this.REQUEST_TIMEOUT_MS)
 			});
 			if (response.status === 401) {
 				return this.formatUnauthorizedResponse();
@@ -73,7 +75,7 @@ export class ApiClient {
 			content: [
 				{
 					type: "text",
-					text: JSON.stringify(data, null, 2),
+					text: JSON.stringify(data),
 				},
 			],
 		};
