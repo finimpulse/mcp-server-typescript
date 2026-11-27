@@ -3,7 +3,7 @@ import {getFilterExpression} from '../../../utils/filters.js';
 
 export const statisticsRisksInputSchema = z.object({
 	symbol: z.string().describe('Asset identifier (ticker symbol).'),
-	limit: z.number().min(1).max(5000).default(10).optional().describe('Maximum number of items to return.'),
+	limit: z.number().min(1).max(1000).default(10).optional().describe('Maximum number of items to return.'),
 	offset: z.number().min(0).optional().describe('Offset for paginated results.'),
 	filters: getFilterExpression().optional().describe(
 		`Optional filter expressions applied to risk metrics.

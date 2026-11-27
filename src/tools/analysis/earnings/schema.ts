@@ -23,7 +23,7 @@ export const analysisEarningsInputSchema = z.object({
 		.describe('Start date filter (YYYY-MM-DD).'),
 	end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 		.describe('End date filter (YYYY-MM-DD).'),
-	limit: z.number().min(1).max(5000).default(10).optional()
+	limit: z.number().min(1).max(1000).default(10).optional()
 		.describe('Maximum number of items to return.'),
 	offset: z.number().min(0).optional()
 		.describe('Pagination offset (0-based).'),

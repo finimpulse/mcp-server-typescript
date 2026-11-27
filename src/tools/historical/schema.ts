@@ -27,7 +27,7 @@ export const historiesInputSchema = z.object({
 	).optional().describe(
 		'Optional sorting configuration. Records can be sorted by date only: [{"selector": "date", "desc": false}]. By default, records are sorted by date in descending order.'
 	),
-	limit: z.number().min(1).max(5000).default(10).optional().describe("Maximum number of matched items returned."),
+	limit: z.number().min(1).max(1000).default(10).optional().describe("Maximum number of matched items returned."),
 	offset: z.number().min(0).optional().describe(
 		`Pagination offset (0-based).`
 	),

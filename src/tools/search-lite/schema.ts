@@ -10,7 +10,7 @@ export const searchLiteInputSchema = z.object({
 	symbols: z.array(z.string()).optional().describe(
 		`A list of ticker symbols to retrieve. When provided, the response returns only the specified tickers. If a symbol does not exist, it is excluded from the results.`
 	),
-	limit: z.number().min(1).max(5000).default(10).optional().describe('Maximum number of matched items returned.'),
+	limit: z.number().min(1).max(1000).default(10).optional().describe('Maximum number of matched items returned.'),
 	offset: z.number().min(0).optional().describe('Pagination offset (0-based).'),
 	filters: getFilterExpression().optional().describe(
 		`Optional filter expressions.

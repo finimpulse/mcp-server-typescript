@@ -3,7 +3,7 @@ import {getFilterExpression} from '../../../utils/filters.js';
 
 export const holdingsTopHoldingsInputSchema = z.object({
 	symbol: z.string().describe('Asset identifier (ticker symbol).'),
-	limit: z.number().min(1).max(5000).default(10).optional().describe('Maximum number of matched items returned.'),
+	limit: z.number().min(1).max(1000).default(10).optional().describe('Maximum number of matched items returned.'),
 	offset: z.number().min(0).optional().describe('Pagination offset (0-based).'),
 	filters: getFilterExpression().optional().describe(
 		`Optional filter expressions.

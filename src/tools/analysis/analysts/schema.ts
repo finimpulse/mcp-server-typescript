@@ -3,7 +3,7 @@ import {getFilterExpression} from '../../../utils/filters.js';
 
 export const analysisAnalystsInputSchema = z.object({
 	symbol: z.string().min(1).describe('Asset identifier (ticker symbol).'),
-	limit: z.number().min(1).max(5000).default(10).optional()
+	limit: z.number().min(1).max(1000).default(10).optional()
 		.describe('Maximum number of analyst records to return.'),
 	offset: z.number().min(0).optional()
 		.describe('Pagination offset (0-based).'),

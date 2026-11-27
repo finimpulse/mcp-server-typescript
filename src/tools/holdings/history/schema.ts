@@ -6,7 +6,7 @@ export const holdingsHistoryInputSchema = z.object({
 	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe(
 		'Holdings reporting date (YYYY-MM-DD). Must be a date available for the requested symbol; use get_holdings_history_dates to retrieve valid dates.'
 	),
-	limit: z.number().int().min(1).optional().describe('Maximum number of matched records returned.'),
+	limit: z.number().int().min(1).max(1000).optional().describe('Maximum number of matched records returned. Maximum: 1000.'),
 	offset: z.number().int().min(0).optional().describe('Pagination offset (0-based).'),
 	filters: getFilterExpression().optional().describe(
 		getFilterDescription('"filters": ["weight_pct", ">", 1]')

@@ -5,7 +5,7 @@ export const optionsChainInputSchema = z.object({
 	symbol: z.string().min(1).describe('Asset identifier (ticker symbol).'),
 	expiration_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 		.describe('Expiration date to retrieve (YYYY-MM-DD). Use get_options_expirations to discover valid dates.'),
-	limit: z.number().min(1).max(5000).default(10).optional()
+	limit: z.number().min(1).max(1000).default(10).optional()
 		.describe('Maximum number of contracts to return.'),
 	offset: z.number().min(0).optional()
 		.describe('Pagination offset (0-based).'),

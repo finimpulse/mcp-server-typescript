@@ -4,7 +4,7 @@ import {z} from 'zod';
 export const searchInputSchema = z.object({
 	search_text: z.string().optional().describe('Free-text query (e.g., “NVDA”, “NVIDIA”, partial ticker, partial name).'),
 	quote_types: z.array(z.enum(['mutualfund','etf','stock'])).optional().describe(`Controls which asset types are included in the search.`),
-	limit: z.number().min(1).max(5000).default(10).optional().describe("Maximum number of matched items returned."),
+	limit: z.number().min(1).max(1000).default(10).optional().describe("Maximum number of matched items returned."),
 	offset: z.number().min(0).optional().describe(
 		`Pagination offset (0-based).`
 	),
